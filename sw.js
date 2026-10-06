@@ -1,6 +1,7 @@
 /* Highlight Corner service worker — offline app shell, fresh data.
-   Version the cache name to invalidate old shells on deploy. */
-const CACHE = 'hc-v2';
+   The deploy workflow stamps the commit SHA into CACHE below, so every
+   deploy installs a fresh worker and no stale shell can survive a release. */
+const CACHE = 'hc-__BUILD_ID__';
 const APP_SHELL = [
   './', 'index.html', 'highlights.html', 'fantasy.html', 'recaps.html',
   'game.html', 'privacy.html', '404.html',
