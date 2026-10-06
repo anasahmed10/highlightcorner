@@ -10,6 +10,7 @@ Target domain: `highlightcorner.com` (currently serves the older Codex build —
 | Weekly scoreboard | Live ESPN data, defaults to current week, viewer-local times |
 | Game highlights | One-tap YouTube deep links per game; featured highest-scoring game |
 | Fantasy leaders | PPR / half-PPR / standard, via Sleeper |
+| Recap show more (game page) | Recap body clamps to 3 lines with Show more/less on mobile so the box score sits higher; full text on desktop |
 | Comedic recaps | Kempski-style + League seasoning, ~150 words, verdicts (nail-biter, comfortable, garbage-time, blowout); Week 4 done |
 | Game center pages | Scoring summary → tabbed box score → team stats → fantasy → tabbed injuries → recap; prev/next game nav |
 | Spoiler-free mode | Persisted toggle |
