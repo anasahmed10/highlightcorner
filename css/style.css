@@ -103,6 +103,15 @@ select, .seg button {
 .recap-card p { margin: 8px 0; }
 .recap-card .keystat { font-size: .88rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 8px; margin-top: 10px; }
 .recap-card .keystat strong { color: var(--text); }
+/* Recap show more: clamp the summary to 3 lines on mobile so the box score
+   sits higher; full text on desktop, toggle hidden when nothing overflows. */
+.recap-text { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.recap-text.expanded { display: block; }
+.recap-toggle { background: none; border: 0; padding: 10px 0; margin: 2px 0 0; min-height: 44px; color: var(--accent); font: inherit; font-weight: 700; font-size: .92rem; cursor: pointer; }
+@media (min-width: 700px) {
+  .recap-text { display: block; }
+  .recap-toggle { display: none; }
+}
 
 /* Tables */
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -14px; padding: 0 14px; }

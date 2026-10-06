@@ -274,7 +274,8 @@
         html += `<article class="recap-card" style="margin-top:14px">
           <span class="verdict ${HC.esc(recap.verdict)}">${HC.esc(String(recap.verdict).replace(/-/g, ' '))}</span>
           <h3>${HC.esc(recap.headline)}</h3>
-          ${HC.esc(recap.recap).split('\n\n').map(x => `<p>${x}</p>`).join('')}
+          <div class="recap-text" id="recapText">${HC.esc(recap.recap).split('\n\n').map(x => `<p>${x}</p>`).join('')}</div>
+          <button class="recap-toggle" id="recapToggle" aria-expanded="false">Show more ▾</button>
           <div class="keystat"><strong>Key stat:</strong> ${HC.esc(recap.keyStat)}</div>
         </article>`;
       }
@@ -324,6 +325,16 @@
       });
       const cb = document.getElementById('copyGameBtn');
       if (cb) cb.addEventListener('click', () => HC.copyLink(location.href, cb));
+      const rt = document.getElementById('recapText');
+      const rtg = document.getElementById('recapToggle');
+      if (rt && rtg) {
+        if (rt.scrollHeight <= rt.clientHeight + 2) rtg.style.display = 'none';
+        rtg.addEventListener('click', () => {
+          const open = rt.classList.toggle('expanded');
+          rtg.setAttribute('aria-expanded', String(open));
+          rtg.innerHTML = open ? 'Show less ▴' : 'Show more ▾';
+        });
+      }
       if (HC.renderAds) HC.renderAds();
       document.title = `Highlight Corner — ${(away.team || {}).abbreviation} @ ${(home.team || {}).abbreviation}`;
       document.addEventListener('hc:theme', () => init(), { once: true });
