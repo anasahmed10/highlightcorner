@@ -58,7 +58,9 @@ automatically. The old Vercel/Codex deployment can be retired afterwards.
 Automated: cron job `weekly-nfl-recaps` runs Tuesdays ~8am ET. It determines the
 just-completed week, writes Kempski-style recaps (humor throughout, League
 seasoning) for each final game into `data/recaps.json`, commits, and pushes —
-the push triggers the GitHub Actions deploy automatically.
+the push triggers the GitHub Actions deploy automatically. Recaps are grounded
+in ESPN box scores plus nflverse advanced stats (EPA, win-probability swings;
+see `tools/nflverse_week.py`).
 
 ## Shipping checklist
 
