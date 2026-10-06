@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Highlight Corner — Page Not Found</title>
+<meta name="description" content="This page doesn't exist. Head back to the scoreboard.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="site-header"><div class="inner">
+  <a class="brand" href="index.html">Highlight<span>Corner</span></a>
+  <nav class="main-nav">
+    <a href="index.html">Scores</a>
+    <a href="highlights.html">Highlights</a>
+    <a href="fantasy.html">Fantasy</a>
+    <a href="recaps.html">Recaps</a>
+  </nav>
+</div></header>
+<main class="wrap">
+  <div class="empty" style="margin-top:40px">
+    <div style="font-size:2.5rem">🏈</div>
+    <h1 class="page-title">Fourth and long</h1>
+    <p class="page-sub">This page doesn't exist. The punt team is on the field.</p>
+    <a class="btn btn-yt btn-block-center" href="index.html" style="margin-top:16px">Back to the scoreboard</a>
+  </div>
+</main>
+<script>
+try {
+  const t = localStorage.getItem('hc-theme');
+  if (t) document.documentElement.setAttribute('data-theme', t);
+  else if (window.matchMedia('(prefers-color-scheme: dark)').matches) document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.setAttribute('data-theme', 'light');
+} catch (e) {}
+</script>
+</body>
+</html>

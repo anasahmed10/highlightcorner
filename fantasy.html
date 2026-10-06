@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Highlight Corner — Fantasy Leaders</title>
+<meta name="description" content="Top fantasy football scorers by position, every week.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0e1013">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Highlight Corner">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="canonical" href="https://highlightcorner.com/fantasy.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Highlight Corner">
+<meta property="og:title" content="Highlight Corner — Fantasy Leaders">
+<meta property="og:description" content="Top fantasy football scorers by position, every week.">
+<meta property="og:url" content="https://highlightcorner.com/fantasy.html">
+<meta name="twitter:card" content="summary"><link rel="stylesheet" href="css/style.css">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1549898506474594" crossorigin="anonymous"></script>
+</head>
+<body>
+<header class="site-header"><div class="inner">
+  <a class="brand" href="index.html">Highlight<span>Corner</span></a>
+  <nav class="main-nav">
+    <a data-page="scores" href="index.html">Scores</a>
+    <a data-page="highlights" href="highlights.html">Highlights</a>
+    <a data-page="fantasy" href="fantasy.html">Fantasy</a>
+    <a data-page="recaps" href="recaps.html">Recaps</a>
+    <a data-page="privacy" href="privacy.html">Privacy</a>
+  </nav>
+  <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
+  <button class="spoiler-toggle" aria-label="Toggle spoiler-free mode" title="Spoiler-free mode">👁</button>
+</div></header>
+<main class="wrap">
+  <h1 class="page-title">Fantasy Leaders</h1>
+  <p class="page-sub">Top scorers by position for the week. Scoring updates live as games go final.</p>
+  <div class="controls">
+    <select id="weekSel" aria-label="Choose week"></select>
+    <select id="posSel" aria-label="Choose position">
+      <option value="ALL">All positions</option>
+      <option value="QB">Quarterbacks</option>
+      <option value="RB">Running Backs</option>
+      <option value="WR">Wide Receivers</option>
+      <option value="TE">Tight Ends</option>
+      <option value="K">Kickers</option>
+      <option value="DST">Defenses</option>
+    </select>
+    <div class="seg" role="group" aria-label="Scoring format">
+      <button data-fmt="ppr" class="active">PPR</button>
+      <button data-fmt="half">Half-PPR</button>
+      <button data-fmt="std">Standard</button>
+    </div>
+  </div>
+  <div class="ad-slot"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1549898506474594" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
+  <div id="fantasy"><div class="loading"><div class="spinner"></div>Loading fantasy stats…</div></div>
+</main>
+<footer class="site-footer">Scores are facts. The jokes are opinions.<br>Data: ESPN · Highlights: YouTube · Fantasy: Sleeper.</footer>
+<script src="js/app.js"></script>
+<script src="js/ads.js"></script>
+<script src="js/fantasy.js"></script>
+</body>
+</html>

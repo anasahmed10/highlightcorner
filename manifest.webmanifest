@@ -1,0 +1,29 @@
+{
+  "background_color": "#0e1013",
+  "description": "Weekly NFL scores, highlights, fantasy leaders and comedic recaps.",
+  "display": "standalone",
+  "icons": [
+    {
+      "sizes": "192x192",
+      "src": "icons/icon-192.png",
+      "type": "image/png"
+    },
+    {
+      "sizes": "512x512",
+      "src": "icons/icon-512.png",
+      "type": "image/png"
+    },
+    {
+      "purpose": "maskable",
+      "sizes": "512x512",
+      "src": "icons/icon-maskable-512.png",
+      "type": "image/png"
+    }
+  ],
+  "name": "Highlight Corner \u2014 NFL Scores & Recaps",
+  "orientation": "portrait",
+  "scope": "./",
+  "short_name": "Highlight Corner",
+  "start_url": "index.html",
+  "theme_color": "#0e1013"
+}
