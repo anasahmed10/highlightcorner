@@ -37,7 +37,7 @@ Target domain: `highlightcorner.com` (currently serves the older Codex build —
 
 | Feature | Notes |
 |---|---|
-| Permanent deploy + domain cutover | Vercel CLI has no login here — Anas runs `vercel login` then `vercel deploy --prod`, or does it in the Vercel dashboard; then moves `highlightcorner.com` to the new project |
+| Permanent deploy + domain cutover | ✅ Migrated to GitHub Actions → GitHub Pages 2026-10-06 (repo `anasahmed10/highlightcorner`, live at `anasahmed10.github.io/highlightcorner`). Remaining: Anas points `highlightcorner.com` DNS at GitHub Pages (apex A records `185.199.108.153` / `.109` / `.110` / `.111`, or `www` CNAME to `anasahmed10.github.io`) — TLS is automatic |
 | AdSense re-review | Needs: site live on domain → confirm `/ads.txt` → Anas adds payment info → request review |
 
 ## ⚠️ Standing decisions

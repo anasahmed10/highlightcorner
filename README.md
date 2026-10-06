@@ -39,26 +39,26 @@ python3 -m http.server 8080
 
 ## Deploying to highlightcorner.com
 
-The site is 100% static — deploy it anywhere:
+The site is 100% static and deploys via **GitHub Actions → GitHub Pages**:
 
-1. **Vercel** (recommended): `npm i -g vercel && vercel --prod` in this folder,
-   or drag the folder into vercel.com. Add `highlightcorner.com` under
-   Project → Settings → Domains and follow the DNS instructions.
-2. **Netlify**: drag the folder into netlify.com/drop, then add the custom
-   domain under Site settings → Domain management.
-3. **GitHub Pages / Cloudflare Pages**: push the folder to a repo and enable
-   Pages; point the domain's DNS at the host.
+- Repo: `github.com/anasahmed10/highlightcorner` (public, branch `main`)
+- Workflow: `.github/workflows/deploy.yml` — every push to `main` builds and
+  deploys to Pages automatically. Live at
+  `https://anasahmed10.github.io/highlightcorner/` until the domain cutover.
+- `CNAME` file at the repo root already declares `highlightcorner.com`.
 
-DNS: create the A / CNAME records your host shows you (Vercel/Netlify give you
-exact values when you add the domain). The domain is registered but currently
-points at a placeholder IP, so this step is still needed.
+Domain cutover (one-time, in your DNS provider): point `highlightcorner.com`
+at GitHub Pages — apex A records to `185.199.108.153`, `185.199.109.153`,
+`185.199.110.153`, `185.199.111.153` (or a `www` CNAME to
+`anasahmed10.github.io`). GitHub then provisions the TLS certificate
+automatically. The old Vercel/Codex deployment can be retired afterwards.
 
 ## Weekly recap refresh
 
 Automated: cron job `weekly-nfl-recaps` runs Tuesdays ~8am ET. It determines the
 just-completed week, writes Kempski-style recaps (humor throughout, League
-seasoning) for each final game into `data/recaps.json`, and reports. Redeploy
-after it runs (automatic on push once permanent hosting is set up).
+seasoning) for each final game into `data/recaps.json`, commits, and pushes —
+the push triggers the GitHub Actions deploy automatically.
 
 ## Shipping checklist
 
@@ -67,6 +67,7 @@ after it runs (automatic on push once permanent hosting is set up).
   once, then `vercel deploy --prod` from `~/workspace/highlightcorner/`
   (or imports the folder in the Vercel dashboard); then moves
   `highlightcorner.com` to the new project to replace the Codex build.
+  (Superseded 2026-10-06: migrated to GitHub Actions → GitHub Pages.)
 - Confirm `/ads.txt` and `/privacy.html` live on the domain, then request the
   AdSense re-review (owner adds payment info first).
 
