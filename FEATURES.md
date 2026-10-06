@@ -1,30 +1,35 @@
 # Highlight Corner — Feature Dashboard
 
-Living tracker for the standalone site (`~/workspace/highlightcorner/`). Updated as work ships.
-Target domain: `highlightcorner.com` (currently serves the older Codex build — cutover needs Anas's go-ahead).
+Living tracker for the redesigned static site. Updated as work ships.
+Live domain: [highlightcorner.com](https://highlightcorner.com), served through GitHub Pages
+(verified October 6, 2026).
+
+Agent entry point: [AGENTS.md](AGENTS.md). Detailed maintenance instructions:
+[agent guide](docs/agent-guide.md). Prioritized proposed upgrades and acceptance
+criteria: [upgrade roadmap](docs/roadmap.md).
 
 ## ✅ Shipped
 
 | Feature | Notes |
 |---|---|
-| Weekly scoreboard | Live ESPN data, defaults to current week, viewer-local times |
+| Weekly scoreboard | ESPN data, week selector, viewer-local times; current-week initialization/fallback behavior needs coordinated handling |
 | Game highlights | One-tap YouTube deep links per game; featured highest-scoring game |
 | Fantasy leaders | PPR / half-PPR / standard, via Sleeper |
 | Recap show more (game page) | Recap body clamps to 3 lines with Show more/less on mobile so the box score sits higher; full text on desktop |
-| Comedic recaps | Kempski-style + League seasoning, ~150 words, verdicts (nail-biter, comfortable, garbage-time, blowout); Week 4 done |
-| Game center pages | Scoring summary → tabbed box score → team stats → fantasy → tabbed injuries → recap; prev/next game nav |
-| Spoiler-free mode | Persisted toggle |
+| Comedic recaps | Original multi-paragraph narratives with verdicts (nail-biter, comfortable, garbage-time, blowout); Week 4 stored in JSON |
+| Game center pages | Matchup/highlights → recap → scoring summary → tabbed box score → team stats → fantasy → tabbed injuries; prev/next game nav |
+| Spoiler preference | Persisted toggle blurs selected scores; other outcome clues remain visible |
 | Favorites + watched | Team favorites w/ filter; watched/unwatched tracking w/ filter |
 | Team colors | Logo-derived, matchup-aware, readable in light/dark |
-| Mobile-first UI | Centered Watch-highlights CTA, 44px+ touch targets |
+| Mobile-first UI | Centered Watch-highlights CTA, responsive layouts; control sizing/accessibility audit proposed |
 | AdSense | In-flow units + desktop side rails (≥1280px); privacy page; `ads.txt` |
 | SEO basics | Meta/OG/canonical, sitemap.xml, robots.txt, favicon, 404 page |
 | PWA | Manifest, icons, service worker, iOS meta — Add to Home Screen, no app store |
-| Weekly recap automation | Cron `weekly-nfl-recaps`, Tuesdays ~8am ET; writes `data/recaps.json` |
-| Dashboard artifact recap port | All 16 longer recaps installed; its weekly refresh now uses the same style |
+| Recap supporting statistics | `tools/nflverse_week.py` emits nflverse evidence for regular-season recaps; does not write recap prose |
+| Recap content port | Longer Week 4 recaps stored in `data/recaps.json`; external dashboard/refresh status is unverified |
 | Copy-link buttons | Highlights cards (copies YouTube link) + game pages (copies game URL), with "Copied ✓" feedback |
 | Sortable fantasy tables | Top 25 per position; sort by Player or Pts; position dropdown filter (instant, no reload) |
-| UI polish | Skeleton shimmer loading, card entrance motion, tactile press states, pulsing LIVE dot, sticky filter bar, loser dimming, scroll-to-top, smooth theme transitions (all respect reduced-motion) |
+| UI polish | Skeleton shimmer loading, card entrance motion, tactile press states, pulsing LIVE dot, sticky filter bar, loser dimming, scroll-to-top, smooth theme transitions; CSS motion reductions present, full audit proposed |
 | Collapsible game sections | Scoring Summary (hidden by default), Box Score, Team Stats, Fantasy, Injuries — dropdowns with counts |
 | Site character | Team-color gradient bars on cards/hero, yard-line hero texture, playful microcopy ("Scores are facts. The jokes are opinions.") |
 
@@ -34,12 +39,19 @@ Target domain: `highlightcorner.com` (currently serves the older Codex build —
 |---|---|
 | — | Nothing currently building |
 
-## 📋 Planned / waiting on Anas
+## 📋 Proposed upgrades and external follow-ups
 
-| Feature | Notes |
+Implementation priorities live in [docs/roadmap.md](docs/roadmap.md):
+
+1. Reliability: coordinated season/week handling, recoverable loading, regression checks.
+2. Trust and usability: comprehensive spoiler protection, accessibility, reproducible content refresh.
+3. Release quality: controlled publishing/offline behavior, search/share metadata, measured performance.
+
+| Follow-up | Current evidence / next action |
 |---|---|
-| Permanent deploy + domain cutover | ✅ Migrated to GitHub Actions → GitHub Pages 2026-10-06 (repo `anasahmed10/highlightcorner`, live at `anasahmed10.github.io/highlightcorner`). Remaining: Anas points `highlightcorner.com` DNS at GitHub Pages (apex A records `185.199.108.153` / `.109` / `.110` / `.111`, or `www` CNAME to `anasahmed10.github.io`) — TLS is automatic |
-| AdSense re-review | Needs: site live on domain → confirm `/ads.txt` → Anas adds payment info → request review |
+| GitHub Pages and domain | Deployment workflow and `CNAME` are present; apex HTTPS and `www` redirect verified October 6, 2026. Domain cutover is no longer listed as pending. |
+| Weekly recap scheduler | Earlier docs described `weekly-nfl-recaps` on Tuesdays; no scheduler exists in this repository. Locate and verify the external automation before changing or relying on it. |
+| AdSense review | Earlier docs recorded a rejection/payment follow-up. Current account status is unverified; owner checks dashboard and live `/ads.txt`/privacy content before deciding next steps. |
 
 ## ⚠️ Standing decisions
 
