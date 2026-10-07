@@ -1,7 +1,7 @@
 # Highlight Corner upgrade roadmap
 
-Baseline: redesigned static site, October 7, 2026. All items below are **proposed**;
-none is implemented by adding this document. Priorities reflect source inspection,
+Baseline: redesigned static site, October 7, 2026. Items below are **proposed** unless marked shipped in the status notes;
+adding this document does not implement them. Priorities reflect source inspection,
 not traffic analytics or a promise of delivery dates. Follow the stages in order;
 within each stage, use the listed order unless the user's priorities change.
 
@@ -62,8 +62,12 @@ not every acceptance criterion:
 - **R2 — in progress:** 12-second request bound, week-discovery recovery, retry
   on scores/highlights/fantasy, stale-response guards, and cached theme rendering.
   Broader failure/race fixtures remain.
-- **R3 — in progress:** focused DOM and worker tests run locally and in Pages CI.
-  Full normalization/context/provider fixtures and browser smoke automation remain.
+- **R3 — shipped (issue #4, October 7):** 67 checks pass locally with synthetic
+  provider fixtures, all seven page smoke checks, normalization/context/preferences,
+  failure/retry/race coverage, and committed source/data validation. Both CI workflows
+  run the suite before deployment; removing stale-response guards in temporary
+  copies makes the corresponding checks fail. Uses existing Node/jsdom tooling;
+  browser layout and device verification remain manual checks, not jsdom coverage.
 - **R4 — in progress:** native hidden outcomes and safe matchup links replace
   blur across sports pages. Browser accessibility-tree checks performed; manual
   screen-reader checks and full live/pregame fixture coverage remain.

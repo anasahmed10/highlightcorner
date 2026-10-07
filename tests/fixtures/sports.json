@@ -1,0 +1,324 @@
+{
+  "scoreboard": {
+    "week": {
+      "number": 5
+    },
+    "events": [
+      {
+        "id": "1001",
+        "date": "2026-10-08T20:00:00Z",
+        "status": {
+          "type": {
+            "state": "pre",
+            "completed": false,
+            "shortDetail": "Scheduled"
+          }
+        },
+        "competitions": [
+          {
+            "competitors": [
+              {
+                "homeAway": "home",
+                "score": "0",
+                "team": {
+                  "abbreviation": "DAL",
+                  "displayName": "Dallas Cowboys",
+                  "shortDisplayName": "Cowboys",
+                  "color": "003594"
+                }
+              },
+              {
+                "homeAway": "away",
+                "score": "0",
+                "team": {
+                  "abbreviation": "TB",
+                  "displayName": "Tampa Bay Buccaneers",
+                  "shortDisplayName": "Buccaneers",
+                  "color": "D50A0A"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "1002",
+        "date": "2026-10-09T20:00:00Z",
+        "status": {
+          "type": {
+            "state": "in",
+            "completed": false,
+            "shortDetail": "Q3 4:32"
+          }
+        },
+        "competitions": [
+          {
+            "competitors": [
+              {
+                "homeAway": "away",
+                "score": "14",
+                "team": {
+                  "abbreviation": "NE",
+                  "shortDisplayName": "Patriots",
+                  "color": "002244"
+                }
+              },
+              {
+                "homeAway": "home",
+                "score": "17",
+                "team": {
+                  "abbreviation": "NYJ",
+                  "shortDisplayName": "Jets",
+                  "color": "125740"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "1003",
+        "date": "2026-10-10T20:00:00Z",
+        "status": {
+          "type": {
+            "state": "post",
+            "completed": true,
+            "shortDetail": "Final"
+          }
+        },
+        "competitions": [
+          {
+            "competitors": [
+              {
+                "homeAway": "home",
+                "score": "27",
+                "winner": true,
+                "records": [
+                  {
+                    "summary": "4-1"
+                  }
+                ],
+                "team": {
+                  "abbreviation": "CLE",
+                  "shortDisplayName": "Browns",
+                  "color": "311D00"
+                }
+              },
+              {
+                "homeAway": "away",
+                "score": "24",
+                "winner": false,
+                "team": {
+                  "abbreviation": "PIT",
+                  "shortDisplayName": "Steelers",
+                  "color": "FFB612"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "summary": {
+    "header": {
+      "status": {
+        "type": {
+          "state": "post",
+          "completed": true,
+          "shortDetail": "Final"
+        }
+      },
+      "competitions": [
+        {
+          "date": "2026-10-10T20:00:00Z",
+          "competitors": [
+            {
+              "homeAway": "away",
+              "score": "24",
+              "team": {
+                "abbreviation": "PIT",
+                "shortDisplayName": "Steelers"
+              }
+            },
+            {
+              "homeAway": "home",
+              "score": "27",
+              "team": {
+                "abbreviation": "CLE",
+                "shortDisplayName": "Browns"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "gameInfo": {
+      "venue": {
+        "fullName": "Fixture Stadium"
+      }
+    },
+    "scoringPlays": [
+      {
+        "period": {
+          "number": 1
+        },
+        "clock": {
+          "displayValue": "5:12"
+        },
+        "team": {
+          "abbreviation": "PIT"
+        },
+        "text": "Fixture touchdown <script>bad()</script>",
+        "awayScore": 7,
+        "homeScore": 0
+      }
+    ],
+    "boxscore": {
+      "players": [
+        {
+          "team": {
+            "abbreviation": "PIT"
+          },
+          "statistics": [
+            {
+              "name": "passing",
+              "keys": [
+                "passingYards",
+                "passingTouchdowns",
+                "interceptions"
+              ],
+              "labels": [
+                "YDS",
+                "TD",
+                "INT"
+              ],
+              "athletes": [
+                {
+                  "athlete": {
+                    "id": "p1",
+                    "displayName": "Fixture Quarterback"
+                  },
+                  "stats": [
+                    "300",
+                    "2",
+                    "1"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "team": {
+            "abbreviation": "CLE"
+          },
+          "statistics": []
+        }
+      ],
+      "teams": [
+        {
+          "team": {
+            "abbreviation": "PIT"
+          },
+          "statistics": [
+            {
+              "name": "totalYards",
+              "displayValue": "350"
+            }
+          ]
+        },
+        {
+          "team": {
+            "abbreviation": "CLE"
+          },
+          "statistics": [
+            {
+              "name": "totalYards",
+              "displayValue": "380"
+            }
+          ]
+        }
+      ]
+    },
+    "injuries": [
+      {
+        "team": {
+          "abbreviation": "PIT"
+        },
+        "injuries": [
+          {
+            "athlete": {
+              "displayName": "Fixture Player"
+            },
+            "status": "Questionable",
+            "details": "Ankle"
+          }
+        ]
+      }
+    ]
+  },
+  "players": {
+    "p1": {
+      "n": "Fixture Quarterback",
+      "p": "QB",
+      "t": "PIT"
+    },
+    "p2": {
+      "n": "Fixture Receiver <b>name</b>",
+      "p": "WR",
+      "t": "CLE"
+    }
+  },
+  "stats": {
+    "p1": {
+      "pts_ppr": 20,
+      "pts_half_ppr": 19,
+      "pts_std": 18,
+      "pass_yd": 300,
+      "pass_td": 2
+    },
+    "p2": {
+      "pts_ppr": 18,
+      "pts_half_ppr": 14,
+      "pts_std": 10,
+      "rec": 8,
+      "rec_yd": 100
+    },
+    "unknown": {
+      "pts_ppr": 50
+    },
+    "TEAM_CLE": {
+      "pts_ppr": 12,
+      "pts_half_ppr": 12,
+      "pts_std": 12,
+      "def_sack": 3
+    }
+  },
+  "recaps": [
+    {
+      "gameId": "1003",
+      "week": 5,
+      "away": "PIT",
+      "home": "CLE",
+      "awayScore": 24,
+      "homeScore": 27,
+      "verdict": "nail-biter",
+      "headline": "Fixture final <b>headline</b>",
+      "recap": "First fixture paragraph.\n\nSecond fixture paragraph.",
+      "keyStat": "Fixture stat"
+    }
+  ],
+  "highlights": {
+    "version": 1,
+    "status": "ready",
+    "games": {
+      "1003": {
+        "url": "https://www.youtube.com/watch?v=abcdefghijk",
+        "source": "YouTube",
+        "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+        "verifiedAt": "2026-10-07T12:00:00Z"
+      }
+    }
+  }
+}
