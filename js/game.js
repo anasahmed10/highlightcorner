@@ -307,7 +307,13 @@
         <p data-spoiler-placeholder hidden class="spoiler-notice">Scores, recaps, and game stats are hidden. Turn off Hide spoilers in Settings to reveal them.</p>`;
 
       if (recap) {
+        const recapColors = HC.teamTextColors(away.team || {}, home.team || {});
         html += `<article data-outcome class="recap-card" style="margin-top:14px">
+          <div class="recap-scoreboard">
+            <div class="recap-score-team"><span class="recap-score-location">Away</span><strong style="color:${recapColors.away}">${HC.esc(recap.away)}</strong><span class="recap-score-number">${HC.esc(recap.awayScore)}</span></div>
+            <span class="recap-score-status">Final</span>
+            <div class="recap-score-team"><span class="recap-score-location">Home</span><strong style="color:${recapColors.home}">${HC.esc(recap.home)}</strong><span class="recap-score-number">${HC.esc(recap.homeScore)}</span></div>
+          </div>
           <span class="verdict ${HC.esc(recap.verdict)}">${HC.esc(String(recap.verdict).replace(/-/g, ' '))}</span>
           <h3>${HC.esc(recap.headline)}</h3>
           <div class="recap-text" id="recapText">${HC.esc(recap.recap).split('\n\n').map(x => `<p>${x}</p>`).join('')}</div>
