@@ -23,7 +23,8 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | Favorites + watched | Team favorites w/ filter; watched/unwatched tracking w/ filter |
 | Team colors | Logo-derived, matchup-aware, readable in light/dark |
 | Mobile-first UI | Centered Watch-highlights CTA, responsive layouts; control sizing/accessibility audit proposed |
-| AdSense | In-flow units + desktop side rails (≥1280px); privacy page; `ads.txt` |
+| AdSense | Manual in-flow units use the existing Board/Game IDs; desktop rails (≥1280px) use a dedicated Rail ID. Privacy page and `ads.txt` remain in place. |
+| In-flow ad placement | The existing unit appears after five score cards, three highlight cards, or the first recap; these pages keep one stable unit across renders. Revenue impact requires AdSense reporting after ads serve. |
 | SEO basics | Meta/OG/canonical, sitemap.xml, robots.txt, favicon, 404 page |
 | PWA | Manifest, icons, offline shell, iOS/Android install guidance, native prompt when supported, dismissed/standalone promotion handling; physical-device installation pending |
 | Recap supporting statistics | `tools/nflverse_week.py` emits nflverse evidence for regular-season recaps; does not write recap prose |
@@ -53,7 +54,7 @@ Implementation priorities live in [docs/roadmap.md](docs/roadmap.md):
 |---|---|
 | GitHub Pages and domain | Deployment workflow and `CNAME` are present; apex HTTPS and `www` redirect verified October 6, 2026. Domain cutover is no longer listed as pending. |
 | Weekly recap scheduler | Earlier docs described `weekly-nfl-recaps` on Tuesdays; no scheduler exists in this repository. Locate and verify the external automation before changing or relying on it. |
-| AdSense review | Earlier docs recorded a rejection/payment follow-up. Current account status is unverified; owner checks dashboard and live `/ads.txt`/privacy content before deciding next steps. |
+| AdSense review | On October 7, 2026, the dashboard showed `highlightcorner.com` as “Getting ready” with review requested and Auto ads off. It showed `ads.txt` as “Not found,” though the live `/ads.txt` returned HTTP 200 with the correct publisher line; recheck after AdSense crawls the site. The payment warning conflicts with the “profile complete” tile, so verify payment readiness in the account before expecting earnings. |
 
 ## ⚠️ Standing decisions
 

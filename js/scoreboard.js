@@ -4,6 +4,8 @@
   HC.initTheme(); HC.initNav('scores'); HC.initPrefs();
   const sel = document.getElementById('weekSel');
   const box = document.getElementById('games');
+  const lead = document.getElementById('gamesLead');
+  const rest = document.getElementById('gamesRest');
   const favGrid = document.getElementById('favGrid');
   let recaps = [];
   let highlightMap = null;
@@ -69,20 +71,20 @@
     });
     if (filter === 'unwatched') evs = evs.filter(ev => !HC.isWatched(String(ev.id)));
     const watchedCount = eventsCache.filter(ev => HC.isWatched(String(ev.id))).length;
-    let html = `<p class="page-sub">${watchedCount} of ${eventsCache.length} watched</p>`;
     let lastDay = '';
-    html += evs.slice().sort((a, b) => new Date(a.date) - new Date(b.date)).map(ev => {
+    const cards = evs.slice().sort((a, b) => new Date(a.date) - new Date(b.date)).map(ev => {
       const g = HC.gameInfo(ev);
       const date = new Date(g.date);
       const day = Number.isNaN(date.getTime()) ? 'Date to be announced' : new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'short', day: 'numeric' }).format(date);
       const heading = day === lastDay ? '' : `<h2 class="day-heading">${HC.esc(day)}</h2>`;
       lastDay = day;
       return heading + cardHTML(g);
-    }).join('') ||
-      `<div class="empty">${filter === 'favorites' && !favs.length
+    });
+    lead.innerHTML = `<p class="page-sub">${watchedCount} of ${eventsCache.length} watched</p>` +
+      (cards.slice(0, 5).join('') || `<div class="empty">${filter === 'favorites' && !favs.length
         ? 'Pick some favorite teams above to filter the board.'
-        : 'No games match this filter.'}</div>`;
-    box.innerHTML = html;
+        : 'No games match this filter.'}</div>`);
+    rest.innerHTML = cards.slice(5).join('');
     HC.contentReady(box);
     box.querySelectorAll('.game-card').forEach(card => {
       card.addEventListener('click', e => {
@@ -110,7 +112,8 @@
     loading = true;
     if (!quiet) {
       refresh.disabled = true;
-      box.innerHTML = HC.skeletons(4);
+      lead.innerHTML = HC.skeletons(4);
+      rest.innerHTML = '';
     }
     freshness.textContent = quiet ? 'Checking for live updates…' : 'Updating scores…';
     try {
@@ -134,7 +137,8 @@
       } else {
         eventsCache = [];
         freshness.textContent = navigator.onLine ? 'Scores unavailable' : 'You’re offline';
-        box.innerHTML = '<div class="error"><p>Couldn’t load scores. Try again when you’re connected.</p><button class="btn btn-ghost" id="retryScores">Try again</button></div>';
+        lead.innerHTML = '<div class="error"><p>Couldn’t load scores. Try again when you’re connected.</p><button class="btn btn-ghost" id="retryScores">Try again</button></div>';
+        rest.innerHTML = '';
         document.getElementById('retryScores').addEventListener('click', load);
       }
     } finally { if (token === request && !quiet) refresh.disabled = false; }

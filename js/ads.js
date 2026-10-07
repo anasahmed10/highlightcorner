@@ -13,7 +13,7 @@
       d.className = 'ad-rail ' + side;
       d.setAttribute('aria-hidden', 'true');
       d.innerHTML = '<ins class="adsbygoogle" style="display:block;width:160px;height:600px"'
-        + ' data-ad-client="' + CLIENT + '" data-ad-format="auto"></ins>';
+        + ' data-ad-client="' + CLIENT + '" data-ad-slot="9881709462" data-ad-format="auto"></ins>';
       document.body.appendChild(d);
     });
   }

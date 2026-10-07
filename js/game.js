@@ -3,6 +3,7 @@
   'use strict';
   HC.initTheme(); HC.initNav('scores'); HC.initPrefs();
   const box = document.getElementById('game');
+  const adBox = document.getElementById('gameAd');
   const params = new URLSearchParams(location.search);
   const gameId = params.get('id');
   const weekParam = params.get('week');
@@ -350,7 +351,6 @@
         html += `<div class="empty">This game hasn't started yet — box score, fantasy and injuries will appear here after kickoff.</div>`;
       }
 
-      html += `<div class="ad-slot"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1549898506474594" data-ad-format="auto" data-full-width-responsive="true"></ins></div>`;
       box.innerHTML = html;
       HC.contentReady(box);
       Array.from(box.querySelectorAll('details')).forEach((section, i) => {
@@ -400,7 +400,8 @@
           setExpanded(!rt.classList.contains('expanded'));
         });
       }
-      if (HC.renderAds && !adsInitialized && box.querySelector('.ad-slot')) {
+      if (HC.renderAds && !adsInitialized) {
+        adBox.innerHTML = '<div class="ad-slot"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1549898506474594" data-ad-slot="4662837100" data-ad-format="auto" data-full-width-responsive="true"></ins></div>';
         HC.renderAds();
         adsInitialized = true;
       }
