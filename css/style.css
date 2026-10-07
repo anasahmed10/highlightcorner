@@ -71,7 +71,8 @@ select, .seg button {
 .team-row .tname { font-weight: 700; font-size: 1.02rem; flex: 1; min-width: 0; }
 .team-row .trec { color: var(--muted); font-size: .82rem; font-weight: 400; }
 .team-row .tscore { font-weight: 800; font-size: 1.35rem; font-variant-numeric: tabular-nums; min-width: 44px; text-align: right; }
-.team-row.winner .tscore::after { content: " ◀"; font-size: .8rem; }
+.team-row.winner .tscore { position: relative; }
+.team-row.winner .tscore::before { content: "▶"; position: absolute; right: calc(100% + 4px); top: 50%; transform: translateY(-50%); font-size: .8rem; }
 .game-card .card-foot { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .chip {
   font-size: .8rem; font-weight: 700; padding: 6px 10px; border-radius: 999px;
