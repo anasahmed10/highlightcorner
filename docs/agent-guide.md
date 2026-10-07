@@ -35,6 +35,7 @@ are configured. Provider availability, CORS, and response formats can change;
 verify current responses when investigating data failures.
 
 - `HC.fetchJSON(url)` rejects non-success HTTP responses, parses JSON, and aborts after 12 seconds.
+- `HC.startVisiblePolling(callback, interval)` schedules non-overlapping updates while a page is visible, pauses its timer in a background tab, and refreshes immediately when the tab returns. Scores, Highlights, and game pages use it with a 60-second interval; the game page stops after ESPN reports the final state. Scoreboard and Highlights retain their last successful rendering when a background update fails.
 - `HC.scoreboard(week)` calls ESPN's NFL scoreboard, adding `?week=` when supplied.
   It currently does not specify season or season type.
 - `HC.gameSummary(id)` calls ESPN's summary endpoint with `?event=`.
@@ -194,9 +195,9 @@ available. For changed JSON, run `python3 -m json.tool data/recaps.json > /dev/n
 | --- | --- |
 | Shared core/header/CSS | All main pages, light/dark themes, repeated toggles, narrow/wide layouts, console errors |
 | Scoreboard | Current/earlier week, empty week, favorites, watched/unwatched filters, keyboard card activation |
-| Highlights | Search URL, copied link, no completed games, featured game, game links |
+| Highlights | Search URL, copied link, no completed games, featured game, game links, live refresh and background-tab pause |
 | Fantasy | All three formats, position filter, both sort directions, missing players, no stats |
-| Game center | Missing/invalid ID, pregame/live/final examples, team tabs, collapsed sections, copied URL, previous/next boundaries |
+| Game center | Missing/invalid ID, pregame/live/final examples, live refresh preserves open sections and selected team tabs, polling stops after final status, copied URL, previous/next boundaries |
 | Recaps | Multiple weeks, matching game ID, paragraph rendering, verdict style, mobile expand/collapse and desktop full text |
 | Preferences | Persistence across navigation/reload, fresh storage, blocked storage, spoiler blur without layout breakage |
 | Accessibility/layout | Keyboard focus, control names/states, reduced motion, long names, horizontal table scrolling, no page overflow |

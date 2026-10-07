@@ -7,10 +7,10 @@
   let cached = null;
   let request = 0;
 
-  async function load(renderOnly = false) {
+  async function load(renderOnly = false, quiet = false) {
     const token = ++request;
     const week = parseInt(sel.value, 10) || 1;
-    box.innerHTML = HC.skeletons(4);
+    if (!quiet) box.innerHTML = HC.skeletons(4);
     try {
       const sb = renderOnly && cached ? cached : await HC.scoreboard(week);
       if (token !== request) return;
@@ -66,8 +66,10 @@
       HC.contentReady(box);
     } catch (e) {
       if (token !== request) return;
-      box.innerHTML = '<div class="error"><p>Couldn’t load the games. Blame the refs.</p><button class="btn btn-ghost" id="retryHighlights">Try again</button></div>';
-      document.getElementById('retryHighlights').addEventListener('click', () => load());
+      if (!quiet || !cached) {
+        box.innerHTML = '<div class="error"><p>Couldn’t load the games. Blame the refs.</p><button class="btn btn-ghost" id="retryHighlights">Try again</button></div>';
+        document.getElementById('retryHighlights').addEventListener('click', () => load());
+      }
     }
   }
 
@@ -77,5 +79,6 @@
     sel.value = sel.options[sel.options.length - 1].value;
     sel.addEventListener('change', () => { cached = null; load(); });
     load();
+    HC.startVisiblePolling(() => load(false, true));
   })();
 })();

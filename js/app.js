@@ -77,6 +77,44 @@
     } finally { clearTimeout(timeout); }
   };
 
+  /* Poll live data only while the page is in front, without overlapping requests. */
+  HC.startVisiblePolling = function (callback, interval = 60000) {
+    let timer = null;
+    let running = false;
+    let stopped = false;
+    const clear = () => {
+      if (timer !== null) window.clearTimeout(timer);
+      timer = null;
+    };
+    const schedule = () => {
+      clear();
+      if (!stopped && document.visibilityState !== 'hidden') {
+        timer = window.setTimeout(run, interval);
+      }
+    };
+    const run = async () => {
+      clear();
+      if (stopped || running || document.visibilityState === 'hidden') return;
+      running = true;
+      try { await callback(); }
+      finally {
+        running = false;
+        schedule();
+      }
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') clear();
+      else run();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    schedule();
+    return () => {
+      stopped = true;
+      clear();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  };
+
   /* ---------- ESPN ---------- */
   const SB = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard';
   HC.scoreboard = (week) => HC.fetchJSON(week ? `${SB}?week=${week}` : SB);

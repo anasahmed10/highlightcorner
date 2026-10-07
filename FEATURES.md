@@ -12,12 +12,12 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 
 | Feature | Notes |
 |---|---|
-| Weekly scoreboard | ESPN data, current-week selection, day grouping, pregame labels without implied 0–0 results, Refresh and labeled updated time; stale responses are ignored |
-| Game highlights | One-tap YouTube deep links per game; featured highest-scoring game |
+| Weekly scoreboard | ESPN data, current-week selection, day grouping, pregame labels without implied 0–0 results, Refresh and labeled updated time; stale responses are ignored; visible pages refresh live scores every minute and pause in the background |
+| Game highlights | One-tap YouTube deep links per game; featured highest-scoring game; visible page refreshes game status and scores every minute |
 | Fantasy leaders | PPR / half-PPR / standard, via Sleeper |
 | Recap show more (game page) | Recap body clamps to 3 lines with Show more/less on mobile so the box score sits higher; full text on desktop |
 | Comedic recaps | Original multi-paragraph narratives with verdicts (nail-biter, comfortable, garbage-time, blowout); Week 4 stored in JSON |
-| Game center pages | Matchup/highlights → recap → scoring summary → tabbed box score → team stats → fantasy → tabbed injuries; prev/next game nav |
+| Game center pages | Matchup/highlights → recap → scoring summary → tabbed box score → team stats → fantasy → tabbed injuries; prev/next game nav; live game details refresh every minute while visible and stop after the final status |
 | Spoiler preference | Settings toggle hides scores, records, verdicts, featured picks, recaps and stats from visible/accessibility content; device screen-reader review pending |
 | Favorites + watched | Team favorites w/ filter; watched/unwatched tracking w/ filter |
 | Team colors | Logo-derived, matchup-aware, readable in light/dark |

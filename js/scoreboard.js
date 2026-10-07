@@ -98,13 +98,16 @@
     }));
   }
 
-  async function load() {
+  async function load(quiet = false) {
     const token = ++request;
     const week = parseInt(sel.value, 10) || currentWeek;
     weekCache = week;
-    loading = true; refresh.disabled = true;
-    freshness.textContent = 'Updating scores…';
-    box.innerHTML = HC.skeletons(4);
+    loading = true;
+    if (!quiet) {
+      refresh.disabled = true;
+      box.innerHTML = HC.skeletons(4);
+    }
+    freshness.textContent = quiet ? 'Checking for live updates…' : 'Updating scores…';
     try {
       const sb = await HC.scoreboard(week);
       if (token !== request) return;
@@ -116,11 +119,16 @@
         : 'Offline — showing a saved response';
     } catch (e) {
       if (token !== request) return;
-      loading = false; eventsCache = [];
-      freshness.textContent = navigator.onLine ? 'Scores unavailable' : 'You’re offline';
-      box.innerHTML = '<div class="error"><p>Couldn’t load scores. Try again when you’re connected.</p><button class="btn btn-ghost" id="retryScores">Try again</button></div>';
-      document.getElementById('retryScores').addEventListener('click', load);
-    } finally { if (token === request) refresh.disabled = false; }
+      loading = false;
+      if (quiet && eventsCache.length) {
+        freshness.textContent = 'Couldn’t refresh — showing the last update';
+      } else {
+        eventsCache = [];
+        freshness.textContent = navigator.onLine ? 'Scores unavailable' : 'You’re offline';
+        box.innerHTML = '<div class="error"><p>Couldn’t load scores. Try again when you’re connected.</p><button class="btn btn-ghost" id="retryScores">Try again</button></div>';
+        document.getElementById('retryScores').addEventListener('click', load);
+      }
+    } finally { if (token === request && !quiet) refresh.disabled = false; }
   }
   refresh.addEventListener('click', load);
   document.addEventListener('hc:theme', render);
@@ -139,5 +147,6 @@
     sel.addEventListener('change', load);
     renderFavGrid();
     load();
+    HC.startVisiblePolling(() => load(true));
   })();
 })();
