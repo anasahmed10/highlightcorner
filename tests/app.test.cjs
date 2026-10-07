@@ -24,6 +24,27 @@ test('fresh week selection uses the provider current week', async () => {
   dom.window.close();
 });
 
+test('visible polling pauses in the background and refreshes when the page returns', async () => {
+  const dom = app();
+  const w = dom.window;
+  let calls = 0;
+  const stop = w.HC.startVisiblePolling(() => { calls++; }, 10);
+  await new Promise(resolve => w.setTimeout(resolve, 25));
+  assert.ok(calls >= 1);
+
+  Object.defineProperty(w.document, 'visibilityState', { configurable: true, value: 'hidden' });
+  w.document.dispatchEvent(new w.Event('visibilitychange'));
+  const hiddenCalls = calls;
+  await new Promise(resolve => w.setTimeout(resolve, 25));
+  assert.equal(calls, hiddenCalls);
+
+  Object.defineProperty(w.document, 'visibilityState', { configurable: true, value: 'visible' });
+  w.document.dispatchEvent(new w.Event('visibilitychange'));
+  assert.equal(calls, hiddenCalls + 1);
+  stop();
+  dom.window.close();
+});
+
 test('week discovery failure leaves a usable selector with an honest fallback', async () => {
   const dom = app();
   dom.window.fetch = async () => { throw new Error('offline'); };

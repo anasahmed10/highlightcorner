@@ -6,6 +6,26 @@
   const params = new URLSearchParams(location.search);
   const gameId = params.get('id');
   const weekParam = params.get('week');
+  let gameState = '';
+  let currentTeams = null;
+  let syncRecapToggle = () => {};
+  let stopPolling = () => {};
+  let adsInitialized = false;
+
+  document.addEventListener('hc:spoilers', () => syncRecapToggle());
+  window.addEventListener('resize', () => syncRecapToggle());
+  document.addEventListener('hc:theme', () => {
+    if (!currentTeams) return;
+    const colors = HC.teamTextColors(currentTeams.away, currentTeams.home);
+    const hero = box.querySelector('.game-hero');
+    if (hero) {
+      hero.style.setProperty('--ga', colors.away);
+      hero.style.setProperty('--gh', colors.home);
+    }
+    box.querySelectorAll('.team-tab').forEach(tab => {
+      tab.style.setProperty('--team', tab.textContent.trim() === currentTeams.awayAbbr ? colors.away : colors.home);
+    });
+  });
 
   const TEAM_STATS = [
     ['firstDowns', '1st Downs'], ['thirdDownEff', '3rd Down'], ['fourthDownEff', '4th Down'],
@@ -200,9 +220,17 @@
       <tbody>${rows}</tbody></table></div>`;
   }
 
-  (async function init() {
+  async function loadGame(quiet = false) {
     if (!gameId) { box.innerHTML = '<div class="empty">No game selected. <a href="index.html">Back to scores</a>.</div>'; return; }
-    box.innerHTML = HC.skeletons(3);
+    const uiState = {
+      openSections: Array.from(box.querySelectorAll('details'), section => section.open),
+      activeTabs: Array.from(box.querySelectorAll('[data-tabgroup]'), group => {
+        const active = group.querySelector('.team-tab.active');
+        return active ? active.textContent.trim() : '';
+      }),
+      recapExpanded: Boolean(box.querySelector('#recapText.expanded'))
+    };
+    if (!quiet) box.innerHTML = HC.skeletons(3);
     try {
       const [d, recaps, sb] = await Promise.all([
         HC.gameSummary(gameId),
@@ -215,6 +243,11 @@
       const home = teams.find(t => t.homeAway === 'home') || {};
       const st = (d.header || {}).status || {};
       const state = ((st.type || {}).state) || '';
+      gameState = state;
+      currentTeams = {
+        away: away.team || {}, home: home.team || {},
+        awayAbbr: (away.team || {}).abbreviation || ''
+      };
       const c = HC.teamTextColors(away.team || {}, home.team || {});
       const recap = (recaps || []).find(r => String(r.gameId) === String(gameId));
       const venue = (((d.gameInfo || {}).venue) || {}).fullName || '';
@@ -311,6 +344,9 @@
       html += `<div class="ad-slot"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1549898506474594" data-ad-format="auto" data-full-width-responsive="true"></ins></div>`;
       box.innerHTML = html;
       HC.contentReady(box);
+      Array.from(box.querySelectorAll('details')).forEach((section, i) => {
+        if (uiState.openSections[i] !== undefined) section.open = uiState.openSections[i];
+      });
       box.querySelectorAll('[data-tabgroup]').forEach(group => {
         const tabs = group.querySelectorAll('.team-tab');
         const panes = group.querySelectorAll('.team-pane');
@@ -323,6 +359,11 @@
           panes.forEach(p => p.classList.toggle('active', p.dataset.pane === t.dataset.tab));
         }));
       });
+      box.querySelectorAll('[data-tabgroup]').forEach((group, i) => {
+        const wanted = uiState.activeTabs[i];
+        const tab = Array.from(group.querySelectorAll('.team-tab')).find(t => t.textContent.trim() === wanted);
+        if (tab) tab.click();
+      });
       const wb = document.getElementById('watchedBtn');
       if (wb) wb.addEventListener('click', () => {
         wb.textContent = HC.toggleWatched(gameId) ? '✓ Watched' : 'Mark as watched';
@@ -331,33 +372,39 @@
       if (cb) cb.addEventListener('click', () => HC.copyLink(location.href, cb));
       const rt = document.getElementById('recapText');
       const rtg = document.getElementById('recapToggle');
+      syncRecapToggle = () => {};
       if (rt && rtg) {
-        const syncRecapToggle = () => {
+        const updateRecapToggle = () => {
           if (!HC.spoilersHidden() && !rt.classList.contains('expanded')) {
             rtg.style.display = rt.scrollHeight > rt.clientHeight + 2 ? '' : 'none';
           }
         };
+        const setExpanded = expanded => {
+          rt.classList.toggle('expanded', expanded);
+          rtg.setAttribute('aria-expanded', String(expanded));
+          rtg.innerHTML = expanded ? 'Show less ▴' : 'Show more ▾';
+        };
+        if (uiState.recapExpanded) setExpanded(true);
+        syncRecapToggle = updateRecapToggle;
         syncRecapToggle();
-        document.addEventListener('hc:spoilers', syncRecapToggle);
-        window.addEventListener('resize', syncRecapToggle);
         rtg.addEventListener('click', () => {
-          const open = rt.classList.toggle('expanded');
-          rtg.setAttribute('aria-expanded', String(open));
-          rtg.innerHTML = open ? 'Show less ▴' : 'Show more ▾';
+          setExpanded(!rt.classList.contains('expanded'));
         });
       }
-      if (HC.renderAds) HC.renderAds();
+      if (HC.renderAds && !adsInitialized && box.querySelector('.ad-slot')) {
+        HC.renderAds();
+        adsInitialized = true;
+      }
       document.title = `Highlight Corner — ${(away.team || {}).abbreviation} @ ${(home.team || {}).abbreviation}`;
-      document.addEventListener('hc:theme', () => {
-        const colors = HC.teamTextColors(away.team || {}, home.team || {});
-        const hero = box.querySelector('.game-hero');
-        hero.style.setProperty('--ga', colors.away); hero.style.setProperty('--gh', colors.home);
-        box.querySelectorAll('.team-tab').forEach(tab => {
-          tab.style.setProperty('--team', tab.textContent.trim() === (away.team || {}).abbreviation ? colors.away : colors.home);
-        });
-      });
     } catch (e) {
-      box.innerHTML = '<div class="error">Couldn’t load this game — it may have been flexed out of existence. <a href="index.html">Back to scores</a>.</div>';
+      if (!quiet) box.innerHTML = '<div class="error">Couldn’t load this game — it may have been flexed out of existence. <a href="index.html">Back to scores</a>.</div>';
     }
-  })();
+  }
+
+  loadGame().finally(() => {
+    stopPolling = HC.startVisiblePolling(() => {
+      if (gameState === 'post') { stopPolling(); return; }
+      return loadGame(true);
+    });
+  });
 })();
