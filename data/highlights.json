@@ -1,0 +1,618 @@
+{
+  "version": 1,
+  "status": "ready",
+  "season": 2026,
+  "updatedAt": "2026-10-07T15:22:38.100816+00:00",
+  "games": {
+    "401872979": {
+      "url": "https://www.youtube.com/watch?v=8qB8fHEgpkg",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "ATL",
+      "home": "NO",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872978": {
+      "url": "https://www.youtube.com/watch?v=sD0WZLGybRw",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "DET",
+      "home": "CAR",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872975": {
+      "url": "https://www.youtube.com/watch?v=3T1_zYMHPaQ",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "DEN",
+      "home": "SF",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872977": {
+      "url": "https://www.youtube.com/watch?v=a0oq3jtgsvE",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "LAC",
+      "home": "SEA",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872976": {
+      "url": "https://www.youtube.com/watch?v=UH-pYLB0KQ4",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "KC",
+      "home": "LV",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872974": {
+      "url": "https://www.youtube.com/watch?v=YHo13wCIHT4",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "MIA",
+      "home": "MIN",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872973": {
+      "url": "https://www.youtube.com/watch?v=1MzoImgClWQ",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "TEN",
+      "home": "BAL",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872969": {
+      "url": "https://www.youtube.com/watch?v=a2zogEoiXV0",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "JAX",
+      "home": "CIN",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872968": {
+      "url": "https://www.youtube.com/watch?v=13AbO1AEq1E",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "GB",
+      "home": "TB",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872966": {
+      "url": "https://www.youtube.com/watch?v=OdvCc-cxRz4",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "ARI",
+      "home": "NYG",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872970": {
+      "url": "https://www.youtube.com/watch?v=h6eywSmXaCI",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "LAR",
+      "home": "PHI",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872967": {
+      "url": "https://www.youtube.com/watch?v=Yayn1UWwu1Y",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "DAL",
+      "home": "HOU",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872971": {
+      "url": "https://www.youtube.com/watch?v=Z5zAM_GLGI0",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "NE",
+      "home": "BUF",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872972": {
+      "url": "https://www.youtube.com/watch?v=IlcC1zFWyVw",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "NYJ",
+      "home": "CHI",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872965": {
+      "url": "https://www.youtube.com/watch?v=VSkRsq4Tlfg",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "IND",
+      "home": "WSH",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872964": {
+      "url": "https://www.youtube.com/watch?v=qJn2zHTs9BY",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 4,
+      "away": "PIT",
+      "home": "CLE",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872963": {
+      "url": "https://www.youtube.com/watch?v=KScULet1ves",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "PHI",
+      "home": "CHI",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872962": {
+      "url": "https://www.youtube.com/watch?v=EL-uDgYSYlI",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "LAR",
+      "home": "DEN",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872960": {
+      "url": "https://www.youtube.com/watch?v=7gWPdESD1og",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "BAL",
+      "home": "DAL",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872961": {
+      "url": "https://www.youtube.com/watch?v=xcj0NwyEJUk",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "LV",
+      "home": "NO",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872959": {
+      "url": "https://www.youtube.com/watch?v=PwKZhQg5n6w",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "MIN",
+      "home": "TB",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872958": {
+      "url": "https://www.youtube.com/watch?v=7ngu-tT0PQs",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "ARI",
+      "home": "SF",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872951": {
+      "url": "https://www.youtube.com/watch?v=LwBJf78vzjY",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "HOU",
+      "home": "IND",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872955": {
+      "url": "https://www.youtube.com/watch?v=j8mZDG_M7cs",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "SEA",
+      "home": "WSH",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872957": {
+      "url": "https://www.youtube.com/watch?v=Oi9HQlp-ysA",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "NE",
+      "home": "JAX",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872950": {
+      "url": "https://www.youtube.com/watch?v=sqOhOfjHhaI",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "CIN",
+      "home": "PIT",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872949": {
+      "url": "https://www.youtube.com/watch?v=EyGW6pqjIgs",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "CAR",
+      "home": "CLE",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872953": {
+      "url": "https://www.youtube.com/watch?v=v__pg6qIYL4",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "LAC",
+      "home": "BUF",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872952": {
+      "url": "https://www.youtube.com/watch?v=eyM7QUODW6c",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "KC",
+      "home": "MIA",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872954": {
+      "url": "https://www.youtube.com/watch?v=xsJzYyK4mGE",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "NYJ",
+      "home": "DET",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872956": {
+      "url": "https://www.youtube.com/watch?v=GmCLbwLRGqA",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "TEN",
+      "home": "NYG",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872948": {
+      "url": "https://www.youtube.com/watch?v=sbXZBAUOkDw",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 3,
+      "away": "ATL",
+      "home": "GB",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872947": {
+      "url": "https://www.youtube.com/watch?v=qg9GZqmTRto",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 2,
+      "away": "NYG",
+      "home": "LAR",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872945": {
+      "url": "https://www.youtube.com/watch?v=baPzspvJv5Q",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 2,
+      "away": "IND",
+      "home": "KC",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872944": {
+      "url": "https://www.youtube.com/watch?v=s6KiKu6PZgk",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 2,
+      "away": "WSH",
+      "home": "DAL",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872943": {
+      "url": "https://www.youtube.com/watch?v=_k-w90zF8t4",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 2,
+      "away": "SEA",
+      "home": "ARI",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872942": {
+      "url": "https://www.youtube.com/watch?v=pV8FmQa0a5w",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 2,
+      "away": "MIA",
+      "home": "SF",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872940": {
+      "url": "https://www.youtube.com/watch?v=bGoj6Mktog0",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 2,
+      "away": "JAX",
+      "home": "DEN",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872941": {
+      "url": "https://www.youtube.com/watch?v=cyk5Vci3k-c",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 2,
+      "away": "LV",
+      "home": "LAC",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872936": {
+      "url": "https://www.youtube.com/watch?v=Z7OIS7hXV7E",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 2,
+      "away": "GB",
+      "home": "NYJ",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872934": {
+      "url": "https://www.youtube.com/watch?v=Bi13ofXC0xY",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 2,
+      "away": "CIN",
+      "home": "HOU",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872937": {
+      "url": "https://www.youtube.com/watch?v=hwqFHBP3_VM",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 2,
+      "away": "MIN",
+      "home": "CHI",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872939": {
+      "url": "https://www.youtube.com/watch?v=qQFyOm6nFaE",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 2,
+      "away": "PHI",
+      "home": "TEN",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872938": {
+      "url": "https://www.youtube.com/watch?v=ZhFUgsuEgV4",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 2,
+      "away": "NO",
+      "home": "BAL",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872932": {
+      "url": "https://www.youtube.com/watch?v=ULjOfKcZl4o",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 2,
+      "away": "DET",
+      "home": "BUF",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872931": {
+      "url": "https://www.youtube.com/watch?v=RYh8_uw45Fw",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "DEN",
+      "home": "KC",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872930": {
+      "url": "https://www.youtube.com/watch?v=9R8P93W2iKE",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "DAL",
+      "home": "NYG",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872927": {
+      "url": "https://www.youtube.com/watch?v=d6wKdU-5kME",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "GB",
+      "home": "MIN",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872928": {
+      "url": "https://www.youtube.com/watch?v=bi4dvOh4tPA",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "MIA",
+      "home": "LV",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872929": {
+      "url": "https://www.youtube.com/watch?v=UYunnfDMXGc",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "WSH",
+      "home": "PHI",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872926": {
+      "url": "https://www.youtube.com/watch?v=UKqM7fT42uk",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "ARI",
+      "home": "LAC",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872923": {
+      "url": "https://www.youtube.com/watch?v=KC4OW2m3hjs",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "NO",
+      "home": "DET",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872661": {
+      "url": "https://www.youtube.com/watch?v=gXmzn5ZBsHU",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "CHI",
+      "home": "CAR",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872924": {
+      "url": "https://www.youtube.com/watch?v=vt9DKUJ_Q-Y",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "NYJ",
+      "home": "TEN",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872922": {
+      "url": "https://www.youtube.com/watch?v=T5D7UViL1L0",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "CLE",
+      "home": "JAX",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872658": {
+      "url": "https://www.youtube.com/watch?v=TQcletbGnAk",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "ATL",
+      "home": "PIT",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872660": {
+      "url": "https://www.youtube.com/watch?v=X3AZfHgZXFE",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "BUF",
+      "home": "HOU",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872659": {
+      "url": "https://www.youtube.com/watch?v=iyDolDtuiT0",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "BAL",
+      "home": "IND",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872925": {
+      "url": "https://www.youtube.com/watch?v=6Jc-OI39Qng",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "TB",
+      "home": "CIN",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872657": {
+      "url": "https://www.youtube.com/watch?v=C9sL5j_iUiE",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "SF",
+      "home": "LAR",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    },
+    "401872656": {
+      "url": "https://www.youtube.com/watch?v=hyEng1b5j8o",
+      "source": "YouTube",
+      "channelId": "UCDVYQ4Zhbm3S2dlz7P1GBDg",
+      "season": 2026,
+      "week": 1,
+      "away": "NE",
+      "home": "SEA",
+      "verifiedAt": "2026-10-07T15:22:37.526468+00:00"
+    }
+  }
+}

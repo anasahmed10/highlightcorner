@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '17 */2 * * *'
 
 permissions:
   contents: read
@@ -33,6 +35,7 @@ jobs:
       - name: Verify and compile styles
         run: |
           npm test
+          python3 -m unittest discover -s tests -p 'test_highlights.py'
           npm run build:css
           for script in js/*.js sw.js; do node --check "$script"; done
           python3 -m json.tool manifest.webmanifest > /dev/null
@@ -42,6 +45,10 @@ jobs:
           cp *.html sw.js manifest.webmanifest favicon.svg ads.txt robots.txt sitemap.xml CNAME _site/
           cp css/style.css css/utilities.css _site/css/
           cp -R js icons data _site/
+      - name: Refresh official game highlight links
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: python3 tools/refresh_highlights.py --out _site/data/highlights.json --previous-url https://highlightcorner.com/data/highlights.json --optional
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Stamp build id into service worker

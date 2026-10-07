@@ -1,6 +1,6 @@
 # Highlight Corner
 
-A mobile-first NFL hub for scores, outbound YouTube highlights, weekly fantasy
+A mobile-first NFL hub for scores, outbound official game highlights, weekly fantasy
 leaders, original humorous recaps, and game centers with box scores, team stats,
 fantasy scorers, and injuries.
 
@@ -34,8 +34,8 @@ preview origin's cache in browser developer tools.
 
 | Page | Purpose |
 | --- | --- |
-| `index.html` | Weekly scores, favorites, watched filters and game links |
-| `highlights.html` | Per-game YouTube searches and copied highlight links |
+| `index.html` | Weekly scores, favorites, watched filters, game links and available direct highlights |
+| `highlights.html` | Legacy standalone page for matched official game videos and copied links |
 | `fantasy.html` | Weekly leaders by position, scoring format and sortable tables |
 | `recaps.html` | Original recaps grouped by week |
 | `game.html?id=<espnGameId>&week=<n>` | Game center and previous/next weekly navigation |
@@ -45,7 +45,7 @@ preview origin's cache in browser developer tools.
 Theme, spoiler preference, favorite teams and watched games are stored in the
 visitor's browser. Hide spoilers removes scores, team records, outcome labels, featured picks,
 recap prose, and stats from visible and accessible page content. Reveal them
-through Settings. Mobile navigation uses four persistent bottom tabs.
+through Settings. Mobile navigation uses three persistent bottom tabs: Scores, Fantasy, and Recaps.
 
 ## Data and content
 
@@ -56,6 +56,30 @@ positions and teams; `data/recaps.json` stores editorial recaps.
 Sports data is requested on page load or selection changes, not continuously
 polled. Fantasy currently selects the 2026 regular season explicitly. Shared
 season handling and more resilient loading are roadmap priorities.
+
+Highlight buttons use `data/highlights.json` to open the official video matched
+to that ESPN game ID. `tools/refresh_highlights.py` discovers NFL-channel uploads
+through the YouTube Data API and matches both teams, season, and week. It rejects
+previews, player clips, full-game replays, private videos, and other channels.
+Upcoming games and games without a verified video show a pending state.
+
+Automatic discovery requires YouTube Data API v3 to be enabled for a Google
+Cloud API key. Store it as the repository Actions secret `YOUTUBE_API_KEY`.
+The Pages workflow refreshes the map on publication and every two hours once
+the workflow is on `main`.
+The key stays in Actions; visitors only download the generated link map.
+For a local refresh with the key already in your environment, run:
+
+```sh
+python3 tools/refresh_highlights.py
+```
+
+The checked-in map was populated through a live API run on October 7, 2026.
+The YouTube-only key is configured in the repository Actions secret. API failures preserve the
+last deployed map when it can be fetched; links expire after 30 days without
+verification. The automatic matcher currently supports the regular season.
+NFL.com game-specific links are also supported by the map, but NFL.com pages
+are not harvested automatically because of their terms for commercial use.
 
 Recaps require content updates. `tools/nflverse_week.py` can provide supporting
 regular-season EPA and win-probability statistics; it requires Python 3, `curl`

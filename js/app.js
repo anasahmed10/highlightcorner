@@ -174,10 +174,31 @@
     } catch (e) { return iso; }
   };
 
-  /* ---------- YouTube deep links ---------- */
-  HC.ytSearchURL = (week, awayAbbr, homeAbbr) =>
-    'https://www.youtube.com/results?search_query=' +
-    encodeURIComponent(`NFL Week ${week} ${awayAbbr} vs ${homeAbbr} highlights`);
+  /* ---------- Automatically matched official highlight links ---------- */
+  HC.highlightLink = (map, id) => {
+    const link = map && map.version === 1 && map.games && map.games[String(id)];
+    if (!link || typeof link.url !== 'string') return null;
+    const age = Date.now() - Date.parse(link.verifiedAt);
+    if (!Number.isFinite(age) || age < -300000 || age > 30 * 86400000) return null;
+    try {
+      const url = new URL(link.url);
+      if (url.protocol !== 'https:' || url.username || url.password) return null;
+      if (link.source === 'YouTube' && link.channelId === 'UCDVYQ4Zhbm3S2dlz7P1GBDg' &&
+          url.hostname === 'www.youtube.com' && url.pathname === '/watch' &&
+          /^[A-Za-z0-9_-]{11}$/.test(url.searchParams.get('v') || '')) {
+        return { url: url.href, source: 'YouTube' };
+      }
+      if (link.source === 'NFL.com' && url.hostname === 'www.nfl.com' &&
+          /^\/videos\/[^/]+$/.test(url.pathname)) return { url: url.href, source: 'NFL.com' };
+    } catch (e) {}
+    return null;
+  };
+
+  HC.highlightPending = (map, completed) => !completed
+    ? 'Highlights available after the game'
+    : !map || map.status !== 'ready'
+      ? 'Official highlight links temporarily unavailable'
+      : 'Official highlights not available yet';
 
   /* ---------- team colors: logo-based, readable, matchup-aware ---------- */
   function hexToRgb(h) {

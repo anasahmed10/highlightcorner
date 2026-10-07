@@ -10,12 +10,12 @@ behavior. External schedules and account status require separate verification.
 The repository root is the static site. Only Tailwind utilities have a compilation step; HTML and JavaScript remain plain static files. Committed CSS allows immediate local preview. Run `npm ci` and `npm run build:css` when changing utility classes; commit `css/utilities.css`. Tailwind Preflight is deliberately omitted to preserve the existing stylesheet. Most pages
 load `js/app.js`, then `js/ads.js`, then their page script at the end of the body.
 `app.js` assigns a fresh `window.HC` object, so reordering it after consumers can
-break the site. Shared navigation/header markup is repeated across HTML files. Place both desktop and mobile navigation before `js/app.js` so page initialization can set the active tab. The shared script creates the Settings dialog, install promotion, and offline notice before page scripts initialize theme/preferences.
+break the site. Shared navigation/header markup is repeated across HTML files. Navigation has Scores, Fantasy, and Recaps; highlights are available beside View game on completed score cards. The old highlights URL remains accessible for existing links. Place both desktop and mobile navigation before `js/app.js` so page initialization can set the active tab. The shared script creates the Settings dialog, install promotion, and offline notice before page scripts initialize theme/preferences.
 
 | Page | Script | Responsibility |
 | --- | --- | --- |
-| `index.html` | `js/scoreboard.js` | Week selector, scores, favorites, watched filters, game links |
-| `highlights.html` | `js/highlights.js` | YouTube searches, featured completed game, copied links |
+| `index.html` | `js/scoreboard.js` | Week selector, scores, favorites, watched filters, game and highlight links |
+| `highlights.html` | `js/highlights.js` | Legacy standalone page: matched official videos, featured completed game, copied links |
 | `fantasy.html` | `js/fantasy.js` | Weekly Sleeper leaders, scoring formats, position filters, sorting |
 | `recaps.html` | `js/recaps.js` | Stored recaps grouped by descending week |
 | `game.html` | `js/game.js` | Matchup, weekly navigation, recap, box score, stats, fantasy, injuries |
@@ -30,9 +30,11 @@ calls `HC.renderAds()` after rendering.
 
 ## Data and interfaces
 
-All sports API requests happen in the visitor's browser. No API keys or server
-are configured. Provider availability, CORS, and response formats can change;
-verify current responses when investigating data failures.
+Scores and fantasy requests happen in the visitor's browser. Highlight discovery
+runs in GitHub Actions through the YouTube Data API using `YOUTUBE_API_KEY`; only
+the generated public map reaches the browser. No application server is needed.
+Provider availability and formats can change; verify responses when investigating
+data failures.
 
 - `HC.fetchJSON(url)` rejects non-success HTTP responses, parses JSON, and aborts after 12 seconds.
 - `HC.startVisiblePolling(callback, interval)` schedules non-overlapping updates while a page is visible, pauses its timer in a background tab, and refreshes immediately when the tab returns. Scores, Highlights, and game pages use it with a 60-second interval; the game page stops after ESPN reports the final state. Scoreboard and Highlights retain their last successful rendering when a background update fails.
@@ -54,11 +56,39 @@ verify current responses when investigating data failures.
   Sleeper's rankings or distance-based kicker scoring.
 - `game.html?id=<espnGameId>&week=<n>` identifies a game and its weekly context.
   `id` is required; missing IDs display a recovery link. The optional week informs
-  sibling navigation and highlight searches. Preserve these links when editing.
-- `HC.ytSearchURL` produces a YouTube search URL using week and team abbreviations;
-  it does not select or guarantee a particular highlight video.
+  sibling navigation. Preserve these links when editing.
+- `HC.highlightLink(map, id)` resolves a verified game-specific link. It accepts
+  direct NFL.com video pages or official NFL-channel YouTube watch URLs, rejects
+  collection/search pages and unsafe destinations, and expires links after 30 days.
+- `HC.highlightPending(map, completed)` labels future games, missing videos, or
+  unavailable discovery separately. Unmatched games never get a guessed URL.
 
 ### Stored JSON
+
+`data/highlights.json` has `version: 1`, a `status`, UTC `updatedAt`, and `games`
+keyed by string ESPN event ID. A generated entry has `url`, `source`, `channelId`,
+`season`, `week`, `away`, `home`, and UTC `verifiedAt`. `source` is `YouTube` for
+automatic discovery. Only NFL channel `UCDVYQ4Zhbm3S2dlz7P1GBDg` is eligible.
+The October 7, 2026 snapshot contains 61 verified videos for 64 completed games.
+The YouTube-only API key is configured as the repository Actions secret.
+
+`tools/refresh_highlights.py` reads ESPN's current regular-season year/week,
+loads completed games, paginates the official channel's uploads via the YouTube
+Data API, and verifies candidate ownership/public visibility with `videos.list`.
+Matching requires a whole-game highlights title, both exact team aliases, year,
+and week. API metadata is re-read on every successful run. Pagination is bounded;
+failed refreshes leave the previous map intact. Request errors are sanitized so
+the API key cannot appear in logs. NFL.com HTML is not collected automatically.
+
+Set up a Google Cloud key with YouTube Data API v3 enabled and store it in the
+repository Actions secret `YOUTUBE_API_KEY`. The Pages workflow refreshes staged
+`_site/data/highlights.json` on deployment and on a two-hour schedule, preserving
+the last successful public map from the live site's `/data/highlights.json` when
+available. It never commits generated data or secrets. Scheduled discovery runs from the workflow on `main`.
+The matcher supports regular-season numeric weeks only; postseason titles need
+a separately verified matching contract. Run `python3 tools/refresh_highlights.py`
+for local refresh with an environment key, and `python3 -m unittest discover -s
+tests -p 'test_highlights.py'` for the offline matcher checks.
 
 `data/players.json` is an object keyed by Sleeper player ID. Each value has `n`
 (name), `p` (position), and `t` (team). Unknown IDs are skipped by fantasy rendering.
@@ -195,7 +225,7 @@ available. For changed JSON, run `python3 -m json.tool data/recaps.json > /dev/n
 | --- | --- |
 | Shared core/header/CSS | All main pages, light/dark themes, repeated toggles, narrow/wide layouts, console errors |
 | Scoreboard | Current/earlier week, empty week, favorites, watched/unwatched filters, keyboard card activation |
-| Highlights | Search URL, copied link, no completed games, featured game, game links, live refresh and background-tab pause |
+| Highlights | Game-specific destination and copied URL, unmatched/future games, failed map request, featured game, game links, live refresh and background-tab pause |
 | Fantasy | All three formats, position filter, both sort directions, missing players, no stats |
 | Game center | Missing/invalid ID, pregame/live/final examples, live refresh preserves open sections and selected team tabs, polling stops after final status, copied URL, previous/next boundaries |
 | Recaps | Multiple weeks, matching game ID, paragraph rendering, verdict style, mobile expand/collapse and desktop full text |

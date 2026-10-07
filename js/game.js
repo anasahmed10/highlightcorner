@@ -232,10 +232,11 @@
     };
     if (!quiet) box.innerHTML = HC.skeletons(3);
     try {
-      const [d, recaps, sb] = await Promise.all([
+      const [d, recaps, sb, highlightMap] = await Promise.all([
         HC.gameSummary(gameId),
         HC.fetchJSON('data/recaps.json').catch(() => []),
-        HC.scoreboard(weekParam || undefined).catch(() => null)
+        HC.scoreboard(weekParam || undefined).catch(() => null),
+        HC.fetchJSON('data/highlights.json').catch(() => null)
       ]);
       const comp = ((d.header || {}).competitions || [])[0] || {};
       const teams = comp.competitors || [];
@@ -252,6 +253,7 @@
       const recap = (recaps || []).find(r => String(r.gameId) === String(gameId));
       const venue = (((d.gameInfo || {}).venue) || {}).fullName || '';
       const week = weekParam || '';
+      const highlight = HC.highlightLink(highlightMap, gameId);
 
       // prev/next game within the week, ordered by kickoff (spoiler-safe: no scores)
       let navHtml = '';
@@ -294,8 +296,9 @@
           <div class="matchup">${side(away, c.away)}<div class="mid"><span data-outcome>${heroScore}</span><span data-spoiler-placeholder hidden>vs</span></div>${side(home, c.home)}</div>
           <div class="gmeta"><span data-outcome>${HC.esc(((st.type || {}).shortDetail) || '')} · </span> ${HC.esc(HC.fmtDate(comp.date))}${venue ? ' · ' + HC.esc(venue) : ''}</div>
         </div>
-        <a class="btn btn-yt btn-block-center" target="_blank" rel="noopener"
-           href="${HC.ytSearchURL(week, (away.team || {}).abbreviation, (home.team || {}).abbreviation)}">▶ Watch highlights</a>
+        ${highlight
+          ? `<a class="btn btn-primary btn-block-center" target="_blank" rel="noopener" href="${HC.esc(highlight.url)}">▶ Watch highlights on ${HC.esc(highlight.source)}</a>`
+          : `<p class="page-sub" style="text-align:center;margin:16px 0">${HC.esc(HC.highlightPending(highlightMap, state === 'post'))}</p>`}
         <div style="display:flex;gap:8px;margin-top:10px">
           <button class="btn btn-ghost" id="watchedBtn" style="flex:1">${HC.isWatched(gameId) ? '✓ Watched' : 'Mark as watched'}</button>
           <button class="btn btn-ghost" id="copyGameBtn" style="flex:0 0 auto" aria-label="Copy link to this game" title="Copy link to this game">⧉</button>

@@ -6,6 +6,7 @@
   const box = document.getElementById('games');
   const favGrid = document.getElementById('favGrid');
   let recaps = [];
+  let highlightMap = null;
   let currentWeek = 1;
   let filter = 'all';
   let eventsCache = [];
@@ -39,6 +40,7 @@
     const c = HC.teamTextColors(g.away, g.home);
     const recap = recaps.find(r => String(r.gameId) === g.id);
     const watched = HC.isWatched(g.id);
+    const highlight = g.state === 'post' ? HC.highlightLink(highlightMap, g.id) : null;
     return `<div class="game-card" style="--ga:${c.away};--gh:${c.home}" data-href="game.html?id=${g.id}&week=${weekCache}" tabindex="0" role="link"
         aria-label="${HC.esc(g.away.abbr)} at ${HC.esc(g.home.abbr)}">
       <div class="game-meta">
@@ -49,7 +51,10 @@
       <div class="card-foot">
         ${recap ? `<span data-outcome class="chip"><span class="verdict ${HC.esc(recap.verdict)}" style="margin:0">${HC.esc(String(recap.verdict).replace(/-/g, ' '))}</span></span>` : ''}
         <button class="chip watched-toggle" data-id="${g.id}">${watched ? '✓ Watched' : 'Mark watched'}</button>
-        <span class="chip">View game →</span>
+        <span class="card-actions">
+          <a class="chip" href="game.html?id=${HC.esc(g.id)}&week=${weekCache}">View game →</a>
+          ${highlight ? `<a class="chip highlight-link" href="${HC.esc(highlight.url)}" target="_blank" rel="noopener noreferrer" aria-label="View Highlights on ${HC.esc(highlight.source)} for ${HC.esc(g.away.abbr)} at ${HC.esc(g.home.abbr)}">View Highlights</a>` : ''}
+        </span>
       </div>
     </div>`;
   }
@@ -81,11 +86,11 @@
     HC.contentReady(box);
     box.querySelectorAll('.game-card').forEach(card => {
       card.addEventListener('click', e => {
-        if (e.target.closest('button')) return;
+        if (e.target.closest('button, a')) return;
         location.href = card.dataset.href;
       });
       card.addEventListener('keydown', e => {
-        if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button')) {
+        if ((e.key === 'Enter' || e.key === ' ') && !e.target.closest('button, a')) {
           e.preventDefault(); location.href = card.dataset.href;
         }
       });
@@ -109,9 +114,13 @@
     }
     freshness.textContent = quiet ? 'Checking for live updates…' : 'Updating scores…';
     try {
-      const sb = await HC.scoreboard(week);
+      const [sb, links] = await Promise.all([
+        HC.scoreboard(week),
+        HC.fetchJSON('data/highlights.json').catch(() => null)
+      ]);
       if (token !== request) return;
       eventsCache = sb.events || [];
+      highlightMap = links;
       loading = false;
       render();
       freshness.textContent = navigator.onLine

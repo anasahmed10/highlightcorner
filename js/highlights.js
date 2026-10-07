@@ -1,10 +1,11 @@
-/* Highlights page — one-tap YouTube deep links per game */
+/* Highlights page — automatically matched official game videos */
 (function () {
   'use strict';
   HC.initTheme(); HC.initNav('highlights'); HC.initPrefs();
   const sel = document.getElementById('weekSel');
   const box = document.getElementById('hl');
   let cached = null;
+  let cachedLinks = null;
   let request = 0;
 
   async function load(renderOnly = false, quiet = false) {
@@ -12,9 +13,14 @@
     const week = parseInt(sel.value, 10) || 1;
     if (!quiet) box.innerHTML = HC.skeletons(4);
     try {
-      const sb = renderOnly && cached ? cached : await HC.scoreboard(week);
+      const useCache = renderOnly && cached;
+      const [sb, links] = await Promise.all([
+        useCache ? cached : HC.scoreboard(week),
+        useCache ? cachedLinks : HC.fetchJSON('data/highlights.json').catch(() => null)
+      ]);
       if (token !== request) return;
       cached = sb;
+      cachedLinks = links;
       const events = sb.events || [];
       const infos = events.map(HC.gameInfo);
 
@@ -25,16 +31,18 @@
         const top = done.sort((a, b) =>
           (Number(b.away.score) + Number(b.home.score)) - (Number(a.away.score) + Number(a.home.score)))[0];
         const c = HC.teamTextColors(top.away, top.home);
-        feat = `<a data-outcome class="game-card" style="border:2px solid var(--accent);text-decoration:none" target="_blank" rel="noopener"
-            href="${HC.ytSearchURL(week, top.away.abbr, top.home.abbr)}">
+        const highlight = HC.highlightLink(links, top.id);
+        feat = `<div data-outcome class="game-card" style="border:2px solid var(--accent)">
           <div class="game-meta"><span class="status">🔥 Highest-scoring game</span><span>${HC.esc(HC.fmtDate(top.date))}</span></div>
           <div style="font-weight:800;font-size:1.15rem">
             <span style="color:${c.away}">${HC.esc(top.away.abbr)}</span>
             <span class="blur-score" style="color:var(--text)"> ${HC.esc(top.away.score)}–${HC.esc(top.home.score)} </span>
             <span style="color:${c.home}">${HC.esc(top.home.abbr)}</span>
           </div>
-          <div class="card-foot center" style="margin-top:12px"><span class="btn btn-yt">▶ Watch highlights</span></div>
-        </a>`;
+          <div class="card-foot center" style="margin-top:12px">${highlight
+            ? `<a class="btn btn-primary" href="${HC.esc(highlight.url)}" target="_blank" rel="noopener">▶ Watch highlights on ${HC.esc(highlight.source)}</a>`
+            : `<p class="page-sub">${HC.esc(HC.highlightPending(links, true))}</p>`}</div>
+        </div>`;
       }
 
       box.innerHTML = feat + infos.map(g => {
@@ -42,6 +50,7 @@
         const score = (g.completed || g.state === 'in') && g.away.score != null
           ? `<span data-outcome class="blur-score"> · ${HC.esc(g.away.score)}–${HC.esc(g.home.score)}</span>` : '';
         const watched = HC.isWatched(g.id);
+        const highlight = HC.highlightLink(links, g.id);
         return `<div class="game-card" style="--ga:${c.away};--gh:${c.home}">
           <div class="game-meta">
             <span><span data-outcome class="status ${HC.statusClass(g)}">${HC.esc(HC.statusLabel(g))}</span>${score}</span>
@@ -53,9 +62,11 @@
           <div class="team-row"><img src="${HC.esc(g.home.logo || '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
             <div class="tname" style="color:${c.home}">${HC.esc(g.home.short || g.home.name)}</div></div>
           <div class="card-foot center" style="margin-top:12px">
-            <a class="btn btn-yt" href="${HC.ytSearchURL(week, g.away.abbr, g.home.abbr)}" target="_blank" rel="noopener">▶ Watch highlights</a>
+            ${highlight
+              ? `<a class="btn btn-primary" href="${HC.esc(highlight.url)}" target="_blank" rel="noopener">▶ Watch highlights on ${HC.esc(highlight.source)}</a>`
+              : `<p class="page-sub">${HC.esc(HC.highlightPending(links, g.completed))}</p>`}
             <a class="btn btn-ghost" href="game.html?id=${g.id}&week=${week}">Game page</a>
-            <button class="chip copy-btn" data-url="${HC.ytSearchURL(week, g.away.abbr, g.home.abbr)}">⧉ Copy link</button>
+            ${highlight ? `<button class="chip copy-btn" data-url="${HC.esc(highlight.url)}">⧉ Copy highlight link</button>` : ''}
           </div>
         </div>`;
       }).join('') || '<div class="empty">No games found for this week.</div>';

@@ -16,6 +16,22 @@ function app(options = {}) {
   return dom;
 }
 
+test('highlight links reject expired, unofficial, search, and generic collection destinations', () => {
+  const dom = app();
+  const HC = dom.window.HC;
+  const link = { source: 'YouTube', channelId: 'UCDVYQ4Zhbm3S2dlz7P1GBDg',
+    url: 'https://www.youtube.com/watch?v=Abcdef12345', verifiedAt: new Date().toISOString() };
+  const lookup = entry => HC.highlightLink({ version: 1, games: { '123': entry } }, '123');
+  assert.equal(lookup(link).url, link.url);
+  assert.equal(lookup({ ...link, channelId: 'imposter' }), null);
+  assert.equal(lookup({ ...link, url: 'https://www.youtube.com/results?search_query=NFL' }), null);
+  assert.equal(lookup({ ...link, verifiedAt: '2020-01-01T00:00:00Z' }), null);
+  assert.equal(lookup({ ...link, url: 'https://www.youtube.com.evil.example/watch?v=Abcdef12345' }), null);
+  assert.equal(lookup({ ...link, source: 'NFL.com', url: 'https://www.nfl.com/videos/channel/game-highlights-vc' }), null);
+  assert.equal(lookup({ ...link, source: 'NFL.com', url: 'https://www.nfl.com/videos/eagles-vs-buccaneers-highlights-week-4' }).source, 'NFL.com');
+  dom.window.close();
+});
+
 test('fresh week selection uses the provider current week', async () => {
   const dom = app();
   const select = dom.window.document.getElementById('weekSel');

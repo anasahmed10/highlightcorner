@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Highlight Corner — Game Highlights</title>
-<meta name="description" content="One-tap YouTube highlight links for every NFL game.">
+<meta name="description" content="Game-specific links to official NFL highlights when available.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0e1013">
@@ -17,7 +17,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Highlight Corner">
 <meta property="og:title" content="Highlight Corner — Game Highlights">
-<meta property="og:description" content="One-tap YouTube highlight links for every NFL game.">
+<meta property="og:description" content="Game-specific links to official NFL highlights when available.">
 <meta property="og:url" content="https://highlightcorner.com/highlights.html">
 <meta name="twitter:card" content="summary"><link rel="stylesheet" href="css/utilities.css">
 <link rel="stylesheet" href="css/style.css">
@@ -29,7 +29,6 @@
   <a class="brand" href="index.html">Highlight<span>Corner</span></a>
   <nav class="main-nav" aria-label="Main navigation">
     <a data-page="scores" href="index.html">Scores</a>
-    <a data-page="highlights" href="highlights.html">Highlights</a>
     <a data-page="fantasy" href="fantasy.html">Fantasy</a>
     <a data-page="recaps" href="recaps.html">Recaps</a>
   </nav>
@@ -37,15 +36,14 @@
 </div></header>
 <main class="wrap" id="main" tabindex="-1">
   <h1 class="page-title">Game Highlights</h1>
-  <p class="page-sub">One tap per game — straight to YouTube highlights.</p>
+  <p class="page-sub">Official highlights for your game, when available. <a href="https://www.nfl.com/videos/channel/game-highlights-vc" target="_blank" rel="noopener">Browse all NFL.com highlights</a>.</p>
   <div class="controls"><select id="weekSel" aria-label="Choose week"></select></div>
   <div id="hl"><div class="loading"><div class="spinner"></div>Loading games…</div></div>
   <div class="ad-slot"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1549898506474594" data-ad-format="auto" data-full-width-responsive="true"></ins></div>
 </main>
-<footer class="site-footer">Scores are facts. The jokes are opinions.<br>Data: ESPN · Highlights: YouTube · Fantasy: Sleeper.<br><a href="privacy.html">Privacy</a></footer>
-<nav class="bottom-nav grid grid-cols-4" aria-label="Mobile navigation">
+<footer class="site-footer">Scores are facts. The jokes are opinions.<br>Data: ESPN · Highlights: NFL / YouTube · Fantasy: Sleeper.<br><a href="privacy.html">Privacy</a></footer>
+<nav class="bottom-nav grid grid-cols-3" aria-label="Mobile navigation">
   <a data-page="scores" href="index.html" class="flex flex-col items-center justify-center gap-1"><img src="icons/ui/list.svg" alt="" width="22" height="22"><span>Scores</span></a>
-  <a data-page="highlights" href="highlights.html" class="flex flex-col items-center justify-center gap-1"><img src="icons/ui/play.svg" alt="" width="22" height="22"><span>Highlights</span></a>
   <a data-page="fantasy" href="fantasy.html" class="flex flex-col items-center justify-center gap-1"><img src="icons/ui/chart-no-axes-column.svg" alt="" width="22" height="22"><span>Fantasy</span></a>
   <a data-page="recaps" href="recaps.html" class="flex flex-col items-center justify-center gap-1"><img src="icons/ui/notebook-pen.svg" alt="" width="22" height="22"><span>Recaps</span></a>
 </nav>

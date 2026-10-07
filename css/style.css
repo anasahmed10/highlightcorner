@@ -2,13 +2,13 @@
 :root { color-scheme: light dark; }
 [data-theme="light"] {
   --bg: #f6f7f9; --card: #ffffff; --text: #14161a; --muted: #5d6570;
-  --border: #e3e6eb; --accent: #d50a0a; --accent-text: #ffffff;
+  --border: #e3e6eb; --accent: #d50a0a; --accent-text: #ffffff; --highlight-text: #ffffff;
   --nav-bg: rgba(255,255,255,.92); --shadow: 0 1px 3px rgba(0,0,0,.08);
   --table-head: #eef0f4;
 }
 [data-theme="dark"] {
   --bg: #0e1013; --card: #171a20; --text: #f2f4f7; --muted: #9aa3af;
-  --border: #262b34; --accent: #ff3b30; --accent-text: #ffffff;
+  --border: #262b34; --accent: #ff3b30; --accent-text: #ffffff; --highlight-text: #0e1013;
   --nav-bg: rgba(14,16,19,.92); --shadow: 0 1px 3px rgba(0,0,0,.4);
   --table-head: #1e232c;
 }
@@ -396,3 +396,9 @@ button.chip { min-height: 44px; font-size: .8rem; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* Score card actions stay together; videos use the site's accent in both themes. */
+.card-actions { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+.card-actions .chip { min-height: 44px; }
+.card-actions .highlight-link { background: var(--accent); color: var(--highlight-text); }
+.card-actions .highlight-link:hover { filter: brightness(.95); }

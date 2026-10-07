@@ -13,7 +13,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | Feature | Notes |
 |---|---|
 | Weekly scoreboard | ESPN data, current-week selection, day grouping, pregame labels without implied 0–0 results, Refresh and labeled updated time; stale responses are ignored; visible pages refresh live scores every minute and pause in the background |
-| Game highlights | One-tap YouTube deep links per game; featured highest-scoring game; visible page refreshes game status and scores every minute |
+| Game highlights | Colored View Highlights links beside View game on score cards when verified videos are available; three navigation tabs; official YouTube mapping refreshed at deployment and every two hours |
 | Fantasy leaders | PPR / half-PPR / standard, via Sleeper |
 | Recap show more (game page) | Recap body clamps to 3 lines with Show more/less on mobile so the box score sits higher; full text on desktop |
 | Comedic recaps | Original multi-paragraph narratives with verdicts (nail-biter, comfortable, garbage-time, blowout); Week 4 stored in JSON |
@@ -27,9 +27,9 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | PWA | Manifest, icons, offline shell, iOS/Android install guidance, native prompt when supported, dismissed/standalone promotion handling; physical-device installation pending |
 | Recap supporting statistics | `tools/nflverse_week.py` emits nflverse evidence for regular-season recaps; does not write recap prose |
 | Recap content port | Longer Week 4 recaps stored in `data/recaps.json`; external dashboard/refresh status is unverified |
-| Copy-link buttons | Highlights cards (copies YouTube link) + game pages (copies game URL), with "Copied ✓" feedback |
+| Copy-link buttons | Highlights cards (copies the matched video URL) + game pages (copies game URL), with "Copied ✓" feedback |
 | Sortable fantasy tables | Top 25 per position; sort by Player or Pts; position dropdown filter (instant, no reload) |
-| UI polish | Skeletons, motion-aware scroll-to-top, light/dark themes, four mobile tabs, Settings, focus styles, larger controls and safe-area spacing; full accessibility audit pending |
+| UI polish | Skeletons, motion-aware scroll-to-top, light/dark themes, three mobile tabs, Settings, focus styles, larger controls and safe-area spacing; full accessibility audit pending |
 | Collapsible game sections | Scoring Summary (hidden by default), Box Score, Team Stats, Fantasy, Injuries — dropdowns with counts |
 | Site character | Team-color gradient bars on cards/hero, yard-line hero texture, playful microcopy ("Scores are facts. The jokes are opinions.") |
 
@@ -37,6 +37,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 
 | Feature | Notes |
 |---|---|
+| Automatic highlight discovery | YouTube API matcher verifies official channel, both teams, season/week, and public visibility. YouTube-only key configured in Actions; October 7 live run mapped 61 of 64 completed games. Pages refreshes the map at deployment and every two hours. |
 | Mobile/PWA upgrade — implemented; device checks pending | Compiled Tailwind utilities and Lucide icons; content before ads; focused regression tests and public-asset deployment. Physical-device install and screen-reader checks remain. |
 
 ## 📋 Proposed upgrades and external follow-ups
@@ -55,6 +56,6 @@ Implementation priorities live in [docs/roadmap.md](docs/roadmap.md):
 
 ## ⚠️ Standing decisions
 
-- No self-hosted NFL video — outbound YouTube links only (rights).
+- No self-hosted NFL video — outbound links to official NFL videos only.
 - No Auto Ads — manual units only, one per page + desktop rails.
 - Scores/stats are facts; ESPN endpoint + hotlinked logos carry ToS/licensing caveats, especially once ads serve.
