@@ -53,9 +53,11 @@ The static site loads scores/game summaries from ESPN and fantasy stats from
 Sleeper in the browser. `data/players.json` maps Sleeper IDs to player names,
 positions and teams; `data/recaps.json` stores editorial recaps.
 
-Sports data is requested on page load or selection changes, not continuously
-polled. Fantasy currently selects the 2026 regular season explicitly. Shared
-season handling and more resilient loading are roadmap priorities.
+Scores, highlights and open game centers refresh every minute while their page is
+visible; polling pauses in background tabs, and game-center polling stops after
+the game is final. Fantasy data loads on page/week selection. Fantasy currently
+selects the 2026 regular season explicitly. Shared season handling and broader
+failure recovery remain roadmap priorities.
 
 Highlight buttons use `data/highlights.json` to open the official video matched
 to that ESPN game ID. `tools/refresh_highlights.py` discovers NFL-channel uploads

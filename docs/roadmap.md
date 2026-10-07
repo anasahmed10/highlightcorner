@@ -1,6 +1,6 @@
 # Highlight Corner upgrade roadmap
 
-Baseline: redesigned static site, October 6, 2026. All items below are **proposed**;
+Baseline: redesigned static site, October 7, 2026. All items below are **proposed**;
 none is implemented by adding this document. Priorities reflect source inspection,
 not traffic analytics or a promise of delivery dates. Follow the stages in order;
 within each stage, use the listed order unless the user's priorities change.
@@ -15,8 +15,8 @@ migration are outside this roadmap unless separately requested.
 | ID / upgrade | Why now and intended change | Acceptance criteria |
 | --- | --- | --- |
 | R1 — Coordinated season/week selection | Fantasy hardcodes 2026 while ESPN uses its default season, and week 4 fallbacks appear in several scripts. Introduce one shared season/week context, align provider requests, and handle unavailable weeks explicitly. Start with current regular-season behavior; do not claim postseason support until both providers are verified. | Scoreboard, highlights, fantasy and game links agree on selected season/week; rollover and offseason examples are checked; missing provider data is labeled honestly. Recap storage/readers distinguish seasons before retaining overlapping week archives. Existing game URLs still load. |
-| R2 — Resilient loading and rendering | Week-selector initialization can reject outside page loading catches; fetches have no timeout; rapid switches can render an older response last. Add recoverable initialization, bounded requests, retry controls, and stale-response protection. Theme-only updates should avoid unnecessary refetches. | Blocked API/JSON, empty results, slow replies and rapid week/format/theme changes leave usable controls and resolve loading states. The most recent selection wins; optional recap/logo failures do not take down usable sports content. |
-| R3 — Meaningful regression checks | There is currently no automated suite or CI validation. Add a small fixture-based suite for data normalization, context selection, preferences and the failure/race behavior introduced above, plus page-level smoke checks. | Checks run locally and in CI without live providers or ad services. Cases include missing competitors, pre/live/post states, storage failures, and out-of-order responses. A real regression fails a check; source/data checks run before deployment. Document the commands and any tooling added. |
+| R2 — Resilient loading and rendering | The current implementation bounds fetches, recovers week discovery, provides retry paths on key data pages, ignores stale scoreboard/highlights responses, and avoids refetching for theme-only changes. Broaden and align protections across pages, especially week/format changes and optional data. | Blocked API/JSON, empty results, slow replies and rapid week/format/theme changes leave usable controls and resolve loading states. The most recent selection wins; optional recap/logo failures do not take down usable sports content. |
+| R3 — Meaningful regression checks | Focused DOM and service-worker tests run locally and in Pages CI, with JavaScript syntax checks and manifest parsing before deployment. Expand coverage for data normalization, context selection, preferences and failure/race behavior, plus page-level smoke checks. | Checks run locally and in CI without live providers or ad services. Cases include missing competitors, pre/live/post states, storage failures, and out-of-order responses. A real regression fails a check; source/data checks run before deployment. Document the commands and any tooling added. |
 
 R1 and R2 should include focused checks as they ship; R3 makes those checks
 repeatable and expands page coverage. Do not defer verification until R3.
@@ -25,7 +25,7 @@ repeatable and expands page coverage. Do not defer verification until R3.
 
 | ID / upgrade | Intended change | Acceptance criteria |
 | --- | --- | --- |
-| R4 — Comprehensive spoiler protection | Expand the existing score blur into an explicit outcome-hiding experience across scores, winner cues, featured picks, verdicts, recaps and game stats. Keep matchup, kickoff, navigation and highlight access useful. | With protection on, outcomes are absent from visible content and accessible names/text until intentionally revealed. Navigation/reload preserves the preference; turning it off restores content. Check every sports page with completed and live fixtures. |
+| R4 — Comprehensive spoiler protection | The site now uses native hidden outcome elements and safe placeholders across sports pages. Finish coverage for any remaining outcome cues while keeping matchup, kickoff, navigation and highlight access useful. | With protection on, outcomes are absent from visible content and accessible names/text until intentionally revealed. Navigation/reload preserves the preference; turning it off restores content. Check every sports page with completed and live fixtures. |
 | R5 — Accessible controls and responsive polish | Audit keyboard order, game tabs, sortable headings, toggle states, focus visibility, touch targets and motion. Address mobile header/filter crowding and long content without altering the redesign's character. | Sorting and tabs work by keyboard with appropriate state announcements; new/current controls have usable names and focus; selected mobile/desktop layouts have no page overflow. Reduced-motion behavior includes scripted scrolling. Perform manual keyboard and screen-reader checks in addition to automated checks. |
 | R6 — Reliable content refresh | Add a reproducible player-map refresh and a validated recap-preparation workflow; establish where the externally described scheduler actually runs. Keep publishing deliberate and original editorial review in the process. | Documented commands produce compatible player mappings and supporting recap data. Validate IDs, scores, season/week and verdicts; incomplete/upstream-delayed games are skipped or flagged. Retain other weeks, show source attribution, and document the verified scheduler or explicitly record that no scheduler exists. Never publish invented stats or raw supporting-tool output as recaps. |
 
@@ -54,7 +54,7 @@ rather than committing this site to a new framework now.
 5. Revisit priorities using owner feedback and measured failures. Keep timelines
    unset until someone explicitly commits to them.
 
-## October 6 mobile/PWA upgrade status
+## October 7 mobile/PWA upgrade status
 
 Implementation is available in the repository. These changes cover parts of the roadmap,
 not every acceptance criterion:

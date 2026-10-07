@@ -292,9 +292,11 @@ standalone flag hide install controls. Check actual Safari/iOS and Chrome/Androi
 installation on devices before calling device behavior verified. The stable
 manifest ID is `/index.html`, matching the previous start URL identity.
 
-Scores fetch on initial load, week changes, or Refresh, with a labeled local
-updated time; they do not poll. Scores, Highlights, and Fantasy guard stale
-responses. Theme changes reuse loaded data. Static in-flow ads follow content;
+Scores, Highlights, and open game centers refresh every 60 seconds while the
+page is visible, pause polling in background tabs, and refresh immediately when
+the page returns. Game-center polling stops after ESPN reports the final state.
+Fantasy fetches on page/week selection. Scores and Highlights ignore stale
+responses; theme changes reuse loaded data. Static in-flow ads follow content;
 game ads follow the recap/stats. Each manual unit is queued once, including
 units added after a game loads; repeated render calls skip existing units. Unfilled AdSense units collapse via status
 attributes; do not hide a pending unit before its first AdSense measurement.
