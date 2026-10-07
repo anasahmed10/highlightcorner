@@ -82,9 +82,13 @@ the API key cannot appear in logs. NFL.com HTML is not collected automatically.
 
 Set up a Google Cloud key with YouTube Data API v3 enabled and store it in the
 repository Actions secret `YOUTUBE_API_KEY`. The Pages workflow refreshes staged
-`_site/data/highlights.json` on deployment and on a two-hour schedule, preserving
-the last successful public map from the live site's `/data/highlights.json` when
-available. It never commits generated data or secrets. Scheduled discovery runs from the workflow on `main`.
+`_site/data/highlights.json` on deployment and after each usual NFL game window:
+Thursday night, Sunday early, Sunday late afternoon, Sunday night, and Monday
+night. UTC cron runs about 4–5 hours after kickoff to allow games and video uploads
+to finish; local wall-clock times shift with daylight saving. It preserves the
+last successful public map from the live site's `/data/highlights.json` when
+available and never commits generated data or secrets. Scheduled discovery runs
+from the workflow on `main`.
 The matcher supports regular-season numeric weeks only; postseason titles need
 a separately verified matching contract. Run `python3 tools/refresh_highlights.py`
 for local refresh with an environment key, and `python3 -m unittest discover -s

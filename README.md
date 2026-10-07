@@ -65,8 +65,10 @@ Upcoming games and games without a verified video show a pending state.
 
 Automatic discovery requires YouTube Data API v3 to be enabled for a Google
 Cloud API key. Store it as the repository Actions secret `YOUTUBE_API_KEY`.
-The Pages workflow refreshes the map on publication and every two hours once
-the workflow is on `main`.
+The Pages workflow refreshes the map on publication and after the usual NFL
+Thursday-night, Sunday early, Sunday late-afternoon, Sunday-night, and Monday-night
+game windows. Its UTC schedule runs about 4–5 hours after kickoff to allow games
+and video uploads to finish; local wall-clock times shift with daylight saving.
 The key stays in Actions; visitors only download the generated link map.
 For a local refresh with the key already in your environment, run:
 

@@ -13,7 +13,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | Feature | Notes |
 |---|---|
 | Weekly scoreboard | ESPN data, current-week selection, day grouping, pregame labels without implied 0–0 results, Refresh and labeled updated time; stale responses are ignored; visible pages refresh live scores every minute and pause in the background |
-| Game highlights | Colored View Highlights links beside View game on score cards when verified videos are available; three navigation tabs; official YouTube mapping refreshed at deployment and every two hours |
+| Game highlights | Colored View Highlights links beside View game on score cards when verified videos are available; three navigation tabs; official YouTube mapping refreshed at deployment and after the usual NFL game windows |
 | Fantasy leaders | PPR / half-PPR / standard, via Sleeper |
 | Recap show more (game page) | Recap body clamps to 3 lines with Show more/less on mobile so the box score sits higher; full text on desktop |
 | Comedic recaps | Original multi-paragraph narratives with verdicts (nail-biter, comfortable, garbage-time, blowout); Week 4 stored in JSON |
@@ -37,7 +37,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 
 | Feature | Notes |
 |---|---|
-| Automatic highlight discovery | YouTube API matcher verifies official channel, both teams, season/week, and public visibility. YouTube-only key configured in Actions; October 7 live run mapped 61 of 64 completed games. Pages refreshes the map at deployment and every two hours. |
+| Automatic highlight discovery | YouTube API matcher verifies official channel, both teams, season/week, and public visibility. YouTube-only key configured in Actions; October 7 live run mapped 61 of 64 completed games. Pages refreshes the map at deployment and after the Thursday, three Sunday, and Monday NFL game windows. |
 | Mobile/PWA upgrade — implemented; device checks pending | Compiled Tailwind utilities and Lucide icons; content before ads; focused regression tests and public-asset deployment. Physical-device install and screen-reader checks remain. |
 
 ## 📋 Proposed upgrades and external follow-ups

@@ -5,7 +5,12 @@ on:
     branches: [main]
   workflow_dispatch:
   schedule:
-    - cron: '17 */2 * * *'
+    # Run after the usual NFL game windows (UTC; allow games and uploads to finish).
+    - cron: '17 5 * * 5'  # Thursday night
+    - cron: '17 22 * * 0' # Sunday early
+    - cron: '17 1 * * 1'  # Sunday late afternoon
+    - cron: '17 5 * * 1'  # Sunday night
+    - cron: '17 5 * * 2'  # Monday night
 
 permissions:
   contents: read
