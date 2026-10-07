@@ -3,9 +3,11 @@
   'use strict';
   HC.initTheme(); HC.initNav('recaps'); HC.initPrefs();
   const box = document.getElementById('recaps');
+  const lead = document.getElementById('recapsLead');
+  const rest = document.getElementById('recapsRest');
 
   (async function init() {
-    box.innerHTML = HC.skeletons(4);
+    lead.innerHTML = HC.skeletons(4);
     try {
       const recaps = await HC.fetchJSON('data/recaps.json');
       if (!recaps.length) throw new Error('empty');
@@ -15,12 +17,11 @@
       scoreboards.forEach(sb => (sb?.events || []).forEach(event => {
         gamesById.set(String(event.id), HC.gameInfo(event));
       }));
-      box.innerHTML = weeks.map(w =>
-        `<h2 class="section-title">Week ${w}</h2>` +
-        recaps.filter(r => r.week === w).map(r => {
+      const entries = weeks.flatMap(w =>
+        recaps.filter(r => r.week === w).map((r, i) => {
           const game = gamesById.get(String(r.gameId));
           const colors = game ? HC.teamTextColors(game.away, game.home) : null;
-          return `
+          return `${i === 0 ? `<h2 class="section-title">Week ${w}</h2>` : ''}
           <article class="recap-card">
             <h3 data-spoiler-placeholder hidden><a href="game.html?id=${HC.esc(r.gameId)}&week=${w}">${HC.esc(r.away)} @ ${HC.esc(r.home)} — View game</a></h3>
             <p data-spoiler-placeholder hidden class="spoiler-notice">Recap hidden. Turn off Hide spoilers in Settings to read it.</p>
@@ -34,11 +35,14 @@
             <div data-outcome>${HC.esc(r.recap).split('\n\n').map(x => `<p>${x}</p>`).join('')}</div>
             <div data-outcome class="keystat"><strong>Key stat:</strong> ${HC.esc(r.keyStat)}</div>
           </article>`;
-        }).join('')
-      ).join('');
+        })
+      );
+      lead.innerHTML = entries[0];
+      rest.innerHTML = entries.slice(1).join('');
       HC.contentReady(box);
     } catch (e) {
-      box.innerHTML = '<div class="empty">Recaps are still being written — good jokes take a minute.</div>';
+      lead.innerHTML = '<div class="empty">Recaps are still being written — good jokes take a minute.</div>';
+      rest.innerHTML = '';
     }
   })();
 })();

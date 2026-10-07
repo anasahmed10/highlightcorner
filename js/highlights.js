@@ -4,6 +4,8 @@
   HC.initTheme(); HC.initNav('highlights'); HC.initPrefs();
   const sel = document.getElementById('weekSel');
   const box = document.getElementById('hl');
+  const lead = document.getElementById('hlLead');
+  const rest = document.getElementById('hlRest');
   let cached = null;
   let cachedLinks = null;
   let request = 0;
@@ -11,7 +13,10 @@
   async function load(renderOnly = false, quiet = false) {
     const token = ++request;
     const week = parseInt(sel.value, 10) || 1;
-    if (!quiet) box.innerHTML = HC.skeletons(4);
+    if (!quiet) {
+      lead.innerHTML = HC.skeletons(4);
+      rest.innerHTML = '';
+    }
     try {
       const useCache = renderOnly && cached;
       const [sb, links] = await Promise.all([
@@ -45,7 +50,7 @@
         </div>`;
       }
 
-      box.innerHTML = feat + infos.map(g => {
+      const cards = infos.map(g => {
         const c = HC.teamTextColors(g.away, g.home);
         const score = (g.completed || g.state === 'in') && g.away.score != null
           ? `<span data-outcome class="blur-score"> · ${HC.esc(g.away.score)}–${HC.esc(g.home.score)}</span>` : '';
@@ -69,7 +74,9 @@
             ${highlight ? `<button class="chip copy-btn" data-url="${HC.esc(highlight.url)}">⧉ Copy highlight link</button>` : ''}
           </div>
         </div>`;
-      }).join('') || '<div class="empty">No games found for this week.</div>';
+      });
+      lead.innerHTML = feat + (cards.slice(0, 3).join('') || '<div class="empty">No games found for this week.</div>');
+      rest.innerHTML = cards.slice(3).join('');
       box.querySelectorAll('.copy-btn').forEach(b => b.addEventListener('click', (e) => {
         e.preventDefault(); e.stopPropagation();
         HC.copyLink(b.dataset.url, b);
@@ -78,7 +85,8 @@
     } catch (e) {
       if (token !== request) return;
       if (!quiet || !cached) {
-        box.innerHTML = '<div class="error"><p>Couldn’t load the games. Blame the refs.</p><button class="btn btn-ghost" id="retryHighlights">Try again</button></div>';
+        lead.innerHTML = '<div class="error"><p>Couldn’t load the games. Blame the refs.</p><button class="btn btn-ghost" id="retryHighlights">Try again</button></div>';
+        rest.innerHTML = '';
         document.getElementById('retryHighlights').addEventListener('click', () => load());
       }
     }

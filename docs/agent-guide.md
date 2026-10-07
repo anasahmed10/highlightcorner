@@ -28,6 +28,14 @@ week options, clipboard feedback, skeletons, scroll-to-top, and worker registrat
 `js/ads.js` initializes manual advertising and desktop rails; dynamic game content
 calls `HC.renderAds()` after rendering.
 
+On Scores, Highlights, and Recaps, the single in-flow ad is a static element
+between lead and remaining content containers. Their page scripts divide rendered
+items around that element so refreshes and filters keep the same AdSense DOM node
+instead of creating another unit. Scores places it after five game cards,
+Highlights after three game cards, and Recaps after the first recap. The game
+page keeps its manual unit outside the rerendered game content so live updates
+do not discard it. The privacy page does not initialize ad rails.
+
 ## Data and interfaces
 
 Scores and fantasy requests happen in the visitor's browser. Highlight discovery
@@ -267,8 +275,12 @@ into unrelated work.
   affected live pages and cache updates. Check `/ads.txt`, `/privacy.html`, the
   manifest and SEO assets when changes touch them. Do not deploy just to validate
   a local documentation or styling change.
-- AdSense publisher configuration exists, but approval/payment/account status is
-  external. Earlier rejection notes are historical, not a current verified status.
+- AdSense publisher configuration and manual ad-unit IDs exist. On October 7,
+  2026, the account showed site review requested and `highlightcorner.com` as
+  “Getting ready”; Auto ads were off. The dashboard showed `ads.txt` as “Not
+  found” while the live file returned HTTP 200 with the publisher line. Recheck
+  review, crawl, and payment status in the external account before expecting
+  revenue. Earlier rejection notes are historical.
   Preserve manual units and privacy disclosures; check current requirements before
   introducing tracking, consent changes, or new advertising behavior.
 - The workflow copies only public assets into `_site/`; development files are
@@ -296,7 +308,9 @@ Scores, Highlights, and open game centers refresh every 60 seconds while the
 page is visible, pause polling in background tabs, and refresh immediately when
 the page returns. Game-center polling stops after ESPN reports the final state.
 Fantasy fetches on page/week selection. Scores and Highlights ignore stale
-responses; theme changes reuse loaded data. Static in-flow ads follow content;
+responses; Fantasy guards stale selections. Theme changes reuse loaded data.
+Static in-flow ads appear within
+the Scores, Highlights, and Recaps content lists; Fantasy follows its tables and
 game ads follow the recap/stats. Each manual unit is queued once, including
 units added after a game loads; repeated render calls skip existing units. Unfilled AdSense units collapse via status
 attributes; do not hide a pending unit before its first AdSense measurement.
