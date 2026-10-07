@@ -222,14 +222,47 @@ python3 -m http.server 8080
 ```
 
 Open `http://localhost:8080`. A real HTTP origin is needed for JSON loading and
-service-worker behavior. Run `npm test` for focused DOM and worker regressions and `npm run build:css`
+service-worker behavior. Run `npm test` for fixture-based page, data-contract, DOM and worker regressions and `npm run build:css`
 for Tailwind. Pull requests run these checks before merging; Pages runs them
-again before deployment. There is no checked-in browser automation suite. Use tools available in your session; if browser checks cannot
+again before deployment. Page smoke checks use jsdom rather than a browser engine. Use tools available in your session; if browser checks cannot
 be performed, report that limit explicitly.
 
 For changed JavaScript, run `node --check path/to/changed-file.js` if Node is
 available. For changed JSON, run `python3 -m json.tool data/recaps.json > /dev/null`
 (or the other changed JSON file). Run `git diff --check` for all changes.
+
+### Automated regression checks (R3)
+
+Use Node 24+ and the existing dev dependencies (`npm ci`), then run `npm test`.
+For a focused run, use `node --test tests/sports.test.cjs tests/pages.test.cjs`
+or `node --test tests/source.test.cjs`. No new dependencies are required.
+
+- `tests/fixtures/sports.json` contains synthetic ESPN pre/live/final events,
+  a game summary, verified highlight links, Sleeper scoring formats, player mappings and editorial recaps.
+  These are test examples, not verified NFL results or publishable content.
+- `tests/helpers/page.cjs` loads real HTML and its declared local/inline scripts
+  in order. Resource loading is disabled, so ads/logos do not contact providers.
+  Fetch uses a fixture router; unexpected URLs and uncaught page errors fail the
+  test. Deferred responses exercise races without real network latency; bounded
+  state waits and window cleanup prevent unresolved tests and polling leaks.
+- `tests/sports.test.cjs` covers normalization with missing competitors,
+  provider/current/earlier/unavailable week selection, persisted/blocked/corrupt
+  storage, week and scoring-format races, retries, malformed JSON and timeout aborts.
+- `tests/pages.test.cjs` smokes all seven public pages and checks rendered game
+  states, week-bearing links, filters, escaping, spoiler restoration, empty data,
+  optional-data failures and theme rendering without new data requests.
+- `tests/source.test.cjs` validates committed recap/player contracts, unique recap
+  IDs, JavaScript/inline-script syntax, local HTML asset references and manifest assets.
+  Both PR checks and Pages deployment already run `npm test`; these validations
+  therefore run before the public deployment artifact is prepared.
+
+On October 7, 2026, all 67 checks passed locally. Removing stale-response guards
+in temporary copies of scoreboard, highlights and fantasy made each corresponding
+race check fail. This proves regression detection without modifying site source.
+These tests pin current week behavior; coordinated season handling remains R1.
+jsdom does not verify CSS layout, screen readers, service-worker browser lifecycle,
+physical-device installation, or provider availability. Keep the manual browser
+checks below; the worker unit tests execute separately in a simulated worker context.
 
 ### Browser checks by change type
 

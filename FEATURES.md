@@ -14,6 +14,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 |---|---|
 | Weekly scoreboard | ESPN data, current-week selection, day grouping, pregame labels without implied 0–0 results, Refresh and labeled updated time; stale responses are ignored; visible pages refresh live scores every minute and pause in the background |
 | Game highlights | Colored View Highlights links beside View game on score cards when verified videos are available; three navigation tabs; official YouTube mapping refreshed at deployment and after the usual NFL game windows |
+| Regression checks (R3) | Offline provider fixtures; smoke checks for all seven pages; normalization/context/preferences/failure/race coverage; stored-data and source checks in PR and pre-deployment CI |
 | Fantasy leaders | PPR / half-PPR / standard, via Sleeper |
 | Recap show more (game page) | Recap body clamps to 3 lines with Show more/less on mobile so the box score sits higher; full text on desktop |
 | Comedic recaps | Original multi-paragraph narratives with verdicts (nail-biter, comfortable, garbage-time, blowout); Week 4 stored in JSON |
@@ -46,7 +47,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 
 Implementation priorities live in [docs/roadmap.md](docs/roadmap.md):
 
-1. Reliability: coordinated season handling and broader data-fixture regression coverage.
+1. Reliability: coordinated season handling and broader failure recovery.
 2. Trust and usability: device/screen-reader verification, accessibility, reproducible content refresh.
 3. Release quality: deployed update verification, search/share metadata, measured performance.
 

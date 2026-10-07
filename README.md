@@ -26,7 +26,8 @@ python3 -m http.server 8080
 Open `http://localhost:8080`. Committed styles work immediately without installing
 anything. When editing Tailwind utility classes, use Node 24+ and run `npm ci`
 then `npm run build:css`; commit the generated `css/utilities.css`.
-`npm test` runs focused DOM and service-worker regression checks. Preview over HTTP rather than opening HTML files directly.
+`npm test` runs fixture-based page smoke, data-contract, DOM, and service-worker
+regression checks without live providers or advertising services. Preview over HTTP rather than opening HTML files directly.
 If the service worker keeps showing old local files, unregister it and clear the
 preview origin's cache in browser developer tools.
 
