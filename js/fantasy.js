@@ -39,10 +39,15 @@
   box.addEventListener('click', (e) => {
     const th = e.target.closest('th.sortable');
     if (!th) return;
+    const restoreFocus = document.activeElement === th;
     const pos = th.dataset.pos, key = th.dataset.sort;
     const cur = sortState[pos] || { key: 'pts', dir: 1 };
     sortState[pos] = { key, dir: cur.key === key ? -cur.dir : 1 };
     renderTables();
+    if (restoreFocus) {
+      const next = [...box.querySelectorAll('th.sortable')].find(h => h.dataset.pos === pos && h.dataset.sort === key);
+      if (next) next.focus();
+    }
   });
 
   const FMT_KEY = { ppr: 'pts_ppr', half: 'pts_half_ppr', std: 'pts_std' };

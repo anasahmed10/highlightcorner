@@ -104,3 +104,26 @@ test('upcoming scoreboard games do not imply a 0–0 result', async () => {
   assert.equal(w.document.querySelector('.status').textContent, 'Upcoming');
   dom.window.close();
 });
+
+test('keyboard fantasy sorting keeps focus so another activation reverses sorting', async () => {
+  const dom = new JSDOM(fs.readFileSync('fantasy.html', 'utf8'), { url: 'https://highlightcorner.com/fantasy.html', runScripts: 'outside-only' });
+  const w = dom.window;
+  w.matchMedia = () => ({ matches: false, addEventListener() {} });
+  w.fetch = async url => ({ ok: true, json: async () => {
+    if (String(url).includes('players.json')) return { p1: { n: 'First Player', p: 'QB', t: 'NE' } };
+    if (String(url).includes('sleeper.app')) return { p1: { pts_ppr: 20, pass_yd: 300 } };
+    return { week: { number: 5 } };
+  } });
+  w.eval(fs.readFileSync('js/app.js', 'utf8'));
+  w.eval(fs.readFileSync('js/fantasy.js', 'utf8'));
+  await new Promise(resolve => setImmediate(resolve));
+  const heading = () => w.document.querySelector('th[data-pos="QB"][data-sort="name"]');
+  heading().focus();
+  heading().dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  assert.equal(w.document.activeElement, heading());
+  assert.equal(heading().getAttribute('aria-sort'), 'ascending');
+  w.document.activeElement.dispatchEvent(new w.KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+  assert.equal(w.document.activeElement, heading());
+  assert.equal(heading().getAttribute('aria-sort'), 'descending');
+  dom.window.close();
+});
