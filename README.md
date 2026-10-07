@@ -38,8 +38,8 @@ preview origin's cache in browser developer tools.
 | `index.html` | Weekly scores, favorites, watched filters, game links and available direct highlights |
 | `highlights.html` | Legacy standalone page for matched official game videos and copied links |
 | `fantasy.html` | Weekly leaders by position, scoring format and sortable tables |
-| `recaps.html` | Original recaps grouped by week |
-| `game.html?id=<espnGameId>&week=<n>` | Game center and previous/next weekly navigation |
+| `recaps.html` | Original recaps grouped by season and week |
+| `game.html?id=<espnGameId>&season=<year>&week=<n>` | Game center and previous/next weekly navigation; older ID/week links still load |
 | `privacy.html` | Privacy disclosures |
 | `404.html` | Missing-page recovery |
 
@@ -56,9 +56,10 @@ positions and teams; `data/recaps.json` stores editorial recaps.
 
 Scores, highlights and open game centers refresh every minute while their page is
 visible; polling pauses in background tabs, and game-center polling stops after
-the game is final. Fantasy data loads on page/week selection. Fantasy currently
-selects the 2026 regular season explicitly. Shared season handling and broader
-failure recovery remain roadmap priorities.
+the game is final. Scores, highlights and fantasy share a selectable regular-season
+year and week discovered from ESPN; fantasy requests Sleeper for that year. The
+year and week travel in navigation and game links. Missing discovery data and
+unavailable weeks are labeled. Broader failure recovery remains a roadmap priority.
 
 Highlight buttons use `data/highlights.json` to open the official video matched
 to that ESPN game ID. `tools/refresh_highlights.py` discovers NFL-channel uploads

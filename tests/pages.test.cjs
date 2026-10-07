@@ -26,7 +26,7 @@ test('scoreboard renders pre/live/final states, favorite and unwatched filters',
   assert.match(cards()[1].querySelector('.status.live').textContent, /Q3/);
   assert.equal(cards()[2].querySelector('.status.final').textContent, 'Final');
   assert.equal(cards()[2].getAttribute('aria-label'), 'PIT at CLE');
-  assert.ok(cards().every(el => el.dataset.href.endsWith('&week=5')));
+  assert.ok(cards().every(el => el.dataset.href.endsWith('&season=2026&week=5')));
   p.doc.querySelector('[data-team="PIT"]').click();
   p.doc.querySelector('[data-f="favorites"]').click();
   assert.equal(cards().length, 1);
@@ -43,7 +43,7 @@ test('highlights feature only a completed game and use the verified video and pr
   const link = p.doc.querySelector('#hl [data-outcome].game-card a');
   assert.equal(new URL(link.href).hostname, 'www.youtube.com');
   assert.equal(link.href, fixture.highlights.games['1003'].url);
-  assert.ok([...p.doc.querySelectorAll('#hl a.btn-ghost')].every(a => a.href.endsWith('&week=5')));
+  assert.ok([...p.doc.querySelectorAll('#hl a.btn-ghost')].every(a => a.href.endsWith('&season=2026&week=5')));
 });
 
 test('fantasy skips unknown players, renders defenses, escapes names and filters positions', async t => {
@@ -72,8 +72,8 @@ for (const [index, state] of [[0, 'pre'], [1, 'in'], [2, 'post']]) {
     } });
     await until(() => p.doc.querySelector('.game-hero'));
     assert.ok(p.requests.some(url => url.endsWith('/summary?event=' + event.id)));
-    assert.ok(p.requests.some(url => url.endsWith('/scoreboard?week=5')));
-    assert.ok([...p.doc.querySelectorAll('.game-nav a')].every(a => a.href.endsWith('&week=5')));
+    assert.ok(p.requests.some(url => url.endsWith('/scoreboard?dates=2026&seasontype=2&week=5')));
+    assert.ok([...p.doc.querySelectorAll('.game-nav a')].every(a => a.href.endsWith('&season=2026&week=5')));
     assert.equal(p.doc.querySelectorAll('.game-nav a').length, index === 1 ? 2 : 1);
     if (state === 'pre') {
       assert.equal(p.doc.querySelector('.mid [data-outcome]').textContent, 'vs');
@@ -158,5 +158,5 @@ test('recaps remain readable with failed optional scoreboards and escape editori
   assert.match(p.doc.querySelector('#recaps h3[data-outcome]').textContent, /<b>headline<\/b>/);
   assert.equal(p.doc.querySelector('#recaps b'), null);
   assert.equal(p.doc.querySelectorAll('#recaps [data-outcome] p').length, 2);
-  assert.equal(p.doc.querySelector('#recaps h3 a').getAttribute('href'), 'game.html?id=1003&week=5');
+  assert.equal(p.doc.querySelector('#recaps h3 a').getAttribute('href'), 'game.html?id=1003&season=2026&week=5');
 });

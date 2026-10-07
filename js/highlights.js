@@ -3,6 +3,7 @@
   'use strict';
   HC.initTheme(); HC.initNav('highlights'); HC.initPrefs();
   const sel = document.getElementById('weekSel');
+  const seasonSel = document.getElementById('seasonSel');
   const box = document.getElementById('hl');
   const lead = document.getElementById('hlLead');
   const rest = document.getElementById('hlRest');
@@ -13,6 +14,7 @@
   async function load(renderOnly = false, quiet = false) {
     const token = ++request;
     const week = parseInt(sel.value, 10) || 1;
+    HC.setContext(seasonSel.value, week, HC.seasonWindow.verified);
     if (!quiet) {
       lead.innerHTML = HC.skeletons(4);
       rest.innerHTML = '';
@@ -20,7 +22,7 @@
     try {
       const useCache = renderOnly && cached;
       const [sb, links] = await Promise.all([
-        useCache ? cached : HC.scoreboard(week),
+        useCache ? cached : HC.scoreboard(week, HC.context.season),
         useCache ? cachedLinks : HC.fetchJSON('data/highlights.json').catch(() => null)
       ]);
       if (token !== request) return;
@@ -70,12 +72,12 @@
             ${highlight
               ? `<a class="btn btn-primary" href="${HC.esc(highlight.url)}" target="_blank" rel="noopener">▶ Watch highlights on ${HC.esc(highlight.source)}</a>`
               : `<p class="page-sub">${HC.esc(HC.highlightPending(links, g.completed))}</p>`}
-            <a class="btn btn-ghost" href="game.html?id=${g.id}&week=${week}">Game page</a>
+            <a class="btn btn-ghost" href="${HC.gameURL(g.id)}">Game page</a>
             ${highlight ? `<button class="chip copy-btn" data-url="${HC.esc(highlight.url)}">⧉ Copy highlight link</button>` : ''}
           </div>
         </div>`;
       });
-      lead.innerHTML = feat + (cards.slice(0, 3).join('') || '<div class="empty">No games found for this week.</div>');
+      lead.innerHTML = feat + (cards.slice(0, 3).join('') || `<div class="empty">No games available for the ${HC.context.season} regular season, Week ${week}.</div>`);
       rest.innerHTML = cards.slice(3).join('');
       box.querySelectorAll('.copy-btn').forEach(b => b.addEventListener('click', (e) => {
         e.preventDefault(); e.stopPropagation();
@@ -94,9 +96,9 @@
 
   document.addEventListener('hc:theme', () => { if (cached) load(true); });
   (async function init() {
-    await HC.weekOptions(sel);
-    sel.value = sel.options[sel.options.length - 1].value;
+    await HC.initSeasonWeek(seasonSel, sel);
     sel.addEventListener('change', () => { cached = null; load(); });
+    seasonSel.addEventListener('change', () => { HC.selectSeasonWeek(seasonSel, sel); cached = null; load(); });
     load();
     HC.startVisiblePolling(() => load(false, true));
   })();

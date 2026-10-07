@@ -1,5 +1,6 @@
 {
   "scoreboard": {
+    "season": {"year": 2026, "type": 2},
     "week": {
       "number": 5
     },
@@ -298,6 +299,7 @@
   "recaps": [
     {
       "gameId": "1003",
+      "season": 2026,
       "week": 5,
       "away": "PIT",
       "home": "CLE",

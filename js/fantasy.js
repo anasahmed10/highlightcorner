@@ -3,6 +3,7 @@
   'use strict';
   HC.initTheme(); HC.initNav('fantasy'); HC.initPrefs();
   const sel = document.getElementById('weekSel');
+  const seasonSel = document.getElementById('seasonSel');
   const posSel = document.getElementById('posSel');
   const box = document.getElementById('fantasy');
   const segBtns = [...document.querySelectorAll('.seg button')];
@@ -27,7 +28,7 @@
       return `<table class="stats"><caption>${label}</caption>
         <thead><tr><th>#</th><th class="sortable" tabindex="0" data-pos="${pos}" data-sort="name">Player${ind('name')}</th>` +
         `<th>Line</th><th class="sortable" tabindex="0" data-pos="${pos}" data-sort="pts">Pts${ind('pts')}</th></tr></thead><tbody>${trs}</tbody></table>`;
-    }).join('') || '<div class="empty">No fantasy data for this week yet — the end zones are still empty.</div>';
+    }).join('') || `<div class="empty">No fantasy stats available for the ${HC.context.season} regular season, Week ${HC.context.week} yet.</div>`;
     box.querySelectorAll('th.sortable').forEach(th => {
       const st = sortState[th.dataset.pos] || { key: 'pts', dir: 1 };
       th.setAttribute('aria-sort', st.key !== th.dataset.sort ? 'none' : (st.key === 'name' ? (st.dir === 1 ? 'ascending' : 'descending') : (st.dir === 1 ? 'descending' : 'ascending')));
@@ -69,10 +70,12 @@
   async function load() {
     const token = ++request;
     const week = parseInt(sel.value, 10) || 1;
+    HC.setContext(seasonSel.value, week, HC.seasonWindow.verified);
+    const season = HC.context.season;
     box.innerHTML = HC.skeletons(3);
     try {
       if (!players) players = await HC.fetchJSON('data/players.json');
-      const stats = await HC.fetchJSON(`https://api.sleeper.app/v1/stats/nfl/regular/2026/${week}`);
+      const stats = await HC.fetchJSON(`https://api.sleeper.app/v1/stats/nfl/regular/${season}/${week}`);
       if (token !== request) return;
       const key = FMT_KEY[fmt];
       const rows = [];
@@ -105,9 +108,9 @@
 
   (async function init() {
     segBtns.forEach(b => b.setAttribute("aria-pressed", String(b.classList.contains("active"))));
-    await HC.weekOptions(sel);
-    sel.value = sel.options[sel.options.length - 1].value;
+    await HC.initSeasonWeek(seasonSel, sel);
     sel.addEventListener('change', load);
+    seasonSel.addEventListener('change', () => { HC.selectSeasonWeek(seasonSel, sel); load(); });
     posSel.addEventListener('change', () => { posFilter = posSel.value; renderTables(); });
     load();
   })();

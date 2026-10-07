@@ -3,16 +3,15 @@
   'use strict';
   HC.initTheme(); HC.initNav('scores'); HC.initPrefs();
   const sel = document.getElementById('weekSel');
+  const seasonSel = document.getElementById('seasonSel');
   const box = document.getElementById('games');
   const lead = document.getElementById('gamesLead');
   const rest = document.getElementById('gamesRest');
   const favGrid = document.getElementById('favGrid');
   let recaps = [];
   let highlightMap = null;
-  let currentWeek = 1;
   let filter = 'all';
   let eventsCache = [];
-  let weekCache = 1;
   let request = 0;
   let loading = false;
   const refresh = document.getElementById("refreshScores");
@@ -40,10 +39,10 @@
 
   function cardHTML(g) {
     const c = HC.teamTextColors(g.away, g.home);
-    const recap = recaps.find(r => String(r.gameId) === g.id);
+    const recap = recaps.find(r => r.season === HC.context.season && String(r.gameId) === g.id);
     const watched = HC.isWatched(g.id);
     const highlight = g.state === 'post' ? HC.highlightLink(highlightMap, g.id) : null;
-    return `<div class="game-card" style="--ga:${c.away};--gh:${c.home}" data-href="game.html?id=${g.id}&week=${weekCache}" tabindex="0" role="link"
+    return `<div class="game-card" style="--ga:${c.away};--gh:${c.home}" data-href="${HC.gameURL(g.id)}" tabindex="0" role="link"
         aria-label="${HC.esc(g.away.abbr)} at ${HC.esc(g.home.abbr)}">
       <div class="game-meta">
         <span ${g.state === 'pre' ? '' : 'data-outcome'} class="status ${HC.statusClass(g)}">${g.state === 'pre' ? 'Upcoming' : HC.esc(HC.statusLabel(g))}</span>
@@ -54,7 +53,7 @@
         ${recap ? `<span data-outcome class="chip"><span class="verdict ${HC.esc(recap.verdict)}" style="margin:0">${HC.esc(String(recap.verdict).replace(/-/g, ' '))}</span></span>` : ''}
         <button class="chip watched-toggle" data-id="${g.id}">${watched ? '✓ Watched' : 'Mark watched'}</button>
         <span class="card-actions">
-          <a class="chip" href="game.html?id=${HC.esc(g.id)}&week=${weekCache}">View game →</a>
+          <a class="chip" href="${HC.gameURL(g.id)}">View game →</a>
           ${highlight ? `<a class="chip highlight-link" href="${HC.esc(highlight.url)}" target="_blank" rel="noopener noreferrer" aria-label="View Highlights on ${HC.esc(highlight.source)} for ${HC.esc(g.away.abbr)} at ${HC.esc(g.home.abbr)}">View Highlights</a>` : ''}
         </span>
       </div>
@@ -83,7 +82,7 @@
     lead.innerHTML = `<p class="page-sub">${watchedCount} of ${eventsCache.length} watched</p>` +
       (cards.slice(0, 5).join('') || `<div class="empty">${filter === 'favorites' && !favs.length
         ? 'Pick some favorite teams above to filter the board.'
-        : 'No games match this filter.'}</div>`);
+        : `No games available for the ${HC.context.season} regular season, Week ${HC.context.week}.`}</div>`);
     rest.innerHTML = cards.slice(5).join('');
     HC.contentReady(box);
     box.querySelectorAll('.game-card').forEach(card => {
@@ -107,8 +106,8 @@
 
   async function load(quiet = false) {
     const token = ++request;
-    const week = parseInt(sel.value, 10) || currentWeek;
-    weekCache = week;
+    const week = parseInt(sel.value, 10) || 1;
+    HC.setContext(seasonSel.value, week, HC.seasonWindow.verified);
     loading = true;
     if (!quiet) {
       refresh.disabled = true;
@@ -118,7 +117,7 @@
     freshness.textContent = quiet ? 'Checking for live updates…' : 'Updating scores…';
     try {
       const [sb, links] = await Promise.all([
-        HC.scoreboard(week),
+        HC.scoreboard(week, HC.context.season),
         HC.fetchJSON('data/highlights.json').catch(() => null)
       ]);
       if (token !== request) return;
@@ -155,9 +154,10 @@
 
   (async function init() {
     try { recaps = await HC.fetchJSON('data/recaps.json'); } catch (e) { recaps = []; }
-    currentWeek = await HC.weekOptions(sel);
+    await HC.initSeasonWeek(seasonSel, sel);
     document.querySelectorAll("#filterRow button").forEach(b => b.setAttribute("aria-pressed", String(b.classList.contains("active"))));
     sel.addEventListener('change', load);
+    seasonSel.addEventListener('change', () => { HC.selectSeasonWeek(seasonSel, sel); load(); });
     renderFavGrid();
     load();
     HC.startVisiblePolling(() => load(true));
