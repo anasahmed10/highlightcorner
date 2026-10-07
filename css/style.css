@@ -71,7 +71,8 @@ select, .seg button {
 .team-row .tname { font-weight: 700; font-size: 1.02rem; flex: 1; min-width: 0; }
 .team-row .trec { color: var(--muted); font-size: .82rem; font-weight: 400; }
 .team-row .tscore { font-weight: 800; font-size: 1.35rem; font-variant-numeric: tabular-nums; min-width: 44px; text-align: right; }
-.team-row.winner .tscore::after { content: " ◀"; font-size: .8rem; }
+.team-row.winner .tscore { position: relative; }
+.team-row.winner .tscore::before { content: "▶"; position: absolute; right: calc(100% + 4px); top: 50%; transform: translateY(-50%); font-size: .8rem; }
 .game-card .card-foot { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .chip {
   font-size: .8rem; font-weight: 700; padding: 6px 10px; border-radius: 999px;
@@ -99,7 +100,18 @@ select, .seg button {
 .recap-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); }
 .recap-card h3 { margin: 0 0 4px; font-size: 1.1rem; }
 .recap-card h3 a { text-decoration: none; }
-.recap-card .scoreline { color: var(--muted); font-size: .9rem; margin-bottom: 8px; }
+.recap-scoreboard {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center; gap: 12px; padding: 14px 12px; margin-bottom: 16px;
+  background: var(--table-head); border: 1px solid var(--border); border-radius: 12px;
+}
+.recap-score-team { display: grid; justify-items: center; gap: 2px; min-width: 0; }
+.recap-score-location, .recap-score-status {
+  color: var(--muted); font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+}
+.recap-score-team strong { font-size: 1.05rem; letter-spacing: .04em; }
+.recap-score-number { color: var(--text); font-size: 2.5rem; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.recap-score-status { padding: 5px 9px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; }
 .recap-card p { margin: 8px 0; }
 .recap-card .keystat { font-size: .88rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 8px; margin-top: 10px; }
 .recap-card .keystat strong { color: var(--text); }

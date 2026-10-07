@@ -17,6 +17,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | Fantasy leaders | PPR / half-PPR / standard, via Sleeper |
 | Recap show more (game page) | Recap body clamps to 3 lines with Show more/less on mobile so the box score sits higher; full text on desktop |
 | Comedic recaps | Original multi-paragraph narratives with verdicts (nail-biter, comfortable, garbage-time, blowout); Week 4 stored in JSON |
+| Recap score panels | Prominent away/home teams in readable team colors and final scores above headlines on Recaps and game pages; respects themes and Hide spoilers |
 | Game center pages | Matchup/highlights → recap → scoring summary → tabbed box score → team stats → fantasy → tabbed injuries; prev/next game nav; live game details refresh every minute while visible and stop after the final status |
 | Spoiler preference | Settings toggle hides scores, records, verdicts, featured picks, recaps and stats from visible/accessibility content; device screen-reader review pending |
 | Favorites + watched | Team favorites w/ filter; watched/unwatched tracking w/ filter |
