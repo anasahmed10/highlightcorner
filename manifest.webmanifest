@@ -21,9 +21,9 @@
     }
   ],
   "name": "Highlight Corner \u2014 NFL Scores & Recaps",
-  "orientation": "portrait",
   "scope": "./",
   "short_name": "Highlight Corner",
   "start_url": "index.html",
-  "theme_color": "#0e1013"
+  "theme_color": "#0e1013",
+  "id": "/index.html"
 }

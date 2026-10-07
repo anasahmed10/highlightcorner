@@ -9,6 +9,7 @@
   let fmt = 'ppr';
   let posFilter = 'ALL';
   let players = null;
+  let request = 0;
   const byPos = {};   // pos -> rows for current week/format
   const sortState = {}; // pos -> {key:'pts'|'name', dir:1|-1}
 
@@ -24,11 +25,17 @@
         `<tr><td>${i + 1}</td><td class="pl">${HC.esc(r.name)} <span class="pos">${HC.esc(r.team)}</span></td>` +
         `<td>${HC.esc(statline(pos, r.s))}</td><td><strong>${r.pts.toFixed(1)}</strong></td></tr>`).join('');
       return `<table class="stats"><caption>${label}</caption>
-        <thead><tr><th>#</th><th class="sortable" data-pos="${pos}" data-sort="name">Player${ind('name')}</th>` +
-        `<th>Line</th><th class="sortable" data-pos="${pos}" data-sort="pts">Pts${ind('pts')}</th></tr></thead><tbody>${trs}</tbody></table>`;
+        <thead><tr><th>#</th><th class="sortable" tabindex="0" data-pos="${pos}" data-sort="name">Player${ind('name')}</th>` +
+        `<th>Line</th><th class="sortable" tabindex="0" data-pos="${pos}" data-sort="pts">Pts${ind('pts')}</th></tr></thead><tbody>${trs}</tbody></table>`;
     }).join('') || '<div class="empty">No fantasy data for this week yet — the end zones are still empty.</div>';
+    box.querySelectorAll('th.sortable').forEach(th => {
+      const st = sortState[th.dataset.pos] || { key: 'pts', dir: 1 };
+      th.setAttribute('aria-sort', st.key !== th.dataset.sort ? 'none' : (st.key === 'name' ? (st.dir === 1 ? 'ascending' : 'descending') : (st.dir === 1 ? 'descending' : 'ascending')));
+    });
+    HC.contentReady(box);
   }
 
+  box.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('th.sortable')) { e.preventDefault(); e.target.click(); } });
   box.addEventListener('click', (e) => {
     const th = e.target.closest('th.sortable');
     if (!th) return;
@@ -55,11 +62,13 @@
   }
 
   async function load() {
-    const week = parseInt(sel.value, 10) || 4;
+    const token = ++request;
+    const week = parseInt(sel.value, 10) || 1;
     box.innerHTML = HC.skeletons(3);
     try {
       if (!players) players = await HC.fetchJSON('data/players.json');
       const stats = await HC.fetchJSON(`https://api.sleeper.app/v1/stats/nfl/regular/2026/${week}`);
+      if (token !== request) return;
       const key = FMT_KEY[fmt];
       const rows = [];
       for (const [pid, s] of Object.entries(stats)) {
@@ -78,17 +87,20 @@
       for (const p of POSITIONS) byPos[p[0]] = rows.filter(r => r.pos === p[0]).slice(0, 25);
       renderTables();
     } catch (e) {
-      box.innerHTML = '<div class="error">Couldn’t load fantasy stats. Your quarterback isn’t the only one having a rough week.</div>';
+      if (token !== request) return;
+      box.innerHTML = '<div class="error">Couldn’t load fantasy stats. Your quarterback isn’t the only one having a rough week.<p><button class="btn btn-ghost" id="retryFantasy">Try again</button></p></div>';
+      document.getElementById('retryFantasy').addEventListener('click', load);
     }
   }
 
   segBtns.forEach(b => b.addEventListener('click', () => {
     segBtns.forEach(x => x.classList.remove('active'));
-    b.classList.add('active'); fmt = b.dataset.fmt; load();
+    b.classList.add('active'); segBtns.forEach(x => x.setAttribute('aria-pressed', String(x === b))); fmt = b.dataset.fmt; load();
   }));
 
   (async function init() {
-    await HC.weekOptions(sel, 4);
+    segBtns.forEach(b => b.setAttribute("aria-pressed", String(b.classList.contains("active"))));
+    await HC.weekOptions(sel);
     sel.value = sel.options[sel.options.length - 1].value;
     sel.addEventListener('change', load);
     posSel.addEventListener('change', () => { posFilter = posSel.value; renderTables(); });

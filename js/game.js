@@ -258,20 +258,20 @@
         </div>`;
 
       let html = `<div class="game-hero" style="--ga:${c.away};--gh:${c.home}">
-          <div class="matchup">${side(away, c.away)}<div class="mid">${heroScore}</div>${side(home, c.home)}</div>
-          <div class="gmeta">${HC.esc(((st.type || {}).shortDetail) || '')} · ${HC.esc(HC.fmtDate(comp.date))}${venue ? ' · ' + HC.esc(venue) : ''}</div>
+          <div class="matchup">${side(away, c.away)}<div class="mid"><span data-outcome>${heroScore}</span><span data-spoiler-placeholder hidden>vs</span></div>${side(home, c.home)}</div>
+          <div class="gmeta"><span data-outcome>${HC.esc(((st.type || {}).shortDetail) || '')} · </span> ${HC.esc(HC.fmtDate(comp.date))}${venue ? ' · ' + HC.esc(venue) : ''}</div>
         </div>
-        ${navHtml}
         <a class="btn btn-yt btn-block-center" target="_blank" rel="noopener"
            href="${HC.ytSearchURL(week, (away.team || {}).abbreviation, (home.team || {}).abbreviation)}">▶ Watch highlights</a>
         <div style="display:flex;gap:8px;margin-top:10px">
           <button class="btn btn-ghost" id="watchedBtn" style="flex:1">${HC.isWatched(gameId) ? '✓ Watched' : 'Mark as watched'}</button>
           <button class="btn btn-ghost" id="copyGameBtn" style="flex:0 0 auto" aria-label="Copy link to this game" title="Copy link to this game">⧉</button>
         </div>
-        <div class="ad-slot" style="margin-top:12px"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1549898506474594" data-ad-format="auto" data-full-width-responsive="true"></ins></div>`;
+        ${navHtml}
+        <p data-spoiler-placeholder hidden class="spoiler-notice">Scores, recaps, and game stats are hidden. Turn off Hide spoilers in Settings to reveal them.</p>`;
 
       if (recap) {
-        html += `<article class="recap-card" style="margin-top:14px">
+        html += `<article data-outcome class="recap-card" style="margin-top:14px">
           <span class="verdict ${HC.esc(recap.verdict)}">${HC.esc(String(recap.verdict).replace(/-/g, ' '))}</span>
           <h3>${HC.esc(recap.headline)}</h3>
           <div class="recap-text" id="recapText">${HC.esc(recap.recap).split('\n\n').map(x => `<p>${x}</p>`).join('')}</div>
@@ -281,6 +281,7 @@
       }
 
       if (state !== 'pre') {
+        html += '<section data-outcome aria-label="Game statistics">';
         const scoringBody = scoringSection(d.scoringPlays);
         if (scoringBody) html += collapsible('Scoring Summary', scoringBody, false, (d.scoringPlays || []).length);
         const groups = (d.boxscore || {}).players || [];
@@ -302,11 +303,14 @@
           const injCount = (d.injuries || []).reduce((n, e) => n + ((e.injuries || []).length), 0);
           html += collapsible('🚑 Injuries', injBody, false, injCount);
         }
+        html += '</section>';
       } else {
         html += `<div class="empty">This game hasn't started yet — box score, fantasy and injuries will appear here after kickoff.</div>`;
       }
 
+      html += `<div class="ad-slot"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1549898506474594" data-ad-format="auto" data-full-width-responsive="true"></ins></div>`;
       box.innerHTML = html;
+      HC.contentReady(box);
       box.querySelectorAll('[data-tabgroup]').forEach(group => {
         const tabs = group.querySelectorAll('.team-tab');
         const panes = group.querySelectorAll('.team-pane');
@@ -328,7 +332,14 @@
       const rt = document.getElementById('recapText');
       const rtg = document.getElementById('recapToggle');
       if (rt && rtg) {
-        if (rt.scrollHeight <= rt.clientHeight + 2) rtg.style.display = 'none';
+        const syncRecapToggle = () => {
+          if (!HC.spoilersHidden() && !rt.classList.contains('expanded')) {
+            rtg.style.display = rt.scrollHeight > rt.clientHeight + 2 ? '' : 'none';
+          }
+        };
+        syncRecapToggle();
+        document.addEventListener('hc:spoilers', syncRecapToggle);
+        window.addEventListener('resize', syncRecapToggle);
         rtg.addEventListener('click', () => {
           const open = rt.classList.toggle('expanded');
           rtg.setAttribute('aria-expanded', String(open));
@@ -337,7 +348,14 @@
       }
       if (HC.renderAds) HC.renderAds();
       document.title = `Highlight Corner — ${(away.team || {}).abbreviation} @ ${(home.team || {}).abbreviation}`;
-      document.addEventListener('hc:theme', () => init(), { once: true });
+      document.addEventListener('hc:theme', () => {
+        const colors = HC.teamTextColors(away.team || {}, home.team || {});
+        const hero = box.querySelector('.game-hero');
+        hero.style.setProperty('--ga', colors.away); hero.style.setProperty('--gh', colors.home);
+        box.querySelectorAll('.team-tab').forEach(tab => {
+          tab.style.setProperty('--team', tab.textContent.trim() === (away.team || {}).abbreviation ? colors.away : colors.home);
+        });
+      });
     } catch (e) {
       box.innerHTML = '<div class="error">Couldn’t load this game — it may have been flexed out of existence. <a href="index.html">Back to scores</a>.</div>';
     }

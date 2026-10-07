@@ -1,16 +1,16 @@
 # Highlight Corner maintenance guide
 
-Verified against the repository on October 6, 2026. This guide describes the
+Verified against the repository on October 7, 2026. This guide describes the
 current implementation; [roadmap.md](roadmap.md) describes proposed changes.
 Source code and the deployment workflow are the authority for implementation
 behavior. External schedules and account status require separate verification.
 
 ## Architecture and file map
 
-The repository root is the static site. There is no compilation step. Most pages
+The repository root is the static site. Only Tailwind utilities have a compilation step; HTML and JavaScript remain plain static files. Committed CSS allows immediate local preview. Run `npm ci` and `npm run build:css` when changing utility classes; commit `css/utilities.css`. Tailwind Preflight is deliberately omitted to preserve the existing stylesheet. Most pages
 load `js/app.js`, then `js/ads.js`, then their page script at the end of the body.
 `app.js` assigns a fresh `window.HC` object, so reordering it after consumers can
-break the site. Shared navigation/header markup is repeated across HTML files.
+break the site. Shared navigation/header markup is repeated across HTML files. Place both desktop and mobile navigation before `js/app.js` so page initialization can set the active tab. The shared script creates the Settings dialog, install promotion, and offline notice before page scripts initialize theme/preferences.
 
 | Page | Script | Responsibility |
 | --- | --- | --- |
@@ -34,14 +34,14 @@ All sports API requests happen in the visitor's browser. No API keys or server
 are configured. Provider availability, CORS, and response formats can change;
 verify current responses when investigating data failures.
 
-- `HC.fetchJSON(url)` rejects non-success HTTP responses and parses JSON.
+- `HC.fetchJSON(url)` rejects non-success HTTP responses, parses JSON, and aborts after 12 seconds.
 - `HC.scoreboard(week)` calls ESPN's NFL scoreboard, adding `?week=` when supplied.
   It currently does not specify season or season type.
 - `HC.gameSummary(id)` calls ESPN's summary endpoint with `?event=`.
 - `HC.gameInfo(event)` normalizes competitors into away/home, status and scores.
   ESPN game IDs become strings.
 - `HC.weekOptions(selectEl, selectedWeek)` requests the current scoreboard and
-  creates options from week 1 through the reported current week; its fallback is 4.
+  creates options from week 1 through the reported current week; its unverified fallback is the supplied week or week 1. A fresh visit selects the provider’s current week.
   This is not a historical-season or postseason selector.
 - Fantasy requests `https://api.sleeper.app/v1/stats/nfl/regular/2026/{week}`.
   It reads `pts_ppr`, `pts_half_ppr`, or `pts_std`, keeps players with at least 8
@@ -88,13 +88,16 @@ collection and preserve previous recaps unless replacement is explicitly request
 | `hc:spoilers` | JSON string `show` or `hide` |
 | `hc:favorites` | JSON array of team abbreviations |
 | `hc:watched` | JSON array of game ID strings |
+| `hc:install-dismissed` | JSON timestamp; suppress suggestion for 30 days |
 
-`HC.prefs` reads/writes the JSON-backed settings; theme storage is separate.
+`HC.prefs` reads/writes the JSON-backed settings, with session-only fallback when storage is blocked; theme storage is separate.
 Theme changes dispatch `hc:theme`; page listeners may rerender or refetch.
-Spoiler changes update `data-spoilers` on the document. Current protection is
-CSS blur on selected scores, not comprehensive outcome hiding: winners, verdicts,
-recap prose, stats, and featured-game labels can reveal outcomes. Treat stronger
-protection as a roadmap upgrade, not an existing guarantee.
+Spoiler changes update `data-spoilers` on the document. Outcome elements use `data-outcome`; `HC.applySpoilers()` toggles their native
+`hidden` attribute, including accessible content. Add `data-spoiler-placeholder`
+for safe replacement text. Every dynamic renderer must call `HC.contentReady(box)`
+after inserting markup. Scoreboard accessible names contain only matchups; records,
+scores, verdicts, featured picks, recaps, and stats are hidden. Complete manual
+screen-reader coverage remains an accessibility follow-up.
 
 ## Redesign conventions
 
@@ -102,7 +105,10 @@ protection as a roadmap upgrade, not an existing guarantee.
   `--accent`, and related tokens) rather than independent page palettes.
 - Preserve the centered 860px content area, responsive tables, sticky header,
   and prominent Watch highlights buttons. Existing key breakpoints are 700px
-  for desktop content/recap expansion and 1280px for advertising rails.
+  for desktop content/recap expansion, 800px for switching bottom tabs to desktop
+  navigation, and 1280px for advertising rails. Safe-area insets pad headers,
+  bottom tabs, and page bottoms. Settings uses a native modal dialog with Escape
+  dismissal and focus return.
 - Derive matchup colors through `HC.teamTextColors`; it adjusts contrast and
   distinguishes similar team palettes. Preserve recognizable team colors.
 - New interactive controls should have clear names, visible keyboard focus,
@@ -173,8 +179,9 @@ python3 -m http.server 8080
 ```
 
 Open `http://localhost:8080`. A real HTTP origin is needed for JSON loading and
-service-worker behavior. There is no `npm test`, build command, or checked-in
-browser test suite. Use tools available in your session; if browser checks cannot
+service-worker behavior. Run `npm test` for focused DOM and worker regressions and `npm run build:css`
+for Tailwind. Pull requests run these checks before merging; Pages runs them
+again before deployment. There is no checked-in browser automation suite. Use tools available in your session; if browser checks cannot
 be performed, report that limit explicitly.
 
 For changed JavaScript, run `node --check path/to/changed-file.js` if Node is
@@ -206,16 +213,18 @@ into unrelated work.
 
 - Remote: `https://github.com/anasahmed10/highlightcorner`; production branch `main`.
 - `.github/workflows/deploy.yml` runs on pushes to `main` and manual dispatch,
-  substitutes the commit SHA for `__BUILD_ID__` in `sw.js`, and uploads the root
-  directory to GitHub Pages. It does not compile code or run tests.
+  substitutes the commit SHA for `__BUILD_ID__` in `sw.js`, after compiling utilities and running tests/syntax checks, then uploads an
+  explicit `_site/` directory of public assets to GitHub Pages. Dependencies,
+  CSS input, tests, tools, and documentation stay out of the deployment.
 - Root `CNAME` declares `highlightcorner.com`. On October 6, 2026, an HTTPS check
   showed `www.highlightcorner.com` redirecting to the apex, which returned HTTP 200
   with GitHub hosting headers. Verify live hosting again for future migrations.
 - `.vercel/` is ignored historical deployment output, not current editable source.
-- `sw.js` caches listed shell assets at install; activation removes other caches
+- `sw.js` caches listed shell assets at install; activation removes only previous `hc-` caches
   on this origin. Shell requests use cache first; `data/` requests use network
-  first with cached fallback. Listed ESPN/Sleeper/YouTube/Google ad hosts bypass
-  worker caching. Offline shell support does not imply offline live sports data.
+  first with cached fallback. All cross-origin requests bypass worker caching. Only successful responses
+  are stored. Query-bearing navigation uses the matching cached HTML shell;
+  failed navigation falls back to the cached recovery page. Offline shell support does not imply offline live sports data.
 - Keep the literal `__BUILD_ID__` in source. Local runs lack deploy stamping, so
   unregister the worker/clear this preview origin's cache in browser tools when
   changes appear stale. Do not erase production browser storage for debugging.
@@ -227,9 +236,9 @@ into unrelated work.
   external. Earlier rejection notes are historical, not a current verified status.
   Preserve manual units and privacy disclosures; check current requirements before
   introducing tracking, consent changes, or new advertising behavior.
-- The workflow uploads the repository root. Treat committed documents as public;
-  never include credentials or private operational material. A narrower publishing
-  artifact is proposed in the roadmap.
+- The workflow copies only public assets into `_site/`; development files are
+  excluded. Keep committed documents free of credentials and private operational
+  material regardless of the deployment boundary.
 
 ## Keep these documents useful
 
@@ -238,3 +247,26 @@ change. Record shipped behavior in [../FEATURES.md](../FEATURES.md). Update
 [roadmap.md](roadmap.md) when an item starts or meets its acceptance criteria.
 Keep proposed behavior separate from current behavior and explain checks actually
 performed in the completion report.
+
+## Mobile app UI and install checks
+
+Settings exposes theme, Hide spoilers, privacy, and home-screen help. Installation
+uses `beforeinstallprompt` only after a user tap when supported; instructions
+remain available elsewhere. `appinstalled`, standalone display mode, and the iOS
+standalone flag hide install controls. Check actual Safari/iOS and Chrome/Android
+installation on devices before calling device behavior verified. The stable
+manifest ID is `/index.html`, matching the previous start URL identity.
+
+Scores fetch on initial load, week changes, or Refresh, with a labeled local
+updated time; they do not poll. Scores, Highlights, and Fantasy guard stale
+responses. Theme changes reuse loaded data. Static in-flow ads follow content;
+game ads follow the recap/stats. Each manual unit is queued once, including
+units added after a game loads; repeated render calls skip existing units. Unfilled AdSense units collapse via status
+attributes; do not hide a pending unit before its first AdSense measurement.
+
+Use `npm test` for install-event lifecycle, nav state, week recovery, hidden
+outcomes, offline game-shell resolution, cache ownership, and failed-response
+caching. Test real data, touch/keyboard controls, layouts, provider failure, and
+service-worker releases separately in the browser. Local `__BUILD_ID__` remains
+unstamped: use a fresh preview origin or clear only the local preview cache
+when old assets appear; do not erase production preferences.

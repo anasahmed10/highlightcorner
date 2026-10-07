@@ -19,31 +19,31 @@
 <meta property="og:title" content="Highlight Corner — Privacy Policy">
 <meta property="og:description" content="Privacy policy for Highlight Corner.">
 <meta property="og:url" content="https://highlightcorner.com/privacy.html">
-<meta name="twitter:card" content="summary"><link rel="stylesheet" href="css/style.css">
+<meta name="twitter:card" content="summary"><link rel="stylesheet" href="css/utilities.css">
+<link rel="stylesheet" href="css/style.css">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1549898506474594" crossorigin="anonymous"></script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header"><div class="inner">
   <a class="brand" href="index.html">Highlight<span>Corner</span></a>
-  <nav class="main-nav">
+  <nav class="main-nav" aria-label="Main navigation">
     <a data-page="scores" href="index.html">Scores</a>
     <a data-page="highlights" href="highlights.html">Highlights</a>
     <a data-page="fantasy" href="fantasy.html">Fantasy</a>
     <a data-page="recaps" href="recaps.html">Recaps</a>
-    <a data-page="privacy" href="privacy.html">Privacy</a>
   </nav>
-  <button class="theme-toggle" aria-label="Toggle theme">🌙</button>
-  <button class="spoiler-toggle" aria-label="Toggle spoiler-free mode" title="Spoiler-free mode">👁</button>
+  <button class="settings-toggle flex items-center justify-center gap-2" aria-label="Open settings" aria-haspopup="dialog"><img src="icons/ui/settings.svg" alt="" width="20" height="20"><span>Settings</span></button>
 </div></header>
-<main class="wrap">
+<main class="wrap" id="main" tabindex="-1">
   <h1 class="page-title">Privacy Policy</h1>
-  <p class="page-sub">Last updated: October 6, 2026</p>
+  <p class="page-sub">Last updated: October 7, 2026</p>
 
   <h2 class="section-title">What we collect</h2>
   <p>Highlight Corner collects nothing directly. There are no accounts, no sign-ups, and no analytics of our own. Scores, stats, and fantasy data are fetched live in your browser from public sports data providers (ESPN and Sleeper); we never see or store those requests.</p>
 
   <h2 class="section-title">Stored on your device only</h2>
-  <p>Your theme choice, spoiler-free preference, favorite teams, and watched games are saved in your browser's local storage, on your device only. They are never sent to us or anyone else. Clearing your browser data removes them.</p>
+  <p>Your theme choice, spoiler-free preference, favorite teams, watched games, and dismissal of the home-screen suggestion are saved in your browser's local storage, on your device only. They are never sent to us or anyone else. Clearing your browser data removes them.</p>
 
   <h2 class="section-title">Advertising</h2>
   <p>We use Google AdSense to show ads. Google may use cookies and similar technologies to serve personalized or non-personalized ads, measure their performance, and prevent fraud. You can learn how Google uses data from sites like this one at <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">Google's partner-sites policy</a>, and manage your ad preferences at <a href="https://adssettings.google.com" target="_blank" rel="noopener">Google Ad Settings</a>.</p>
@@ -60,7 +60,13 @@
   <h2 class="section-title">Contact</h2>
   <p>Questions about this policy: nasworks.development@gmail.com</p>
 </main>
-<footer class="site-footer">Scores are facts. The jokes are opinions.<br>Data: ESPN · Highlights: YouTube · Fantasy: Sleeper.</footer>
+<footer class="site-footer">Scores are facts. The jokes are opinions.<br>Data: ESPN · Highlights: YouTube · Fantasy: Sleeper.<br><a href="privacy.html">Privacy</a></footer>
+<nav class="bottom-nav grid grid-cols-4" aria-label="Mobile navigation">
+  <a data-page="scores" href="index.html" class="flex flex-col items-center justify-center gap-1"><img src="icons/ui/list.svg" alt="" width="22" height="22"><span>Scores</span></a>
+  <a data-page="highlights" href="highlights.html" class="flex flex-col items-center justify-center gap-1"><img src="icons/ui/play.svg" alt="" width="22" height="22"><span>Highlights</span></a>
+  <a data-page="fantasy" href="fantasy.html" class="flex flex-col items-center justify-center gap-1"><img src="icons/ui/chart-no-axes-column.svg" alt="" width="22" height="22"><span>Fantasy</span></a>
+  <a data-page="recaps" href="recaps.html" class="flex flex-col items-center justify-center gap-1"><img src="icons/ui/notebook-pen.svg" alt="" width="22" height="22"><span>Recaps</span></a>
+</nav>
 <script src="js/app.js"></script>
 <script src="js/ads.js"></script>
 <script>HC.initTheme(); HC.initNav('privacy'); HC.initPrefs();</script>
