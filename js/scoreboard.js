@@ -6,18 +6,22 @@
   const box = document.getElementById('games');
   const favGrid = document.getElementById('favGrid');
   let recaps = [];
-  let currentWeek = 4;
+  let currentWeek = 1;
   let filter = 'all';
   let eventsCache = [];
-  let weekCache = 4;
+  let weekCache = 1;
+  let request = 0;
+  let loading = false;
+  const refresh = document.getElementById("refreshScores");
+  const freshness = document.getElementById("freshness");
 
   function teamRow(t, color) {
     const fav = HC.getFavorites().includes(t.abbr);
     return `<div class="team-row${t.winner ? ' winner' : ''}">
       <img src="${HC.esc(t.logo || '')}" alt="${HC.esc(t.abbr)} logo" loading="lazy" onerror="this.style.visibility='hidden'">
       <div class="tname" style="color:${color}">${fav ? '★ ' : ''}${HC.esc(t.short || t.name)}
-        ${t.record ? `<span class="trec"> · ${HC.esc(t.record)}</span>` : ''}</div>
-      <div class="tscore" style="color:${color}">${t.score == null ? '' : HC.esc(t.score)}</div>
+        ${t.record ? `<span data-outcome class="trec"> · ${HC.esc(t.record)}</span>` : ''}</div>
+      <div data-outcome class="tscore" style="color:${color}">${t.score == null ? '' : HC.esc(t.score)}</div>
     </div>`;
   }
 
@@ -36,21 +40,22 @@
     const recap = recaps.find(r => String(r.gameId) === g.id);
     const watched = HC.isWatched(g.id);
     return `<div class="game-card" style="--ga:${c.away};--gh:${c.home}" data-href="game.html?id=${g.id}&week=${weekCache}" tabindex="0" role="link"
-        aria-label="${HC.esc(g.away.abbr)} at ${HC.esc(g.home.abbr)}, ${HC.esc(g.statusText)}">
+        aria-label="${HC.esc(g.away.abbr)} at ${HC.esc(g.home.abbr)}">
       <div class="game-meta">
-        <span class="status ${HC.statusClass(g)}">${HC.esc(HC.statusLabel(g))}</span>
+        <span ${g.state === 'pre' ? '' : 'data-outcome'} class="status ${HC.statusClass(g)}">${g.state === 'pre' ? 'Upcoming' : HC.esc(HC.statusLabel(g))}</span>
         <span>${HC.esc(HC.fmtDate(g.date))}</span>
       </div>
-      ${teamRow(g.away, c.away)}${teamRow(g.home, c.home)}
+      ${teamRow({ ...g.away, score: g.state === 'pre' ? null : g.away.score }, c.away)}${teamRow({ ...g.home, score: g.state === 'pre' ? null : g.home.score }, c.home)}
       <div class="card-foot">
-        ${recap ? `<span class="chip"><span class="verdict ${HC.esc(recap.verdict)}" style="margin:0">${HC.esc(String(recap.verdict).replace(/-/g, ' '))}</span></span>` : ''}
+        ${recap ? `<span data-outcome class="chip"><span class="verdict ${HC.esc(recap.verdict)}" style="margin:0">${HC.esc(String(recap.verdict).replace(/-/g, ' '))}</span></span>` : ''}
         <button class="chip watched-toggle" data-id="${g.id}">${watched ? '✓ Watched' : 'Mark watched'}</button>
-        <span class="chip">Box score →</span>
+        <span class="chip">View game →</span>
       </div>
     </div>`;
   }
 
   function render() {
+    if (loading) return;
     let evs = eventsCache;
     const favs = HC.getFavorites();
     if (filter === 'favorites') evs = evs.filter(ev => {
@@ -60,11 +65,20 @@
     if (filter === 'unwatched') evs = evs.filter(ev => !HC.isWatched(String(ev.id)));
     const watchedCount = eventsCache.filter(ev => HC.isWatched(String(ev.id))).length;
     let html = `<p class="page-sub">${watchedCount} of ${eventsCache.length} watched</p>`;
-    html += evs.map(ev => cardHTML(HC.gameInfo(ev))).join('') ||
+    let lastDay = '';
+    html += evs.slice().sort((a, b) => new Date(a.date) - new Date(b.date)).map(ev => {
+      const g = HC.gameInfo(ev);
+      const date = new Date(g.date);
+      const day = Number.isNaN(date.getTime()) ? 'Date to be announced' : new Intl.DateTimeFormat(undefined, { weekday: 'long', month: 'short', day: 'numeric' }).format(date);
+      const heading = day === lastDay ? '' : `<h2 class="day-heading">${HC.esc(day)}</h2>`;
+      lastDay = day;
+      return heading + cardHTML(g);
+    }).join('') ||
       `<div class="empty">${filter === 'favorites' && !favs.length
         ? 'Pick some favorite teams above to filter the board.'
         : 'No games match this filter.'}</div>`;
     box.innerHTML = html;
+    HC.contentReady(box);
     box.querySelectorAll('.game-card').forEach(card => {
       card.addEventListener('click', e => {
         if (e.target.closest('button')) return;
@@ -85,28 +99,43 @@
   }
 
   async function load() {
+    const token = ++request;
     const week = parseInt(sel.value, 10) || currentWeek;
     weekCache = week;
-    box.innerHTML = HC.skeletons(6);
+    loading = true; refresh.disabled = true;
+    freshness.textContent = 'Updating scores…';
+    box.innerHTML = HC.skeletons(4);
     try {
       const sb = await HC.scoreboard(week);
+      if (token !== request) return;
       eventsCache = sb.events || [];
-      currentWeek = (sb.week || {}).number || week;
+      loading = false;
       render();
-      document.addEventListener('hc:theme', () => render(), { once: true });
+      freshness.textContent = navigator.onLine
+        ? 'Updated ' + new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(new Date())
+        : 'Offline — showing a saved response';
     } catch (e) {
-      box.innerHTML = '<div class="error">Couldn’t load scores. The Wi-Fi appears to be running a prevent defense.</div>';
-    }
+      if (token !== request) return;
+      loading = false; eventsCache = [];
+      freshness.textContent = navigator.onLine ? 'Scores unavailable' : 'You’re offline';
+      box.innerHTML = '<div class="error"><p>Couldn’t load scores. Try again when you’re connected.</p><button class="btn btn-ghost" id="retryScores">Try again</button></div>';
+      document.getElementById('retryScores').addEventListener('click', load);
+    } finally { if (token === request) refresh.disabled = false; }
   }
+  refresh.addEventListener('click', load);
+  document.addEventListener('hc:theme', render);
+  document.addEventListener('hc:spoilers', render);
 
   document.querySelectorAll('#filterRow button').forEach(b => b.addEventListener('click', () => {
     document.querySelectorAll('#filterRow button').forEach(x => x.classList.remove('active'));
-    b.classList.add('active'); filter = b.dataset.f; render();
+    b.classList.add('active'); filter = b.dataset.f;
+    document.querySelectorAll('#filterRow button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); render();
   }));
 
   (async function init() {
     try { recaps = await HC.fetchJSON('data/recaps.json'); } catch (e) { recaps = []; }
-    currentWeek = await HC.weekOptions(sel, currentWeek);
+    currentWeek = await HC.weekOptions(sel);
+    document.querySelectorAll("#filterRow button").forEach(b => b.setAttribute("aria-pressed", String(b.classList.contains("active"))));
     sel.addEventListener('change', load);
     renderFavGrid();
     load();

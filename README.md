@@ -23,8 +23,10 @@ From the repository root:
 python3 -m http.server 8080
 ```
 
-Open `http://localhost:8080`. No build step or package installation is required
-for the website. Preview over HTTP rather than opening HTML files directly.
+Open `http://localhost:8080`. Committed styles work immediately without installing
+anything. When editing Tailwind utility classes, use Node 24+ and run `npm ci`
+then `npm run build:css`; commit the generated `css/utilities.css`.
+`npm test` runs focused DOM and service-worker regression checks. Preview over HTTP rather than opening HTML files directly.
 If the service worker keeps showing old local files, unregister it and clear the
 preview origin's cache in browser developer tools.
 
@@ -41,8 +43,9 @@ preview origin's cache in browser developer tools.
 | `404.html` | Missing-page recovery |
 
 Theme, spoiler preference, favorite teams and watched games are stored in the
-visitor's browser. Spoiler mode currently blurs selected scores; it does not hide
-all outcome clues. Comprehensive protection is a proposed upgrade.
+visitor's browser. Hide spoilers removes scores, team records, outcome labels, featured picks,
+recap prose, and stats from visible and accessible page content. Reveal them
+through Settings. Mobile navigation uses four persistent bottom tabs.
 
 ## Data and content
 
@@ -71,9 +74,10 @@ the service-worker cache name. Keep `__BUILD_ID__` in the source `sw.js`.
 `CNAME` declares `highlightcorner.com`; GitHub hosting was verified October 6, 2026.
 The ignored `.vercel/` folder is historical deployment output.
 
-There is currently no automated test suite or CI test step. Run relevant checks
-from the maintenance guide before publication. The workflow uploads the root,
-so committed documentation should contain only public information.
+The Pages workflow runs regression checks, syntax checks, and the Tailwind build,
+then uploads an explicit public asset directory. Development dependencies, tests,
+tools, and agent documentation are excluded. Run the browser checks in the
+maintenance guide before publication.
 
 ## Advertising, privacy and offline use
 
@@ -82,7 +86,10 @@ Keep `ads.txt`, privacy links, and publisher configuration intact. Approval and
 payment status must be verified in the owner's external account; old rejection
 notes are not evidence of current status.
 
+Settings provides iOS/Android home-screen instructions and the browser install
+prompt when supported. A dismissible suggestion appears after three scoreboard
+cards and stays dismissed for 30 days. Installed windows hide install controls.
 The manifest, icons and service worker support installation and a cached offline
-shell. Local JSON uses network first with cached fallback. Sports API requests
+shell, including game URLs with query parameters. Local JSON uses network first with cached fallback. Sports API requests
 and listed ad/video hosts bypass worker caching, so offline shell support does
 not guarantee offline scores or fantasy data.

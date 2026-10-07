@@ -1,0 +1,129 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const { JSDOM } = require('jsdom');
+
+function app(options = {}) {
+  const html = fs.readFileSync('index.html', 'utf8');
+  const dom = new JSDOM(html, { url: 'https://highlightcorner.com/', runScripts: 'outside-only' });
+  const w = dom.window;
+  w.matchMedia = query => ({ matches: options.standalone && query.includes('standalone'), addEventListener() {} });
+  w.HTMLDialogElement.prototype.showModal = function () { this.open = true; };
+  w.HTMLDialogElement.prototype.close = function () { this.open = false; };
+  w.fetch = async () => ({ ok: true, json: async () => ({ week: { number: 7 } }) });
+  w.eval(fs.readFileSync('js/app.js', 'utf8'));
+  w.HC.initTheme(); w.HC.initNav('scores'); w.HC.initPrefs();
+  return dom;
+}
+
+test('fresh week selection uses the provider current week', async () => {
+  const dom = app();
+  const select = dom.window.document.getElementById('weekSel');
+  await dom.window.HC.weekOptions(select);
+  assert.equal(select.value, '7');
+  dom.window.close();
+});
+
+test('week discovery failure leaves a usable selector with an honest fallback', async () => {
+  const dom = app();
+  dom.window.fetch = async () => { throw new Error('offline'); };
+  const select = dom.window.document.getElementById('weekSel');
+  await dom.window.HC.weekOptions(select, 3);
+  assert.equal(select.value, '3');
+  assert.match(select.options[2].textContent, /unverified/);
+  dom.window.close();
+});
+
+test('mobile and desktop nav expose current-page state, settings has install help', () => {
+  const dom = app();
+  const doc = dom.window.document;
+  assert.equal(doc.querySelectorAll('a[data-page="scores"][aria-current="page"]').length, 2);
+  assert.ok(doc.querySelector('#settingsDialog .install-action'));
+  assert.match(doc.querySelector('#installHelp').textContent, /Add to Home Screen/);
+  dom.window.close();
+});
+
+test('installation calls the browser prompt only on user action and consumes it once', async () => {
+  const dom = app();
+  const w = dom.window;
+  let prompts = 0;
+  const event = new w.Event('beforeinstallprompt', { cancelable: true });
+  event.prompt = async () => { prompts++; };
+  event.userChoice = Promise.resolve({ outcome: 'dismissed' });
+  w.dispatchEvent(event);
+  assert.equal(prompts, 0);
+  assert.equal(event.defaultPrevented, true);
+  w.document.querySelector('.install-action').click();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(prompts, 1);
+  w.document.querySelector('.install-action').click();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(prompts, 1);
+  dom.window.close();
+});
+
+test('standalone launch hides installation promotion and action', () => {
+  const dom = app({ standalone: true });
+  assert.ok(dom.window.document.querySelector('.install-action').hidden);
+  assert.ok(dom.window.document.querySelector('#installPromo').hidden);
+  dom.window.close();
+});
+
+test('spoiler protection removes outcomes from accessible content and persists', () => {
+  const dom = app();
+  const w = dom.window;
+  w.document.querySelector('main').insertAdjacentHTML('beforeend', '<div data-outcome>24–27</div>');
+  w.document.querySelector('.spoiler-toggle').click();
+  assert.equal(w.localStorage.getItem('hc:spoilers'), '"hide"');
+  assert.equal(w.document.querySelector('[data-outcome]').hidden, true);
+  w.document.querySelector('.spoiler-toggle').click();
+  assert.equal(w.document.querySelector('[data-outcome]').hidden, false);
+  dom.window.close();
+});
+
+test('blocked storage still permits spoiler changes during the session', () => {
+  const dom = app();
+  const w = dom.window;
+  Object.defineProperty(w, 'localStorage', { get() { throw new Error('Storage disabled'); } });
+  w.document.querySelector('.spoiler-toggle').click();
+  assert.equal(w.document.documentElement.dataset.spoilers, 'hide');
+  dom.window.close();
+});
+
+test('upcoming scoreboard games do not imply a 0–0 result', async () => {
+  const dom = app();
+  const w = dom.window;
+  const event = { id: 'upcoming', date: '2026-10-08T20:00:00Z', status: { type: { state: 'pre', shortDetail: 'Scheduled' } }, competitions: [{ competitors: [
+    { homeAway: 'away', score: '0', team: { abbreviation: 'TB', shortDisplayName: 'Buccaneers' } },
+    { homeAway: 'home', score: '0', team: { abbreviation: 'DAL', shortDisplayName: 'Cowboys' } }
+  ] }] };
+  w.fetch = async url => ({ ok: true, json: async () => String(url).includes('recaps') ? [] : ({ week: { number: 5 }, events: [event] }) });
+  w.eval(fs.readFileSync('js/scoreboard.js', 'utf8'));
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(w.document.querySelector('.tscore').textContent.trim(), '');
+  assert.equal(w.document.querySelector('.status').textContent, 'Upcoming');
+  dom.window.close();
+});
+
+test('keyboard fantasy sorting keeps focus so another activation reverses sorting', async () => {
+  const dom = new JSDOM(fs.readFileSync('fantasy.html', 'utf8'), { url: 'https://highlightcorner.com/fantasy.html', runScripts: 'outside-only' });
+  const w = dom.window;
+  w.matchMedia = () => ({ matches: false, addEventListener() {} });
+  w.fetch = async url => ({ ok: true, json: async () => {
+    if (String(url).includes('players.json')) return { p1: { n: 'First Player', p: 'QB', t: 'NE' } };
+    if (String(url).includes('sleeper.app')) return { p1: { pts_ppr: 20, pass_yd: 300 } };
+    return { week: { number: 5 } };
+  } });
+  w.eval(fs.readFileSync('js/app.js', 'utf8'));
+  w.eval(fs.readFileSync('js/fantasy.js', 'utf8'));
+  await new Promise(resolve => setImmediate(resolve));
+  const heading = () => w.document.querySelector('th[data-pos="QB"][data-sort="name"]');
+  heading().focus();
+  heading().dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  assert.equal(w.document.activeElement, heading());
+  assert.equal(heading().getAttribute('aria-sort'), 'ascending');
+  w.document.activeElement.dispatchEvent(new w.KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+  assert.equal(w.document.activeElement, heading());
+  assert.equal(heading().getAttribute('aria-sort'), 'descending');
+  dom.window.close();
+});

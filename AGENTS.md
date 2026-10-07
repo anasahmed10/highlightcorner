@@ -16,8 +16,9 @@ These instructions apply throughout this repository, regardless of agent model.
 
 ## Architecture and local preview
 
-- Plain static HTML, shared `css/style.css`, and browser JavaScript. No bundler,
-  package manifest, application backend, or automated test suite exists today.
+- Plain static HTML, shared `css/style.css`, compiled Tailwind utilities, and
+  browser JavaScript. No application backend or JavaScript bundler. Node 24+
+  runs `npm test` and `npm run build:css`; commit generated `css/utilities.css`.
 - Run `python3 -m http.server 8080` from the repository root; open
   `http://localhost:8080`. Do not preview through `file://`.
 - `js/app.js` defines `window.HC`; load it before `js/ads.js` and page scripts.
@@ -35,8 +36,9 @@ These instructions apply throughout this repository, regardless of agent model.
   when interpolating HTML; do not treat provider or recap text as trusted markup.
 - Highlights are outbound YouTube search links, not hosted videos. Advertising
   uses manual units, not Auto Ads. Preserve privacy links, `ads.txt`, and SEO/PWA assets.
-- Season handling is not automatic everywhere: fantasy hardcodes 2026, and
-  several week fallbacks are 4. Check these when changing time/data selection.
+- Season handling is not automatic everywhere: fantasy hardcodes 2026. Shared
+  week discovery uses the provider current week, with a labeled unverified
+  fallback. Check these when changing time/data selection.
 - Keep `__BUILD_ID__` in the source service worker. The Pages workflow substitutes
   the commit SHA at deployment. New shell assets may need `APP_SHELL` updates.
 

@@ -1,0 +1,26 @@
+name: Verify site
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Test and compile styles
+        run: |
+          npm test
+          npm run build:css
+          git diff --exit-code -- css/utilities.css
+          for script in js/*.js sw.js; do node --check "$script"; done
+          python3 -m json.tool manifest.webmanifest > /dev/null

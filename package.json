@@ -1,0 +1,14 @@
+{
+  "name": "highlight-corner",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i css/tailwind.css -o css/utilities.css --minify",
+    "test": "node --test tests/*.test.cjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.0",
+    "jsdom": "30.1.2",
+    "lucide-static": "1.52.0",
+    "tailwindcss": "4.3.0"
+  }
+}

@@ -1,0 +1,6 @@
+/* Compile locally; omit Preflight to preserve existing sports tables and themes. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@source "../*.html";
+@source "../js/*.js";

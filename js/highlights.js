@@ -4,12 +4,17 @@
   HC.initTheme(); HC.initNav('highlights'); HC.initPrefs();
   const sel = document.getElementById('weekSel');
   const box = document.getElementById('hl');
+  let cached = null;
+  let request = 0;
 
-  async function load() {
-    const week = parseInt(sel.value, 10) || 4;
+  async function load(renderOnly = false) {
+    const token = ++request;
+    const week = parseInt(sel.value, 10) || 1;
     box.innerHTML = HC.skeletons(4);
     try {
-      const sb = await HC.scoreboard(week);
+      const sb = renderOnly && cached ? cached : await HC.scoreboard(week);
+      if (token !== request) return;
+      cached = sb;
       const events = sb.events || [];
       const infos = events.map(HC.gameInfo);
 
@@ -20,7 +25,7 @@
         const top = done.sort((a, b) =>
           (Number(b.away.score) + Number(b.home.score)) - (Number(a.away.score) + Number(a.home.score)))[0];
         const c = HC.teamTextColors(top.away, top.home);
-        feat = `<a class="game-card" style="border:2px solid var(--accent);text-decoration:none" target="_blank" rel="noopener"
+        feat = `<a data-outcome class="game-card" style="border:2px solid var(--accent);text-decoration:none" target="_blank" rel="noopener"
             href="${HC.ytSearchURL(week, top.away.abbr, top.home.abbr)}">
           <div class="game-meta"><span class="status">🔥 Highest-scoring game</span><span>${HC.esc(HC.fmtDate(top.date))}</span></div>
           <div style="font-weight:800;font-size:1.15rem">
@@ -35,11 +40,11 @@
       box.innerHTML = feat + infos.map(g => {
         const c = HC.teamTextColors(g.away, g.home);
         const score = (g.completed || g.state === 'in') && g.away.score != null
-          ? `<span class="blur-score"> · ${HC.esc(g.away.score)}–${HC.esc(g.home.score)}</span>` : '';
+          ? `<span data-outcome class="blur-score"> · ${HC.esc(g.away.score)}–${HC.esc(g.home.score)}</span>` : '';
         const watched = HC.isWatched(g.id);
         return `<div class="game-card" style="--ga:${c.away};--gh:${c.home}">
           <div class="game-meta">
-            <span><span class="status ${HC.statusClass(g)}">${HC.esc(HC.statusLabel(g))}</span>${score}</span>
+            <span><span data-outcome class="status ${HC.statusClass(g)}">${HC.esc(HC.statusLabel(g))}</span>${score}</span>
             <span>${HC.esc(HC.fmtDate(g.date))}</span>
           </div>
           <div class="team-row"><img src="${HC.esc(g.away.logo || '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
@@ -58,16 +63,19 @@
         e.preventDefault(); e.stopPropagation();
         HC.copyLink(b.dataset.url, b);
       }));
-      document.addEventListener('hc:theme', () => load(), { once: true });
+      HC.contentReady(box);
     } catch (e) {
-      box.innerHTML = '<div class="error">Couldn’t load the games. Blame the refs.</div>';
+      if (token !== request) return;
+      box.innerHTML = '<div class="error"><p>Couldn’t load the games. Blame the refs.</p><button class="btn btn-ghost" id="retryHighlights">Try again</button></div>';
+      document.getElementById('retryHighlights').addEventListener('click', () => load());
     }
   }
 
+  document.addEventListener('hc:theme', () => { if (cached) load(true); });
   (async function init() {
-    await HC.weekOptions(sel, 4);
+    await HC.weekOptions(sel);
     sel.value = sel.options[sel.options.length - 1].value;
-    sel.addEventListener('change', load);
+    sel.addEventListener('change', () => { cached = null; load(); });
     load();
   })();
 })();

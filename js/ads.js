@@ -3,6 +3,7 @@
 (function () {
   'use strict';
   var CLIENT = 'ca-pub-1549898506474594';
+  var initialized = new WeakSet();
 
   function addRails() {
     if (!window.matchMedia || !window.matchMedia('(min-width: 1280px)').matches) return;
@@ -20,8 +21,13 @@
   function renderAds() {
     try {
       addRails();
-      if (!document.querySelector('ins.adsbygoogle')) return;
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      document.querySelectorAll('ins.adsbygoogle').forEach(function (unit) {
+        if (initialized.has(unit) || unit.hasAttribute('data-adsbygoogle-status')) return;
+        if (unit.closest('.ad-rail') && !window.matchMedia('(min-width: 1280px)').matches) return;
+        initialized.add(unit);
+        try { (window.adsbygoogle = window.adsbygoogle || []).push({}); }
+        catch (e) { initialized.delete(unit); }
+      });
     } catch (e) {}
   }
   window.HC = window.HC || {};

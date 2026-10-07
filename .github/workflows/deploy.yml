@@ -23,16 +23,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install build dependencies
+        run: npm ci
+      - name: Verify and compile styles
+        run: |
+          npm test
+          npm run build:css
+          for script in js/*.js sw.js; do node --check "$script"; done
+          python3 -m json.tool manifest.webmanifest > /dev/null
+      - name: Prepare public site
+        run: |
+          mkdir -p _site/css
+          cp *.html sw.js manifest.webmanifest favicon.svg ads.txt robots.txt sitemap.xml CNAME _site/
+          cp css/style.css css/utilities.css _site/css/
+          cp -R js icons data _site/
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Stamp build id into service worker
         # Fresh cache name per deploy -> the new worker installs on next visit
         # and no stale app shell can survive a release.
-        run: sed -i "s/__BUILD_ID__/${{ github.sha }}/" sw.js
+        run: sed -i "s/__BUILD_ID__/${{ github.sha }}/" _site/sw.js
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5

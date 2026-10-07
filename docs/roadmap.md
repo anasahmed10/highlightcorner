@@ -53,3 +53,23 @@ rather than committing this site to a new framework now.
    guide and feature dashboard so later agents see the actual implementation.
 5. Revisit priorities using owner feedback and measured failures. Keep timelines
    unset until someone explicitly commits to them.
+
+## October 6 mobile/PWA upgrade status
+
+Implementation is available in the repository. These changes cover parts of the roadmap,
+not every acceptance criterion:
+
+- **R2 — in progress:** 12-second request bound, week-discovery recovery, retry
+  on scores/highlights/fantasy, stale-response guards, and cached theme rendering.
+  Broader failure/race fixtures remain.
+- **R3 — in progress:** focused DOM and worker tests run locally and in Pages CI.
+  Full normalization/context/provider fixtures and browser smoke automation remain.
+- **R4 — in progress:** native hidden outcomes and safe matchup links replace
+  blur across sports pages. Browser accessibility-tree checks performed; manual
+  screen-reader checks and full live/pregame fixture coverage remain.
+- **R5 — in progress:** bottom tabs, modal settings, touch targets, focus states,
+  keyboard fantasy sorting, reduced-motion scrolling, safe areas, and layout
+  checks added. Full screen-reader and game-tab audit remain.
+- **R7 — in progress:** explicit public-asset artifact, successful-response-only
+  caching, cache ownership, offline query-bearing game navigation. Production
+  release/update and physical-device checks remain before marking shipped.

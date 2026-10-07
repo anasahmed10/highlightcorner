@@ -3,6 +3,33 @@
   'use strict';
   const HC = window.HC = {};
 
+  /* Shared app chrome is present before page scripts initialize preferences. */
+  const dialog = document.createElement('dialog');
+  dialog.id = 'settingsDialog';
+  dialog.setAttribute('aria-labelledby', 'settingsTitle');
+  dialog.innerHTML = `<div class="flex items-center justify-between gap-3">
+    <div><p class="eyebrow">YOUR GAME DAY</p><h2 id="settingsTitle">Make it yours</h2></div>
+    <button class="icon-button" id="closeSettings" aria-label="Close settings"><img src="icons/ui/x.svg" alt="" width="22" height="22"></button>
+    </div>
+    <div class="settings-row flex items-center justify-between gap-4"><div><strong>Appearance</strong><p>Switch between light and dark.</p></div><button class="theme-toggle">Theme</button></div>
+    <div class="settings-row flex items-center justify-between gap-4"><div><strong>Hide spoilers</strong><p>Hide scores, outcomes, recaps, and stats.</p></div><button class="spoiler-toggle" aria-pressed="false">Off</button></div>
+    <div class="settings-install"><h3>Game day, one tap away</h3><p>Add Highlight Corner to your home screen for quick access.</p>
+    <button class="btn btn-primary install-action flex items-center justify-center gap-2"><img src="icons/ui/download.svg" alt="" width="18" height="18">Add to Home Screen</button>
+    <div id="installHelp" class="install-help" tabindex="-1"><p><strong>iPhone / iPad</strong><br>Open this site in Safari. Open the Share menu, tap Add to Home Screen, then Add. Keep Open as Web App on if shown.</p><p><strong>Android</strong><br>Open your browser’s menu and choose Install app or Add to Home screen. If you’re in another app’s browser, open this site in Chrome first.</p></div>
+    </div><a class="settings-privacy" href="privacy.html">Privacy &amp; data sources →</a>`;
+  document.body.appendChild(dialog);
+  document.querySelectorAll('.settings-toggle').forEach(b => b.addEventListener('click', () => dialog.showModal()));
+  document.getElementById('closeSettings').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', e => { if (e.target === dialog) {
+    const rect = dialog.getBoundingClientRect();
+    if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) dialog.close();
+  }});
+  const promo = document.createElement('aside');
+  promo.id = 'installPromo'; promo.className = 'install-promo'; promo.hidden = true;
+  promo.setAttribute('aria-label', 'Add Highlight Corner to your home screen');
+  promo.innerHTML = `<div class="flex items-start justify-between gap-3"><div><p class="eyebrow">YOUR HOME-SCREEN HUDDLE</p><h2>Keep game day close.</h2><p>Scores, highlights, and recaps. One tap away.</p></div><button class="icon-button" id="dismissInstall" aria-label="Dismiss home-screen suggestion"><img src="icons/ui/x.svg" alt="" width="20" height="20"></button></div><button class="btn btn-primary install-action">Add to Home Screen</button>`;
+  document.querySelector('main').appendChild(promo);
+
   /* ---------- theme ---------- */
   const root = document.documentElement;
   function currentTheme() {
@@ -11,9 +38,11 @@
   }
   function applyTheme(t) {
     root.setAttribute('data-theme', t);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = t === 'dark' ? '#0e1013' : '#f6f7f9';
     try { localStorage.setItem('hc-theme', t); } catch (e) {}
     document.querySelectorAll('.theme-toggle').forEach(b => {
-      b.textContent = t === 'dark' ? '☀️' : '🌙';
+      b.textContent = t === 'dark' ? 'Dark' : 'Light';
       b.setAttribute('aria-label', t === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
     });
     document.dispatchEvent(new CustomEvent('hc:theme', { detail: t }));
@@ -29,16 +58,23 @@
 
   /* ---------- nav ---------- */
   HC.initNav = function (active) {
-    document.querySelectorAll('nav.main-nav a').forEach(a => {
-      if (a.dataset.page === active) a.classList.add('active');
+    document.querySelectorAll('nav a[data-page]').forEach(a => {
+      const on = a.dataset.page === active;
+      a.classList.toggle('active', on);
+      if (on) a.setAttribute('aria-current', 'page');
+      else a.removeAttribute('aria-current');
     });
   };
 
   /* ---------- fetch ---------- */
   HC.fetchJSON = async function (url) {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error('HTTP ' + r.status + ' for ' + url);
-    return r.json();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    try {
+      const r = await fetch(url, { signal: controller.signal });
+      if (!r.ok) throw new Error('HTTP ' + r.status + ' for ' + url);
+      return await r.json();
+    } finally { clearTimeout(timeout); }
   };
 
   /* ---------- ESPN ---------- */
@@ -143,23 +179,23 @@
 
   HC.teamTextColors = function (away, home) {
     const dark = HC.theme() === 'dark';
-    const bg = dark ? [14, 16, 19] : [246, 247, 249];
+    const bg = dark ? [23, 26, 32] : [255, 255, 255];
     function pick(team) {
       const cands = [team.color, team.altColor].map(hexToRgb).filter(Boolean);
       if (!cands.length) return dark ? [255, 255, 255] : [20, 22, 26];
       cands.sort((a, b) => contrast(b, bg) - contrast(a, bg));
-      return ensureContrast(cands[0], bg, 3.2);
+      return ensureContrast(cands[0], bg, 4.5);
     }
     let ca = pick(away), ch = pick(home);
     // matchup-aware: if the two colors look too similar, move one toward its alternate
     if (colorDist(ca, ch) < 95) {
       const altB = [home.altColor, home.color].map(hexToRgb).filter(Boolean)
-        .map(c => ensureContrast(c, bg, 3.2))
+        .map(c => ensureContrast(c, bg, 4.5))
         .sort((a, b) => colorDist(ca, b) - colorDist(ca, a))[0];
       if (altB && colorDist(ca, altB) > colorDist(ca, ch)) ch = altB;
       else {
         const altA = [away.altColor, away.color].map(hexToRgb).filter(Boolean)
-          .map(c => ensureContrast(c, bg, 3.2))
+          .map(c => ensureContrast(c, bg, 4.5))
           .sort((a, b) => colorDist(b, ch) - colorDist(a, ch))[0];
         if (altA && colorDist(altA, ch) > colorDist(ca, ch)) ca = altA;
       }
@@ -173,13 +209,17 @@
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
   HC.weekOptions = async function (selectEl, selectedWeek) {
-    const sb = await HC.scoreboard();
-    const cur = (sb.week || {}).number || 4;
+    let cur = selectedWeek || 1;
+    let verified = false;
+    try {
+      const sb = await HC.scoreboard();
+      if (Number.isInteger(sb.week?.number) && sb.week.number > 0) { cur = sb.week.number; verified = true; }
+    } catch (e) {}
     selectEl.innerHTML = '';
     for (let w = 1; w <= cur; w++) {
       const o = document.createElement('option');
-      o.value = w; o.textContent = 'Week ' + w + (w === cur ? ' (current)' : '');
-      if (w === (selectedWeek || cur)) o.selected = true;
+      o.value = w; o.textContent = 'Week ' + w + (w === cur ? (verified ? ' (current)' : ' (unverified)') : '');
+      if (w === (selectedWeek && selectedWeek <= cur ? selectedWeek : cur)) o.selected = true;
       selectEl.appendChild(o);
     }
     return cur;
@@ -189,9 +229,14 @@
   HC.statusLabel = (g) => g.state === 'in' ? '● ' + g.statusText : g.statusText;
 
   /* ---------- preferences: spoiler-free, favorites, watched (localStorage) ---------- */
+  const sessionPrefs = Object.create(null);
   const store = {
-    get(k, fb) { try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch (e) { return fb; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    get(k, fb) {
+      const fallback = Object.hasOwn(sessionPrefs, k) ? sessionPrefs[k] : fb;
+      try { const v = localStorage.getItem(k); return v == null ? fallback : JSON.parse(v); }
+      catch (e) { return fallback; }
+    },
+    set(k, v) { sessionPrefs[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   };
   HC.prefs = store;
   HC.TEAMS32 = ['ARI','ATL','BAL','BUF','CAR','CHI','CIN','CLE','DAL','DEN','DET','GB','HOU','IND','JAX','KC','LV','LAC','LAR','MIA','MIN','NE','NO','NYG','NYJ','PHI','PIT','SF','SEA','TB','TEN','WSH'];
@@ -200,10 +245,13 @@
   HC.applySpoilers = function () {
     document.documentElement.dataset.spoilers = HC.spoilersHidden() ? 'hide' : 'show';
     document.querySelectorAll('.spoiler-toggle').forEach(b => {
-      b.textContent = HC.spoilersHidden() ? '🙈' : '👁';
+      b.textContent = HC.spoilersHidden() ? 'On' : 'Off';
+      b.setAttribute('aria-pressed', String(HC.spoilersHidden()));
       b.setAttribute('aria-label', 'Spoiler-free mode ' + (HC.spoilersHidden() ? 'on' : 'off'));
       b.classList.toggle('on', HC.spoilersHidden());
     });
+    document.querySelectorAll('[data-outcome]').forEach(el => { el.hidden = HC.spoilersHidden(); });
+    document.querySelectorAll('[data-spoiler-placeholder]').forEach(el => { el.hidden = !HC.spoilersHidden(); });
   };
   HC.initPrefs = function () {
     HC.applySpoilers();
@@ -211,6 +259,7 @@
       b.addEventListener('click', () => {
         store.set('hc:spoilers', HC.spoilersHidden() ? 'show' : 'hide');
         HC.applySpoilers();
+        document.dispatchEvent(new CustomEvent('hc:spoilers'));
       }));
   };
   HC.isWatched = (id) => (store.get('hc:watched', []) || []).includes(String(id));
@@ -228,6 +277,58 @@
     store.set('hc:favorites', f);
     return f.includes(abbr);
   };
+
+  /* Installation is progressive: native prompt where supported, instructions elsewhere. */
+  let installEvent = null;
+  let installedThisSession = false;
+  const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  const installButtons = [...document.querySelectorAll('.install-action')];
+  function updateInstall() {
+    const installed = standalone() || installedThisSession;
+    installButtons.forEach(b => {
+      b.hidden = installed;
+      b.textContent = installEvent ? 'Install Highlight Corner' : 'Add to Home Screen';
+    });
+    document.getElementById('installHelp').hidden = installed;
+    if (installed) promo.hidden = true;
+  }
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); installEvent = e; updateInstall();
+  });
+  window.addEventListener('appinstalled', () => {
+    installedThisSession = true; installEvent = null; installButtons.forEach(b => { b.hidden = true; });
+    promo.hidden = true; document.getElementById('installHelp').hidden = true;
+  });
+  window.matchMedia('(display-mode: standalone)').addEventListener('change', updateInstall);
+  installButtons.forEach(b => b.addEventListener('click', async () => {
+    if (installEvent) {
+      const event = installEvent; installEvent = null;
+      installButtons.forEach(btn => { btn.disabled = true; });
+      try { await event.prompt(); await event.userChoice; }
+      catch (e) { if (!dialog.open) dialog.showModal(); }
+      finally { installButtons.forEach(btn => { btn.disabled = false; }); updateInstall(); }
+    } else {
+      if (!dialog.open) dialog.showModal();
+      document.getElementById('installHelp').focus();
+    }
+  }));
+  document.getElementById('dismissInstall').addEventListener('click', () => {
+    store.set('hc:install-dismissed', Date.now()); promo.hidden = true;
+  });
+  HC.contentReady = function (box) {
+    HC.applySpoilers();
+    if (box.id === 'games' && !standalone() && !installedThisSession && Date.now() - store.get('hc:install-dismissed', 0) > 30 * 86400000) {
+      const cards = box.querySelectorAll('.game-card');
+      if (cards.length) { cards[Math.min(2, cards.length - 1)].after(promo); promo.hidden = false; }
+    }
+  };
+  updateInstall();
+  const offlineNotice = document.createElement('p');
+  offlineNotice.className = 'spoiler-notice'; offlineNotice.setAttribute('role', 'status');
+  offlineNotice.textContent = 'You’re offline. Saved pages and recaps may be available; scores and fantasy stats need a connection.';
+  document.querySelector('main').prepend(offlineNotice);
+  const updateConnection = () => { offlineNotice.hidden = navigator.onLine; };
+  window.addEventListener('online', updateConnection); window.addEventListener('offline', updateConnection); updateConnection();
 
   /* ---------- PWA: register the service worker ---------- */
   if ('serviceWorker' in navigator) {
@@ -272,6 +373,6 @@
     b.id = 'toTop'; b.textContent = '↑'; b.setAttribute('aria-label', 'Back to top');
     document.body.appendChild(b);
     window.addEventListener('scroll', () => b.classList.toggle('show', window.scrollY > 600), { passive: true });
-    b.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    b.addEventListener('click', () => window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
   })();
 })();
