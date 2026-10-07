@@ -38,9 +38,10 @@ These instructions apply throughout this repository, regardless of agent model.
   the YouTube Data API. Keep `YOUTUBE_API_KEY` in Actions secrets; videos are
   outbound official NFL links. Advertising uses manual units, not Auto Ads. Preserve privacy links,
   `ads.txt`, and SEO/PWA assets.
-- Season handling is not automatic everywhere: fantasy hardcodes 2026. Shared
-  week discovery uses the provider current week, with a labeled unverified
-  fallback. Check these when changing time/data selection.
+- Scores, highlights and fantasy share an ESPN-discovered regular-season year
+  and week. Explicit year/week travel in game and navigation links; fantasy uses
+  the selected year. Discovery failures and unavailable weeks are labeled.
+  Check rollover and recap season fields when changing time/data selection.
 - Keep `__BUILD_ID__` in the source service worker. The Pages workflow substitutes
   the commit SHA at deployment. New shell assets may need `APP_SHELL` updates.
 

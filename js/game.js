@@ -7,6 +7,7 @@
   const params = new URLSearchParams(location.search);
   const gameId = params.get('id');
   const weekParam = params.get('week');
+  const seasonParam = params.get('season');
   let gameState = '';
   let currentTeams = null;
   let syncRecapToggle = () => {};
@@ -233,13 +234,25 @@
     };
     if (!quiet) box.innerHTML = HC.skeletons(3);
     try {
-      const [d, recaps, sb, highlightMap] = await Promise.all([
+      const [d, recaps, highlightMap] = await Promise.all([
         HC.gameSummary(gameId),
         HC.fetchJSON('data/recaps.json').catch(() => []),
-        HC.scoreboard(weekParam || undefined).catch(() => null),
         HC.fetchJSON('data/highlights.json').catch(() => null)
       ]);
       const comp = ((d.header || {}).competitions || [])[0] || {};
+      const gameDate = new Date(comp.date);
+      const dateSeason = Number.isNaN(gameDate.getTime()) ? null :
+        gameDate.getUTCFullYear() - (gameDate.getUTCMonth() < 3 ? 1 : 0);
+      const summarySeason = Number(d.header?.season?.year ?? comp.season?.year ?? dateSeason);
+      const requestedSeason = Number(seasonParam);
+      const season = Number.isInteger(requestedSeason) && requestedSeason >= 2000 && requestedSeason <= 2100
+        ? requestedSeason : summarySeason;
+      const reportedWeek = Number(d.header?.week?.number ?? comp.week?.number);
+      const requestedWeek = Number(weekParam);
+      const week = Number.isInteger(requestedWeek) && requestedWeek >= 1 && requestedWeek <= 18
+        ? requestedWeek : Number.isInteger(reportedWeek) && reportedWeek >= 1 && reportedWeek <= 18 ? reportedWeek : 1;
+      if (Number.isInteger(season) && season >= 2000 && season <= 2100) HC.setContext(season, week);
+      const sb = await HC.scoreboard(week, season || undefined).catch(() => null);
       const teams = comp.competitors || [];
       const away = teams.find(t => t.homeAway === 'away') || {};
       const home = teams.find(t => t.homeAway === 'home') || {};
@@ -251,9 +264,8 @@
         awayAbbr: (away.team || {}).abbreviation || ''
       };
       const c = HC.teamTextColors(away.team || {}, home.team || {});
-      const recap = (recaps || []).find(r => String(r.gameId) === String(gameId));
+      const recap = (recaps || []).find(r => r.season === season && String(r.gameId) === String(gameId));
       const venue = (((d.gameInfo || {}).venue) || {}).fullName || '';
-      const week = weekParam || '';
       const highlight = HC.highlightLink(highlightMap, gameId);
 
       // prev/next game within the week, ordered by kickoff (spoiler-safe: no scores)
@@ -266,7 +278,7 @@
         if (idx >= 0 && events.length > 1) {
           const lbl = e => `${e.info.away.abbr} @ ${e.info.home.abbr}`;
           const btn = (e, dir) =>
-            `<a class="btn btn-ghost game-nav-btn" href="game.html?id=${e.id}&week=${HC.esc(week)}">${dir === 'prev' ? '← ' : ''}${HC.esc(lbl(e))}${dir === 'next' ? ' →' : ''}</a>`;
+            `<a class="btn btn-ghost game-nav-btn" href="${HC.gameURL(e.id, { season, week })}">${dir === 'prev' ? '← ' : ''}${HC.esc(lbl(e))}${dir === 'next' ? ' →' : ''}</a>`;
           const prev = events[idx - 1], next = events[idx + 1];
           navHtml = (prev && next)
             ? `<nav class="game-nav" aria-label="Other games this week">${btn(prev, 'prev')}${btn(next, 'next')}</nav>`

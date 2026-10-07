@@ -64,6 +64,11 @@
       if (on) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });
+    const params = new URLSearchParams(location.search);
+    const season = Number(params.get('season'));
+    const week = Number(params.get('week'));
+    if (Number.isInteger(season) && season >= 2026 && season <= 2100 &&
+        Number.isInteger(week) && week >= 1 && week <= 18) HC.setContext(season, week);
   };
 
   /* ---------- fetch ---------- */
@@ -117,7 +122,16 @@
 
   /* ---------- ESPN ---------- */
   const SB = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard';
-  HC.scoreboard = (week) => HC.fetchJSON(week ? `${SB}?week=${week}` : SB);
+  HC.scoreboard = async (week, season) => {
+    if (!season) return HC.fetchJSON(week ? `${SB}?week=${week}` : SB);
+    const query = new URLSearchParams({ dates: String(season), seasontype: '2' });
+    if (week) query.set('week', String(week));
+    const data = await HC.fetchJSON(`${SB}?${query}`);
+    if (data.season && (Number(data.season.year) !== Number(season) || Number(data.season.type) !== 2)) {
+      throw new Error('ESPN season mismatch');
+    }
+    return data;
+  };
   HC.gameSummary = (id) => HC.fetchJSON(
     `https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=${id}`);
 
@@ -282,6 +296,97 @@
       selectEl.appendChild(o);
     }
     return cur;
+  };
+
+  /* One regular-season context shared by scores, highlights, fantasy and game links. */
+  HC.context = null;
+  HC.gameURL = (id, context = HC.context) => {
+    const query = new URLSearchParams({ id: String(id) });
+    if (context?.season) query.set('season', String(context.season));
+    if (context?.week) query.set('week', String(context.week));
+    return `game.html?${query}`;
+  };
+  HC.setContext = function (season, week, verified = true) {
+    HC.context = { season: Number(season), week: Number(week), verified };
+    document.querySelectorAll('nav a[data-page], a.brand, a.back-link[href^="index.html"]').forEach(link => {
+      const url = new URL(link.getAttribute('href'), location.href);
+      url.searchParams.set('season', String(season));
+      url.searchParams.set('week', String(week));
+      link.setAttribute('href', url.pathname.split('/').pop() + url.search);
+    });
+    if (location.pathname.endsWith('.html') && !location.pathname.endsWith('recaps.html')) {
+      const url = new URL(location.href);
+      url.searchParams.set('season', String(season));
+      url.searchParams.set('week', String(week));
+      history.replaceState(null, '', url.pathname + url.search + url.hash);
+    }
+    return HC.context;
+  };
+  HC.selectSeasonWeek = function (seasonEl, weekEl, requestedWeek) {
+    const info = HC.seasonWindow;
+    const season = Number(seasonEl.value);
+    const latest = season < info.providerSeason ? 18 : info.currentWeek;
+    const wanted = Number(requestedWeek);
+    const week = Number.isInteger(wanted) && wanted >= 1 && wanted <= latest ? wanted : latest;
+    weekEl.innerHTML = '';
+    for (let n = 1; n <= latest; n++) {
+      const option = document.createElement('option');
+      option.value = String(n);
+      option.textContent = `Week ${n}`;
+      if (n === latest && season === info.providerSeason) {
+        option.textContent += info.phase === 'upcoming' ? ' (upcoming)' :
+          info.phase === 'last' ? ' (last regular week)' :
+          info.verified ? ' (current)' : ' (unverified)';
+      }
+      if (n === week) option.selected = true;
+      weekEl.appendChild(option);
+    }
+    let notice = document.getElementById('contextNotice');
+    if (!notice && weekEl.parentNode) {
+      notice = document.createElement('span');
+      notice.id = 'contextNotice';
+      notice.className = 'context-notice';
+      notice.setAttribute('role', 'status');
+      weekEl.after(notice);
+    }
+    if (notice) {
+      const requested = requestedWeek != null && String(requestedWeek) !== '' ? String(requestedWeek) : null;
+      notice.textContent = requested && Number(requested) !== week
+        ? `Week ${requested} is not available for the ${season} regular season. Showing Week ${week}.`
+        : !info.verified ? `Season and week could not be verified. Showing Week ${week}.`
+        : info.phase === 'upcoming' && season === info.providerSeason
+          ? `${season} regular-season Week 1 is upcoming. Games and stats may not be available yet.` : '';
+      notice.hidden = !notice.textContent;
+    }
+    return HC.setContext(season, week, info.verified && season <= info.providerSeason);
+  };
+  HC.initSeasonWeek = async function (seasonEl, weekEl) {
+    let sb = null;
+    try { sb = await HC.scoreboard(); } catch (e) {}
+    const today = new Date();
+    const fallbackYear = today.getFullYear() - (today.getMonth() < 7 ? 1 : 0);
+    const reportedYear = Number(sb?.season?.year ?? sb?.leagues?.[0]?.season?.year);
+    const verified = Number.isInteger(reportedYear) && reportedYear >= 2026 && reportedYear <= 2100;
+    const providerSeason = verified ? reportedYear : fallbackYear;
+    const type = Number(sb?.season?.type ?? sb?.leagues?.[0]?.season?.type?.type);
+    const reportedWeek = Number(sb?.week?.number);
+    const regularWeek = type === 2 && Number.isInteger(reportedWeek) && reportedWeek >= 1 && reportedWeek <= 18;
+    const phase = type === 1 ? 'upcoming' : type === 3 || type === 4 ? 'last' : 'current';
+    const currentWeek = regularWeek ? reportedWeek : phase === 'last' ? 18 : 1;
+    HC.seasonWindow = { providerSeason, currentWeek, verified: verified && (regularWeek || phase !== 'current'), phase };
+    seasonEl.innerHTML = '';
+    const first = Math.min(2026, providerSeason);
+    for (let year = first; year <= providerSeason; year++) {
+      const option = document.createElement('option');
+      option.value = String(year);
+      option.textContent = `${year} regular season`;
+      seasonEl.appendChild(option);
+    }
+    const params = new URLSearchParams(location.search);
+    const requestedSeason = Number(params.get('season'));
+    const defaultSeason = phase === 'upcoming' && providerSeason > first ? providerSeason - 1 : providerSeason;
+    seasonEl.value = String(Number.isInteger(requestedSeason) && requestedSeason >= first && requestedSeason <= providerSeason ? requestedSeason : defaultSeason);
+    return HC.selectSeasonWeek(seasonEl, weekEl, params.get('week'));
   };
 
   HC.statusClass = (g) => g.state === 'in' ? 'live' : (g.completed ? 'final' : '');

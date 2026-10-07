@@ -47,6 +47,7 @@ nav.main-nav a.active { color: var(--text); background: var(--table-head); }
 .page-title { font-size: 1.5rem; margin: 18px 0 4px; letter-spacing: -.02em; }
 .page-sub { color: var(--muted); margin: 0 0 14px; font-size: .95rem; }
 .controls { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 16px; align-items: center; }
+.context-notice { flex-basis: 100%; color: var(--muted); font-size: .85rem; }
 select, .seg button {
   font-size: 1rem; padding: 10px 14px; border-radius: 12px; min-height: 44px;
   border: 1px solid var(--border); background: var(--card); color: var(--text);

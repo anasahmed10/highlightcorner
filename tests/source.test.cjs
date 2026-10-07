@@ -20,6 +20,7 @@ test('committed recaps satisfy the reader contract with unique game IDs', () => 
     assert.ok(!ids.has(recap.gameId), `duplicate game ID ${recap.gameId}`);
     ids.add(recap.gameId);
     assert.ok(Number.isInteger(recap.week) && recap.week >= 1 && recap.week <= 18);
+    assert.ok(Number.isInteger(recap.season) && recap.season >= 2026, `${recap.gameId}: season`);
     for (const key of ['awayScore', 'homeScore']) assert.ok(Number.isInteger(recap[key]) && recap[key] >= 0, `${recap.gameId}: ${key}`);
     assert.ok(['nail-biter', 'comfortable', 'garbage-time', 'blowout'].includes(recap.verdict));
     assert.notEqual(recap.away, recap.home);

@@ -17,14 +17,14 @@ break the site. Shared navigation/header markup is repeated across HTML files. N
 | `index.html` | `js/scoreboard.js` | Week selector, scores, favorites, watched filters, game and highlight links |
 | `highlights.html` | `js/highlights.js` | Legacy standalone page: matched official videos, featured completed game, copied links |
 | `fantasy.html` | `js/fantasy.js` | Weekly Sleeper leaders, scoring formats, position filters, sorting |
-| `recaps.html` | `js/recaps.js` | Stored recaps grouped by descending week |
+| `recaps.html` | `js/recaps.js` | Stored recaps grouped by descending season/week |
 | `game.html` | `js/game.js` | Matchup, weekly navigation, recap, box score, stats, fantasy, injuries |
 | `privacy.html` | Inline initialization | Privacy text and shared controls |
 | `404.html` | Inline script | Missing-page recovery and theme |
 
 `css/style.css` owns all site styles. `js/app.js` owns theme/navigation setup,
 HTTP/ESPN helpers, game normalization, formatting, colors, escaping, preferences,
-week options, clipboard feedback, skeletons, scroll-to-top, and worker registration.
+season/week context, clipboard feedback, skeletons, scroll-to-top, and worker registration.
 `js/ads.js` initializes manual advertising and desktop rails; dynamic game content
 calls `HC.renderAds()` after rendering.
 
@@ -46,25 +46,36 @@ data failures.
 
 - `HC.fetchJSON(url)` rejects non-success HTTP responses, parses JSON, and aborts after 12 seconds.
 - `HC.startVisiblePolling(callback, interval)` schedules non-overlapping updates while a page is visible, pauses its timer in a background tab, and refreshes immediately when the tab returns. Scores, Highlights, and game pages use it with a 60-second interval; the game page stops after ESPN reports the final state. Scoreboard and Highlights retain their last successful rendering when a background update fails.
-- `HC.scoreboard(week)` calls ESPN's NFL scoreboard, adding `?week=` when supplied.
-  It currently does not specify season or season type.
+- `HC.scoreboard(week, season)` calls ESPN's NFL scoreboard. With a season,
+  it sends `dates=<year>&seasontype=2&week=<n>` and rejects a response that
+  explicitly reports a different year/type.
 - `HC.gameSummary(id)` calls ESPN's summary endpoint with `?event=`.
 - `HC.gameInfo(event)` normalizes competitors into away/home, status and scores.
   ESPN game IDs become strings.
-- `HC.weekOptions(selectEl, selectedWeek)` requests the current scoreboard and
-  creates options from week 1 through the reported current week; its unverified fallback is the supplied week or week 1. A fresh visit selects the provider’s current week.
-  This is not a historical-season or postseason selector.
-- Fantasy requests `https://api.sleeper.app/v1/stats/nfl/regular/2026/{week}`.
+- `HC.initSeasonWeek(seasonEl, weekEl)` discovers the default ESPN year/type/week,
+  populates 2026-through-current regular-season years and available weeks, and
+  honors valid URL `season`/`week` parameters. `HC.selectSeasonWeek` updates the
+  shared context when the year changes; `HC.setContext` carries it through nav,
+  brand, back and game links. Future week links clamp with a visible explanation.
+  Postseason/offseason defaults to regular Week 18; preseason defaults to the
+  preceding completed season when available. Failed or incomplete discovery
+  falls back to a date-derived year and labeled unverified Week 1.
+  `HC.weekOptions` remains for older callers; new page code uses the shared
+  season/week helpers.
+- Fantasy requests `https://api.sleeper.app/v1/stats/nfl/regular/{season}/{week}`.
   It reads `pts_ppr`, `pts_half_ppr`, or `pts_std`, keeps players with at least 8
   points, and displays up to 25 per position. `TEAM_` IDs identify defenses.
+  The committed player-name map is not season-specific; past-year team labels
+  may need a refreshed historical map.
 - Game-center fantasy is calculated separately from ESPN box-score groups:
   0.04/passing yard, 4/passing TD, -2/interception, 0.1/rushing or receiving yard,
   6/rushing or receiving TD, 1/reception, -2/lost fumble, 3/field goal, 1/extra point.
   It shows up to ten players scoring more than two points. It need not match
   Sleeper's rankings or distance-based kicker scoring.
-- `game.html?id=<espnGameId>&week=<n>` identifies a game and its weekly context.
-  `id` is required; missing IDs display a recovery link. The optional week informs
-  sibling navigation. Preserve these links when editing.
+- `game.html?id=<espnGameId>&season=<year>&week=<n>` identifies a game and its
+  regular-season context. `id` is required; missing IDs display a recovery link.
+  Older ID/week URLs still load by deriving the year from the summary/date.
+  Preserve season/week in sibling navigation.
 - `HC.highlightLink(map, id)` resolves a verified game-specific link. It accepts
   direct NFL.com video pages or official NFL-channel YouTube watch URLs, rejects
   collection/search pages and unsafe destinations, and expires links after 30 days.
@@ -113,15 +124,16 @@ check newly appearing IDs and traded players.
 | Field | Current format |
 | --- | --- |
 | `gameId` | ESPN game ID string, used to join recap and game |
+| `season` | Numeric NFL regular-season year; required for archive grouping and game matching |
 | `week` | Numeric week |
 | `away`, `home` | Team abbreviations |
 | `awayScore`, `homeScore` | Numeric final scores |
 | `headline`, `recap`, `keyStat` | Plain-text strings; double newlines separate paragraphs |
 | `verdict` | `nail-biter`, `comfortable`, `garbage-time`, or `blowout` |
 
-There is no season field today. Avoid overlapping multi-season archives without
-first changing the readers and data contract. Keep IDs unique within the stored
-collection and preserve previous recaps unless replacement is explicitly requested.
+Keep IDs unique within the stored collection and preserve previous recaps unless
+replacement is explicitly requested. Readers group by season and week; recap
+preparation must include the season when adding future entries.
 
 ### Browser state
 
@@ -179,10 +191,12 @@ and direct page loads. Do not add a build system merely to deduplicate markup.
 
 ### Update season/week behavior
 
-Search for `2026`, week fallbacks, scoreboard URL construction, and highlight
-queries across page scripts. Verify ESPN and Sleeper select the same season/week.
-Do not simply change the fantasy year and assume postseason or historical support
-works. Follow the roadmap for a coordinated selection/data-contract upgrade.
+Change the shared `HC.initSeasonWeek`/`HC.setContext` path, not one page's
+provider URL in isolation. Verify ESPN and Sleeper select the same regular-season
+year/week; check postseason, offseason, preseason rollover and URL clamping.
+Keep recap `season` values and game links aligned. The generated highlight map
+is game-ID based and has its own season/week matching workflow. Postseason stats
+are not supported by the regular-season selectors.
 
 ### Refresh recaps
 
@@ -256,10 +270,11 @@ or `node --test tests/source.test.cjs`. No new dependencies are required.
   Both PR checks and Pages deployment already run `npm test`; these validations
   therefore run before the public deployment artifact is prepared.
 
-On October 7, 2026, all 67 checks passed locally. Removing stale-response guards
+On October 7, 2026, all 80 checks passed locally. Removing stale-response guards
 in temporary copies of scoreboard, highlights and fantasy made each corresponding
 race check fail. This proves regression detection without modifying site source.
-These tests pin current week behavior; coordinated season handling remains R1.
+`tests/context.test.cjs` additionally checks shared season/week requests, links,
+rollover, offseason, unavailable weeks, provider mismatch and recap grouping.
 jsdom does not verify CSS layout, screen readers, service-worker browser lifecycle,
 physical-device installation, or provider availability. Keep the manual browser
 checks below; the worker unit tests execute separately in a simulated worker context.

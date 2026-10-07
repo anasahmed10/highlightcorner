@@ -14,7 +14,7 @@ migration are outside this roadmap unless separately requested.
 
 | ID / upgrade | Why now and intended change | Acceptance criteria |
 | --- | --- | --- |
-| R1 — Coordinated season/week selection | Fantasy hardcodes 2026 while ESPN uses its default season, and week 4 fallbacks appear in several scripts. Introduce one shared season/week context, align provider requests, and handle unavailable weeks explicitly. Start with current regular-season behavior; do not claim postseason support until both providers are verified. | Scoreboard, highlights, fantasy and game links agree on selected season/week; rollover and offseason examples are checked; missing provider data is labeled honestly. Recap storage/readers distinguish seasons before retaining overlapping week archives. Existing game URLs still load. |
+| R1 — Coordinated season/week selection | Shared ESPN-discovered regular-season context now drives the score, highlight and fantasy pages. Season and week travel in navigation/game links, and recaps carry season IDs. Postseason and offseason stay on the latest regular week; preseason starts from the last completed season. | Scoreboard, highlights, fantasy and game links agree on selected season/week; rollover and offseason examples are checked; missing provider data is labeled honestly. Recap storage/readers distinguish seasons before retaining overlapping week archives. Existing game URLs still load. |
 | R2 — Resilient loading and rendering | The current implementation bounds fetches, recovers week discovery, provides retry paths on key data pages, ignores stale scoreboard/highlights responses, and avoids refetching for theme-only changes. Broaden and align protections across pages, especially week/format changes and optional data. | Blocked API/JSON, empty results, slow replies and rapid week/format/theme changes leave usable controls and resolve loading states. The most recent selection wins; optional recap/logo failures do not take down usable sports content. |
 | R3 — Meaningful regression checks | Focused DOM and service-worker tests run locally and in Pages CI, with JavaScript syntax checks and manifest parsing before deployment. Expand coverage for data normalization, context selection, preferences and failure/race behavior, plus page-level smoke checks. | Checks run locally and in CI without live providers or ad services. Cases include missing competitors, pre/live/post states, storage failures, and out-of-order responses. A real regression fails a check; source/data checks run before deployment. Document the commands and any tooling added. |
 
@@ -59,6 +59,11 @@ rather than committing this site to a new framework now.
 Implementation is available in the repository. These changes cover parts of the roadmap,
 not every acceptance criterion:
 
+- **R1 — shipped (issue #2, October 7):** explicit ESPN regular-season requests,
+  matching Sleeper year, season/week selectors and links, clamped/unverified
+  labels, and season-tagged recaps. Fixture checks cover rollover, postseason,
+  offseason, missing provider metadata and legacy game URLs. Postseason stats
+  remain outside the regular-season scope.
 - **R2 — in progress:** 12-second request bound, week-discovery recovery, retry
   on scores/highlights/fantasy, stale-response guards, and cached theme rendering.
   Broader failure/race fixtures remain.
