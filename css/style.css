@@ -270,10 +270,16 @@ body, .site-header, .game-card, .recap-card, .game-hero, table.stats, .btn-ghost
 #toTop.show { opacity: 1; pointer-events: auto; transform: none; }
 #toTop:active { transform: scale(.92); }
 
-/* sortable fantasy columns */
-th.sortable { cursor: pointer; user-select: none; -webkit-user-select: none; }
-th.sortable:hover { color: var(--text); }
-.sort-ind { font-size: .75em; margin-left: 3px; }
+/* sortable statistics columns */
+table.stats th:has(.table-sort) { padding: 0; }
+.table-sort { display: inline-flex; align-items: center; justify-content: flex-end; gap: 2px;
+  width: 100%; min-height: 44px; padding: 9px 10px; border: 0; background: none;
+  color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit;
+  text-align: inherit; cursor: pointer; white-space: nowrap; }
+table.stats th:first-child .table-sort { justify-content: flex-start; }
+.table-sort:hover { color: var(--text); }
+.table-sort:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; border-radius: 4px; }
+.sort-ind { font-size: .75em; min-width: 1em; }
 
 /* copy-link buttons */
 .copy-btn { white-space: nowrap; }

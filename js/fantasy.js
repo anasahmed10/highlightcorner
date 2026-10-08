@@ -12,44 +12,21 @@
   let players = null;
   let request = 0;
   const byPos = {};   // pos -> rows for current week/format
-  const sortState = {}; // pos -> {key:'pts'|'name', dir:1|-1}
 
   function renderTables() {
     const positions = posFilter === 'ALL' ? POSITIONS : POSITIONS.filter(([p]) => p === posFilter);
     box.innerHTML = positions.map(([pos, label]) => {
-      const st = sortState[pos] || { key: 'pts', dir: 1 };
-      const list = (byPos[pos] || []).slice().sort((a, b) =>
-        st.key === 'name' ? a.name.localeCompare(b.name) * st.dir : (b.pts - a.pts) * st.dir);
+      const list = byPos[pos] || [];
       if (!list.length) return '';
-      const ind = (key) => st.key === key ? `<span class="sort-ind">${st.dir === 1 ? '▲' : '▼'}</span>` : '';
       const trs = list.map((r, i) =>
         `<tr><td>${i + 1}</td><td class="pl">${HC.esc(r.name)} <span class="pos">${HC.esc(r.team)}</span></td>` +
         `<td>${HC.esc(statline(pos, r.s))}</td><td><strong>${r.pts.toFixed(1)}</strong></td></tr>`).join('');
-      return `<table class="stats"><caption>${label}</caption>
-        <thead><tr><th>#</th><th class="sortable" tabindex="0" data-pos="${pos}" data-sort="name">Player${ind('name')}</th>` +
-        `<th>Line</th><th class="sortable" tabindex="0" data-pos="${pos}" data-sort="pts">Pts${ind('pts')}</th></tr></thead><tbody>${trs}</tbody></table>`;
+      return `<table class="stats" data-sort-id="fantasy-${pos}" data-sort-default="3"><caption>${label}</caption>
+        <thead><tr><th data-sort-type="number">#</th><th data-sort-type="text">Player</th>` +
+        `<th data-sort-type="text">Line</th><th data-sort-type="number">Pts</th></tr></thead><tbody>${trs}</tbody></table>`;
     }).join('') || `<div class="empty">No fantasy stats available for the ${HC.context.season} regular season, Week ${HC.context.week} yet.</div>`;
-    box.querySelectorAll('th.sortable').forEach(th => {
-      const st = sortState[th.dataset.pos] || { key: 'pts', dir: 1 };
-      th.setAttribute('aria-sort', st.key !== th.dataset.sort ? 'none' : (st.key === 'name' ? (st.dir === 1 ? 'ascending' : 'descending') : (st.dir === 1 ? 'descending' : 'ascending')));
-    });
     HC.contentReady(box);
   }
-
-  box.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('th.sortable')) { e.preventDefault(); e.target.click(); } });
-  box.addEventListener('click', (e) => {
-    const th = e.target.closest('th.sortable');
-    if (!th) return;
-    const restoreFocus = document.activeElement === th;
-    const pos = th.dataset.pos, key = th.dataset.sort;
-    const cur = sortState[pos] || { key: 'pts', dir: 1 };
-    sortState[pos] = { key, dir: cur.key === key ? -cur.dir : 1 };
-    renderTables();
-    if (restoreFocus) {
-      const next = [...box.querySelectorAll('th.sortable')].find(h => h.dataset.pos === pos && h.dataset.sort === key);
-      if (next) next.focus();
-    }
-  });
 
   const FMT_KEY = { ppr: 'pts_ppr', half: 'pts_half_ppr', std: 'pts_std' };
   const POSITIONS = [
@@ -81,7 +58,7 @@
       const rows = [];
       for (const [pid, s] of Object.entries(stats)) {
         const pts = Number(s[key] || 0);
-        if (pts < 8) continue;
+        if (pts === 0 || !Number.isFinite(pts)) continue;
         let pos, name, team;
         if (pid.startsWith('TEAM_')) { pos = 'DST'; team = pid.slice(5); name = team + ' D/ST'; }
         else {
@@ -92,7 +69,7 @@
         rows.push({ pos, name, team, pts, s });
       }
       rows.sort((a, b) => b.pts - a.pts);
-      for (const p of POSITIONS) byPos[p[0]] = rows.filter(r => r.pos === p[0]).slice(0, 25);
+      for (const p of POSITIONS) byPos[p[0]] = rows.filter(r => r.pos === p[0]);
       renderTables();
     } catch (e) {
       if (token !== request) return;

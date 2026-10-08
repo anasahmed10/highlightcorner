@@ -24,7 +24,7 @@ break the site. Shared navigation/header markup is repeated across HTML files. N
 
 `css/style.css` owns all site styles. `js/app.js` owns theme/navigation setup,
 HTTP/ESPN helpers, game normalization, formatting, colors, escaping, preferences,
-season/week context, clipboard feedback, skeletons, scroll-to-top, and worker registration.
+season/week context, clipboard feedback, skeletons, sortable table behavior, scroll-to-top, and worker registration.
 `js/ads.js` initializes manual advertising and desktop rails; dynamic game content
 calls `HC.renderAds()` after rendering.
 
@@ -63,14 +63,14 @@ data failures.
   `HC.weekOptions` remains for older callers; new page code uses the shared
   season/week helpers.
 - Fantasy requests `https://api.sleeper.app/v1/stats/nfl/regular/{season}/{week}`.
-  It reads `pts_ppr`, `pts_half_ppr`, or `pts_std`, keeps players with at least 8
-  points, and displays up to 25 per position. `TEAM_` IDs identify defenses.
+  It reads `pts_ppr`, `pts_half_ppr`, or `pts_std` and shows every mapped player
+  with nonzero points, including negative scores. `TEAM_` IDs identify defenses.
   The committed player-name map is not season-specific; past-year team labels
   may need a refreshed historical map.
 - Game-center fantasy is calculated separately from ESPN box-score groups:
   0.04/passing yard, 4/passing TD, -2/interception, 0.1/rushing or receiving yard,
   6/rushing or receiving TD, 1/reception, -2/lost fumble, 3/field goal, 1/extra point.
-  It shows up to ten players scoring more than two points. It need not match
+  It shows every player with nonzero calculated points. It need not match
   Sleeper's rankings or distance-based kicker scoring.
 - `game.html?id=<espnGameId>&season=<year>&week=<n>` identifies a game and its
   regular-season context. `id` is required; missing IDs display a recovery link.
@@ -171,6 +171,11 @@ screen-reader coverage remains an accessibility follow-up.
 - New interactive controls should have clear names, visible keyboard focus,
   accessible state, and comfortable touch targets (aim for at least 44px).
   Existing controls are not uniformly audited; do not call the site fully accessible.
+- `HC.contentReady(box)` enhances `table.stats[data-sort-id]` after each render.
+  Give each table a stable ID, a `thead`, and a sort type (`text`, `number`, or
+  `clock`) on each `th`. Optional `data-sort-default` selects the initial column;
+  state remains in memory for the page session and reapplies after rerenders.
+  Keep original rank cells when sorting ranked player lists.
 - Keep skeletons, empty states, and readable error messages. A loading state must
   eventually resolve or offer recovery. Respect reduced-motion preferences when
   adding animation or scrolling behavior.
