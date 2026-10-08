@@ -120,7 +120,7 @@ tests -p 'test_highlights.py'` for the offline matcher checks.
 
 `tools/build_game_pages.py` fetches all 18 regular-season weeks from 2026
 through ESPN's current year during Pages deployment. It skips empty, unpublished
-future-season weeks, rejects contradictory season/week metadata and incomplete
+weeks only in the newest season, rejects contradictory season/week metadata and incomplete
 matchups, then writes flat `game-<id>.html` files,
 `js/game-pages.js`, and matching sitemap entries into `_site`. The source
 `js/game-pages.js` has no IDs, so a source-root preview uses legacy query links;

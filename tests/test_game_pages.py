@@ -123,3 +123,19 @@ class GamePageTests(unittest.TestCase):
                 build_game_pages.build(root, [2026, 2027], weeks=[5])
             self.assertTrue((root / "game-401872980.html").exists())
             self.assertEqual((root / "js/game-pages.js").read_text().count('401872980'), 1)
+
+    def test_missing_archived_season_fails_the_build(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "js").mkdir()
+            (root / "game.html").write_text(Path("game.html").read_text())
+            (root / "sitemap.xml").write_text(Path("sitemap.xml").read_text())
+            def schedule(url):
+                if 'dates=2027' in url:
+                    return {"events": []}
+                season = 2028 if 'dates=2028' in url else 2026
+                return {"season": {"year": season, "type": 2},
+                        "week": {"number": 5}, "events": [event(game_id=str(401872980 + season - 2026))]}
+            with patch.object(build_game_pages, "fetch_json", side_effect=schedule):
+                with self.assertRaisesRegex(RuntimeError, 'metadata unavailable'):
+                    build_game_pages.build(root, [2026, 2027, 2028], weeks=[5])
