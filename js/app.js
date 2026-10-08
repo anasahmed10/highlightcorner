@@ -479,7 +479,85 @@
   document.getElementById('dismissInstall').addEventListener('click', () => {
     store.set('hc:install-dismissed', Date.now()); promo.hidden = true;
   });
+  const tableSorts = new Map();
+  const sortValue = (cell, type) => {
+    const raw = (cell.dataset.sortValue ?? cell.textContent).trim();
+    if (type === 'text') return raw;
+    if (type === 'clock' || /^\d+:\d{2}$/.test(raw)) {
+      if (!/^\d+:\d{2}$/.test(raw)) return null;
+      const parts = raw.split(':').map(Number);
+      return parts[0] * 60 + parts[1];
+    }
+    const numbers = raw.replace(/(\d)[–-](\d)/g, '$1/$2').match(/-?\d+(?:\.\d+)?/g);
+    return numbers ? numbers.map(Number) : null;
+  };
+  const compareValues = (a, b) => {
+    if (a == null) return b == null ? 0 : 1;
+    if (b == null) return -1;
+    if (Array.isArray(a) && Array.isArray(b)) {
+      for (let i = 0; i < Math.max(a.length, b.length); i++) {
+        const diff = (a[i] ?? 0) - (b[i] ?? 0);
+        if (diff) return diff;
+      }
+      return 0;
+    }
+    return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
+  };
+  HC.sortTables = function (root) {
+    root.querySelectorAll('table.stats[data-sort-id]').forEach(table => {
+      const heads = [...table.querySelectorAll('thead th')];
+      const body = table.tBodies[0];
+      if (!body || !heads.length) return;
+      const id = table.dataset.sortId;
+      const rows = [...body.rows];
+      rows.forEach((row, index) => { row.dataset.originalOrder = String(index); });
+      const apply = () => {
+        const state = tableSorts.get(id);
+        heads.forEach((th, index) => {
+          th.setAttribute('aria-sort', state?.column === index ? (state.dir === 1 ? 'ascending' : 'descending') : 'none');
+          const indicator = th.querySelector('.sort-ind');
+          if (indicator) indicator.textContent = state?.column === index ? (state.dir === 1 ? ' ▲' : ' ▼') : '';
+        });
+        if (!state) return;
+        const type = heads[state.column]?.dataset.sortType || 'text';
+        const sorted = [...body.rows].sort((a, b) => {
+          const aValue = sortValue(a.cells[state.column], type);
+          const bValue = sortValue(b.cells[state.column], type);
+          if (aValue == null || bValue == null) {
+            if (aValue == null && bValue != null) return 1;
+            if (bValue == null && aValue != null) return -1;
+          }
+          return compareValues(aValue, bValue) * state.dir ||
+            Number(a.dataset.originalOrder) - Number(b.dataset.originalOrder);
+        });
+        body.append(...sorted);
+      };
+      heads.forEach((th, index) => {
+        const label = th.textContent.trim();
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'table-sort';
+        button.textContent = label;
+        const indicator = document.createElement('span');
+        indicator.className = 'sort-ind';
+        indicator.setAttribute('aria-hidden', 'true');
+        button.append(indicator);
+        th.replaceChildren(button);
+        button.addEventListener('click', () => {
+          const current = tableSorts.get(id);
+          const dir = current?.column === index ? -current.dir : th.dataset.sortType === 'text' ? 1 : -1;
+          tableSorts.set(id, { column: index, dir });
+          apply();
+        });
+      });
+      if (!tableSorts.has(id) && table.dataset.sortDefault != null) {
+        tableSorts.set(id, { column: Number(table.dataset.sortDefault), dir: Number(table.dataset.sortDir || -1) });
+      }
+      apply();
+    });
+  };
   HC.contentReady = function (box) {
+    HC.sortTables(box);
     HC.applySpoilers();
     if (box.id === 'games' && !standalone() && !installedThisSession && Date.now() - store.get('hc:install-dismissed', 0) > 30 * 86400000) {
       const cards = box.querySelectorAll('.game-card');

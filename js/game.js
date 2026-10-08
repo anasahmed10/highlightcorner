@@ -88,7 +88,7 @@
         (L.ry || 0) * 0.1 + (L.rtd || 0) * 6 + (L.rec || 0) * 1 +
         (L.rcy || 0) * 0.1 + (L.rctd || 0) * 6 - (L.fl || 0) * 2 +
         (L.fgm || 0) * 3 + (L.xpm || 0) * 1;
-      if (e.pts > 2) out.push(e);
+      if (e.pts !== 0) out.push(e);
     });
     return out.sort((a, b) => b.pts - a.pts);
   }
@@ -102,21 +102,21 @@
     return p.join(' · ') || '—';
   }
 
-  function playerTable(teamAbbr, teamName, group, topN, sortKey) {
+  function playerTable(teamAbbr, group, sortKey) {
     const keys = group.keys || [], labels = group.labels || [];
     const idx = keys.indexOf(sortKey);
-    const athletes = (group.athletes || [])
-      .sort((a, b) => num((b.stats || [])[idx]) - num((a.stats || [])[idx]))
-      .slice(0, topN);
+    const athletes = [...(group.athletes || [])]
+      .sort((a, b) => num((b.stats || [])[idx]) - num((a.stats || [])[idx]));
     if (!athletes.length) return '';
     const keep = labels.map((_, i) => i).filter(i => i < 6);
     const rows = athletes.map(a => {
       const cells = keep.map(i => `<td>${HC.esc((a.stats || [])[i] ?? '—')}</td>`).join('');
       return `<tr><td class="pl">${HC.esc(a.athlete.displayName)}</td>${cells}</tr>`;
     }).join('');
-    const heads = keep.map(i => `<th>${HC.esc(labels[i])}</th>`).join('');
-    return `<table class="stats"><caption>${HC.esc(teamAbbr)} ${HC.esc(group.text || '')}</caption>
-      <thead><tr><th>Player</th>${heads}</tr></thead><tbody>${rows}</tbody></table>`;
+    const heads = keep.map(i => `<th data-sort-type="number">${HC.esc(labels[i])}</th>`).join('');
+    const defaultColumn = keep.indexOf(idx) + 1;
+    return `<table class="stats" data-sort-id="box-${HC.esc(teamAbbr)}-${HC.esc(group.name)}"${defaultColumn ? ` data-sort-default="${defaultColumn}"` : ''}><caption>${HC.esc(teamAbbr)} ${HC.esc(group.text || '')}</caption>
+      <thead><tr><th data-sort-type="text">Player</th>${heads}</tr></thead><tbody>${rows}</tbody></table>`;
   }
 
   /* Injuries with team tabs (away first), same styling as the box score tabs */
@@ -167,7 +167,8 @@
         `<tr><td>${HC.esc(((p.clock || {}).displayValue) || '')}</td>
          <td class="pl"><strong>${HC.esc(((p.team || {}).abbreviation) || '')}</strong> ${HC.esc(p.text || '')}</td>
          <td>${HC.esc(p.awayScore)}–${HC.esc(p.homeScore)}</td></tr>`).join('');
-      return `<table class="stats"><caption>${label}</caption><tbody>${rows}</tbody></table>`;
+      return `<table class="stats" data-sort-id="scoring-${q}"><caption>${label}</caption>
+        <thead><tr><th data-sort-type="clock">Clock</th><th data-sort-type="text">Play</th><th data-sort-type="number">Score</th></tr></thead><tbody>${rows}</tbody></table>`;
     }).join('');
     return sections;
   }
@@ -188,10 +189,10 @@
       const abbr = abbrOf(tg);
       let tables = '';
       (tg.statistics || []).forEach(sg => {
-        if (sg.name === 'passing') tables += playerTable(abbr, '', sg, 4, 'passingYards');
-        else if (sg.name === 'rushing') tables += playerTable(abbr, '', sg, 6, 'rushingYards');
-        else if (sg.name === 'receiving') tables += playerTable(abbr, '', sg, 8, 'receivingYards');
-        else if (sg.name === 'kicking') tables += playerTable(abbr, '', sg, 2, 'fieldGoalsMade');
+        if (sg.name === 'passing') tables += playerTable(abbr, sg, 'passingYards');
+        else if (sg.name === 'rushing') tables += playerTable(abbr, sg, 'rushingYards');
+        else if (sg.name === 'receiving') tables += playerTable(abbr, sg, 'receivingYards');
+        else if (sg.name === 'kicking') tables += playerTable(abbr, sg, 'fieldGoalsMade');
       });
       return `<div class="team-pane${i === 0 ? ' active' : ''}" data-pane="${i}" role="tabpanel">
         <div class="table-wrap">${tables || '<div class="empty">No player stats yet.</div>'}</div></div>`;
@@ -217,8 +218,8 @@
     if (!rows) return '';
     const aAbbr = ((aT.team || {}).abbreviation) || 'AWAY';
     const hAbbr = ((hT.team || {}).abbreviation) || 'HOME';
-    return `<div class="table-wrap"><table class="stats">
-      <thead><tr><th>${HC.esc(aAbbr)}</th><th style="text-align:center"></th><th>${HC.esc(hAbbr)}</th></tr></thead>
+    return `<div class="table-wrap"><table class="stats" data-sort-id="team-stats">
+      <thead><tr><th data-sort-type="number">${HC.esc(aAbbr)}</th><th data-sort-type="text" style="text-align:center">Stat</th><th data-sort-type="number">${HC.esc(hAbbr)}</th></tr></thead>
       <tbody>${rows}</tbody></table></div>`;
   }
 
@@ -346,12 +347,12 @@
         if (teamBody) html += collapsible('Team Stats', teamBody, false);
 
         // fantasy leaders for this game
-        const fTop = computeFantasy(groups).slice(0, 10);
+        const fTop = computeFantasy(groups);
         if (fTop.length) {
-          const fBody = `<table class="stats"><thead><tr><th>#</th><th>Player</th><th>Line</th><th>Pts</th></tr></thead><tbody>` +
+          const fBody = `<table class="stats" data-sort-id="game-fantasy" data-sort-default="3"><thead><tr><th data-sort-type="number">#</th><th data-sort-type="text">Player</th><th data-sort-type="text">Line</th><th data-sort-type="number">Pts</th></tr></thead><tbody>` +
             fTop.map((e, i) => `<tr><td>${i + 1}</td><td class="pl">${HC.esc(e.name)} <span class="pos">${HC.esc(e.team)}</span></td><td>${HC.esc(fantasyLine(e))}</td><td><strong>${e.pts.toFixed(1)}</strong></td></tr>`).join('') +
             `</tbody></table>`;
-          html += collapsible('Top Fantasy Scorers <span class="tag">(PPR)</span>', fBody, false);
+          html += collapsible('Game Fantasy Points <span class="tag">(PPR)</span>', fBody, false);
         }
         const injBody = injuriesSection(d.injuries, away, home, c);
         if (injBody) {
