@@ -31,6 +31,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | PWA | Manifest, icons, offline shell, iOS/Android install guidance, native prompt when supported, dismissed/standalone promotion handling; physical-device installation pending |
 | Recap supporting statistics | `tools/nflverse_week.py` emits nflverse evidence for regular-season recaps; does not write recap prose |
 | Recap content port | Longer Week 4 recaps stored in `data/recaps.json`; external dashboard/refresh status is unverified |
+| Content refresh preparation | Sleeper player-map refresh and ESPN recap evidence/validation commands; editorial prose remains manual |
 | Copy-link buttons | Highlights cards (copies the matched video URL) + game pages (copies game URL), with "Copied ✓" feedback |
 | Sortable fantasy tables | Top 25 per position; sort by Player or Pts; position dropdown filter (instant, no reload) |
 | UI polish | Skeletons, motion-aware scroll-to-top, light/dark themes, three mobile tabs, Settings, focus styles, larger controls and safe-area spacing; full accessibility audit pending |
@@ -55,7 +56,7 @@ Implementation priorities live in [docs/roadmap.md](docs/roadmap.md):
 | Follow-up | Current evidence / next action |
 |---|---|
 | GitHub Pages and domain | Deployment workflow and `CNAME` are present; apex HTTPS and `www` redirect verified October 6, 2026. Domain cutover is no longer listed as pending. |
-| Weekly recap scheduler | Earlier docs described `weekly-nfl-recaps` on Tuesdays; no scheduler exists in this repository. Locate and verify the external automation before changing or relying on it. |
+| Weekly recap scheduler | No scheduler found in repository workflows or local Codex automation definitions on October 7, 2026; any external scheduler remains unverified. Editorial publishing remains manual. |
 | AdSense review | On October 7, 2026, the dashboard showed `highlightcorner.com` as “Getting ready” with review requested and Auto ads off. It showed `ads.txt` as “Not found,” though the live `/ads.txt` returned HTTP 200 with the correct publisher line; recheck after AdSense crawls the site. The payment warning conflicts with the “profile complete” tile, so verify payment readiness in the account before expecting earnings. |
 
 ## ⚠️ Standing decisions

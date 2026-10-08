@@ -87,11 +87,18 @@ verification. The automatic matcher currently supports the regular season.
 NFL.com game-specific links are also supported by the map, but NFL.com pages
 are not harvested automatically because of their terms for commercial use.
 
-Recaps require content updates. `tools/nflverse_week.py` can provide supporting
-regular-season EPA and win-probability statistics; it requires Python 3, `curl`
-and `duckdb`. It does not write finished recaps. See the maintenance guide for
-usage, data mapping, attribution and checks. Earlier docs described an external
-weekly recap automation; no scheduler or recap generator is checked into this repo.
+Content updates remain editorial. Refresh the compact Sleeper player map and
+prepare sourced ESPN game evidence with:
+
+```sh
+python3 tools/refresh_players.py --out data/players.json
+python3 tools/prepare_recaps.py --season 2026 --week 5 --out /tmp/hc-week5.json
+```
+
+The preparation tool validates existing recaps but never writes recap prose.
+`tools/nflverse_week.py` can add advanced-stat context; it requires Python 3,
+`curl`, and `duckdb`. See the maintenance guide for review and attribution.
+No recap scheduler was found in this repo or the local Codex automation list.
 
 ## Deployment
 

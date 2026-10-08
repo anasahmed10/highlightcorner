@@ -114,10 +114,12 @@ for local refresh with an environment key, and `python3 -m unittest discover -s
 tests -p 'test_highlights.py'` for the offline matcher checks.
 
 `data/players.json` is an object keyed by Sleeper player ID. Each value has `n`
-(name), `p` (position), and `t` (team). Unknown IDs are skipped by fantasy rendering.
-No player-map generator is checked in; do not claim one exists. If refreshing
-this file, document the source and method, preserve this compact shape, and
-check newly appearing IDs and traded players.
+(name), `p` (position), and `t` (team). Existing defense entries use team IDs and
+`p: DEF`; fantasy also handles `TEAM_` defense IDs separately. Unknown IDs are
+skipped by fantasy rendering. `tools/refresh_players.py` fetches Sleeper's public
+NFL player catalog, updates active QB/RB/WR/TE/K entries with valid teams, and
+retains previous IDs for historical weeks. Review added IDs, names and trades
+before committing; the tool does not publish the site.
 
 `data/recaps.json` is an array. Existing fields are:
 
@@ -200,9 +202,20 @@ are not supported by the regular-season selectors.
 
 ### Refresh recaps
 
-1. Identify the intended season/week and completed games from ESPN. Check final
-   scores, game IDs, chronology, and supporting box-score/scoring information.
-2. If advanced-stat context is needed, the optional Python tool requires Python 3,
+1. Refresh the Sleeper name map when needed with
+   `python3 tools/refresh_players.py --out data/players.json`. This merges active
+   player details into the existing map, retaining older IDs. Review its diff.
+   Source: `https://api.sleeper.app/v1/players/nfl`.
+2. Prepare the intended regular-season week with
+   `python3 tools/prepare_recaps.py --season 2026 --week 5 --out /tmp/hc-week5.json`.
+   This uses ESPN scoreboard and game-summary endpoints. Its output names those
+   sources and separates verified finals (`ready`) from incomplete or delayed
+   games (`flagged`). It validates every stored recap's season, week, ID,
+   verdict, required prose and scores, and compares the selected week with ESPN.
+   It never writes `data/recaps.json`.
+3. Review the preparation file and ESPN game pages. Check chronology and
+   supporting box-score/scoring information; do not infer missing facts.
+4. If advanced-stat context is needed, the optional Python tool requires Python 3,
    `curl`, and the third-party `duckdb` package. Use a virtual environment when
    installing it. From the repository root:
 
@@ -214,18 +227,21 @@ are not supported by the regular-season selectors.
    files older than 12 hours, and emits statistics for regular-season games. Its
    output is supporting evidence, not `data/recaps.json`. nflverse game IDs differ
    from ESPN IDs; map by season/week/matchup. Upstream data may not yet be available.
-3. Write original, multi-paragraph recaps grounded in verified facts, a headline,
+5. Write original, multi-paragraph recaps grounded in verified facts, a headline,
    supported verdict, and a sourced key statistic. Current entries are longer
    narratives; do not enforce the obsolete 150-word note in earlier documentation.
-4. Preserve the array contract and other weeks. Check numeric scores/week, unique
-   string IDs, supported verdicts, and rendering on Recaps and game pages.
-5. Preserve visible nflverse attribution when using its data. The tool identifies
+6. Preserve the array contract and other weeks. Include numeric `season` on every
+   entry. Re-run preparation for that week, then check rendering on Recaps and
+   game pages. Run `python3 -m unittest discover -s tests -p 'test_*.py'`;
+   this offline suite also runs in pull-request and Pages workflows.
+7. Preserve visible nflverse attribution when using its data. The tool identifies
    the dataset as CC-BY-4.0; verify current upstream terms for new uses.
 
 Earlier documentation described an external `weekly-nfl-recaps` Tuesday schedule.
-Only the Pages deployment workflow is present in this repository; no scheduler or
-recap-writing generator is checked in. Inspect the external automation before
-changing its schedule or promising that weekly updates are automatic.
+On October 7, 2026, no recap scheduler was found in this repository's workflows
+or the local Codex automation definitions. Its existence elsewhere remains
+unverified. Recap preparation and publishing are manual; do not promise automatic
+weekly updates.
 
 ## Local validation
 
