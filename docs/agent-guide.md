@@ -334,6 +334,13 @@ into unrelated work.
 
 ## Deployment, caching, and operational limits
 
+Requested repository changes follow the pull request and independent-review
+workflow in [AGENTS.md](../AGENTS.md). A requested change authorizes the agent
+to create and merge its PR after reviewing the full diff and confirming required
+checks, without asking the owner again. Keep unrelated work out of the PR; leave
+the PR open and report a concrete blocker when checks, protections, or review
+findings prevent a safe merge.
+
 - Remote: `https://github.com/anasahmed10/highlightcorner`; production branch `main`.
 - `.github/workflows/deploy.yml` runs on pushes to `main` and manual dispatch,
   substitutes the commit SHA for `__BUILD_ID__` in `sw.js`, after compiling utilities and running tests/syntax checks, then uploads an
