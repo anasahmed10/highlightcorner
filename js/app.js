@@ -484,6 +484,7 @@
     const raw = (cell.dataset.sortValue ?? cell.textContent).trim();
     if (type === 'text') return raw;
     if (type === 'clock' || /^\d+:\d{2}$/.test(raw)) {
+      if (!/^\d+:\d{2}$/.test(raw)) return null;
       const parts = raw.split(':').map(Number);
       return parts[0] * 60 + parts[1];
     }

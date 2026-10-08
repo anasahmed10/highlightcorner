@@ -80,3 +80,18 @@ test('shared sorting compares combined numbers and keeps missing values last aft
   control(host.querySelector('table'), 'Made/Att').click();
   assert.deepEqual(names(host.querySelector('table')), ['Charlie', 'Alpha', 'Bravo', 'Missing']);
 });
+
+test('scoring clocks keep missing values after valid plays in either direction', t => {
+  const p = page(t, 'privacy.html');
+  const host = p.doc.createElement('div');
+  p.doc.body.append(host);
+  host.innerHTML = `<table class="stats" data-sort-id="fixture-clocks"><thead><tr><th data-sort-type="clock">Clock</th></tr></thead><tbody>
+    <tr><td>8:30</td></tr><tr><td></td></tr><tr><td>12:45</td></tr>
+    </tbody></table>`;
+  p.w.HC.contentReady(host);
+  const table = host.querySelector('table');
+  control(table, 'Clock').click();
+  assert.deepEqual(names(table), ['12:45', '8:30', '']);
+  control(table, 'Clock').click();
+  assert.deepEqual(names(table), ['8:30', '12:45', '']);
+});
