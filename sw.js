@@ -6,7 +6,7 @@ const APP_SHELL = [
   './', 'index.html', 'highlights.html', 'fantasy.html', 'recaps.html',
   'game.html', 'privacy.html', '404.html',
   'css/style.css', 'css/utilities.css',
-  'js/app.js', 'js/scoreboard.js', 'js/highlights.js', 'js/fantasy.js',
+  'js/app.js', 'js/game-pages.js', 'js/scoreboard.js', 'js/highlights.js', 'js/fantasy.js',
   'js/recaps.js', 'js/game.js', 'js/ads.js',
   'manifest.webmanifest', 'favicon.svg',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',

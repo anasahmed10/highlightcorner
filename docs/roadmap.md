@@ -34,12 +34,19 @@ repeatable and expands page coverage. Do not defer verification until R3.
 | ID / upgrade | Intended change | Acceptance criteria |
 | --- | --- | --- |
 | R7 — Controlled publishing and offline behavior | Publish an explicit site-asset artifact instead of the entire repository. Check worker response caching, cache ownership and failed/offline navigation behavior while preserving commit-based shell updates. | Public pages/assets and `ads.txt` remain available; agent docs, tools and development files are excluded from the deployment artifact. Failed responses do not poison caches; unrelated caches are preserved. Warm-cache offline and new-release updates pass browser checks. |
-| R8 — Search and share quality | Review generic game-page metadata, canonical behavior, useful matchup links, sitemap entries and content discoverability. Decide whether static per-game pages are warranted before adding generation tooling. | Shared links identify the intended matchup in a crawler-visible response, not only a JavaScript-updated title. Canonicals and sitemap match valid public content; missing IDs do not masquerade as useful game content. Document the chosen approach and verify with fetched HTML plus browser checks. |
+| R8 — Search and share quality (shipped) | Review generic game-page metadata, canonical behavior, useful matchup links, sitemap entries and content discoverability. Decide whether static per-game pages are warranted before adding generation tooling. | Shared links identify the intended matchup in a crawler-visible response, not only a JavaScript-updated title. Canonicals and sitemap match valid public content; missing IDs do not masquerade as useful game content. Document the chosen approach and verify with fetched HTML plus browser checks. |
 | R9 — Measured performance and ad quality | Establish mobile performance and layout-shift baselines, examine repeated data requests and ad initialization, then target measured bottlenecks. Keep manual advertising from obstructing sports content. | Record repeatable before/after measurements on representative pages. Repeated render/theme actions do not duplicate ad setup or requests unnecessarily; blocked/empty ads remain usable. Any new tracking or consent behavior has an explicit product decision and matching privacy documentation. |
 
-R7 can follow Stage 1 sooner if publishing hygiene becomes a priority. R8 may
-require build-time generation; evaluate that as a separate implementation decision
-rather than committing this site to a new framework now.
+**R8 status — shipped (October 8, 2026):** Pages deployment generates
+regular-season matchup shells from verified ESPN weekly schedules, from 2026
+through the current year. Matchup links use those pages when present; the
+noindex legacy game URL supports old links and unknown IDs. The generated
+sitemap contains published matchup URLs. Build tests cover invalid IDs,
+provider mismatches and multi-season archives; fetched HTML and browser
+navigation were checked locally.
+
+R7 can follow Stage 1 sooner if publishing hygiene becomes a priority. R8 uses
+build-time generation without a framework migration.
 
 ## How agents use this roadmap
 

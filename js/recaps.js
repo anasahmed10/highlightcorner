@@ -24,7 +24,7 @@
           const colors = game ? HC.teamTextColors(game.away, game.home) : null;
           return `${i === 0 ? `<h2 class="section-title">${season} · Week ${week}</h2>` : ''}
           <article class="recap-card">
-            <h3 data-spoiler-placeholder hidden><a href="${HC.gameURL(r.gameId, { season, week })}">${HC.esc(r.away)} @ ${HC.esc(r.home)} — View game</a></h3>
+            <h3 data-spoiler-placeholder hidden><a href="${HC.esc(HC.gameURL(r.gameId, { season, week }))}">${HC.esc(r.away)} @ ${HC.esc(r.home)} — View game</a></h3>
             <p data-spoiler-placeholder hidden class="spoiler-notice">Recap hidden. Turn off Hide spoilers in Settings to read it.</p>
             <div data-outcome class="recap-scoreboard">
               <div class="recap-score-team"><span class="recap-score-location">Away</span><strong${colors ? ` style="color:${colors.away}"` : ''}>${HC.esc(r.away)}</strong><span class="recap-score-number">${HC.esc(r.awayScore)}</span></div>
@@ -32,7 +32,7 @@
               <div class="recap-score-team"><span class="recap-score-location">Home</span><strong${colors ? ` style="color:${colors.home}"` : ''}>${HC.esc(r.home)}</strong><span class="recap-score-number">${HC.esc(r.homeScore)}</span></div>
             </div>
             <span data-outcome class="verdict ${HC.esc(r.verdict)}">${HC.esc(String(r.verdict).replace(/-/g, ' '))}</span>
-            <h3 data-outcome><a href="${HC.gameURL(r.gameId, { season, week })}">${HC.esc(r.headline)}</a></h3>
+            <h3 data-outcome><a href="${HC.esc(HC.gameURL(r.gameId, { season, week }))}">${HC.esc(r.headline)}</a></h3>
             <div data-outcome>${HC.esc(r.recap).split('\n\n').map(x => `<p>${x}</p>`).join('')}</div>
             <div data-outcome class="keystat"><strong>Key stat:</strong> ${HC.esc(r.keyStat)}</div>
           </article>`;
