@@ -88,6 +88,10 @@ def build(output, seasons, weeks=range(1, 19)):
         for week in weeks:
             params = urllib.parse.urlencode({'dates': season, 'seasontype': 2, 'week': week})
             data = fetch_json(SCOREBOARD + '?' + params)
+            if not data.get('season') or not data.get('week'):
+                if season > 2026 and not data.get('events'):
+                    continue  # Next season's schedule may not be published yet.
+                raise RuntimeError('ESPN season/week metadata unavailable')
             if (int(data['season']['year']), int(data['season']['type']), int(data['week']['number'])) != (season, 2, week):
                 raise RuntimeError('ESPN season/week selection did not match the request')
             for event in data.get('events', []):

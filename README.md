@@ -114,8 +114,9 @@ the service-worker cache name. Keep `__BUILD_ID__` in the source `sw.js`.
 The workflow builds matchup pages from ESPN's regular-season schedules with
 `python3 tools/build_game_pages.py --out _site`. It generates seasons from 2026
 through ESPN's current year, and writes `game-<id>.html` pages, a game-ID index,
-and matching sitemap entries. The build fails if ESPN returns inconsistent
-season/week data. To preview generated links locally, prepare `_site` as the
+and matching sitemap entries. The build skips an unpublished future schedule
+and fails if ESPN returns inconsistent season/week data. To preview generated
+links locally, prepare `_site` as the
 workflow does, run that command, and serve `_site` over HTTP. A source-root
 preview uses legacy query links.
 

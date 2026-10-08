@@ -119,12 +119,15 @@ for local refresh with an environment key, and `python3 -m unittest discover -s
 tests -p 'test_highlights.py'` for the offline matcher checks.
 
 `tools/build_game_pages.py` fetches all 18 regular-season weeks from 2026
-through ESPN's current year during Pages deployment. It rejects season/week
-mismatches and incomplete matchups, then writes flat `game-<id>.html` files,
+through ESPN's current year during Pages deployment. It skips empty, unpublished
+future-season weeks, rejects contradictory season/week metadata and incomplete
+matchups, then writes flat `game-<id>.html` files,
 `js/game-pages.js`, and matching sitemap entries into `_site`. The source
 `js/game-pages.js` has no IDs, so a source-root preview uses legacy query links;
 preview `_site` to check generated pages. The generic `game.html` is `noindex`
 and omitted from the sitemap. Generated HTML has no scores or result text.
+The service worker falls back to its cached generic game shell for an unvisited
+generated URL while offline; `js/game.js` recovers its ID from the URL path.
 
 `data/players.json` is an object keyed by Sleeper player ID. Each value has `n`
 (name), `p` (position), and `t` (team). Existing defense entries use team IDs and

@@ -5,7 +5,8 @@
   const box = document.getElementById('game');
   const adBox = document.getElementById('gameAd');
   const params = new URLSearchParams(location.search);
-  const gameId = box.dataset.gameId || params.get('id');
+  const pathGameId = location.pathname.match(/\/game-([0-9]+)\.html$/)?.[1];
+  const gameId = box.dataset.gameId || params.get('id') || pathGameId;
   const weekParam = box.dataset.week || params.get('week');
   const seasonParam = box.dataset.season || params.get('season');
   let gameState = '';

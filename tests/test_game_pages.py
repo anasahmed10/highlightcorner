@@ -107,3 +107,19 @@ class GamePageTests(unittest.TestCase):
             index = (root / "js/game-pages.js").read_text()
             self.assertIn('"401872980":2026', index)
             self.assertIn('"401999999":2027', index)
+
+    def test_unpublished_future_season_does_not_block_existing_archive(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "js").mkdir()
+            (root / "game.html").write_text(Path("game.html").read_text())
+            (root / "sitemap.xml").write_text(Path("sitemap.xml").read_text())
+            def schedule(url):
+                if 'dates=2027' in url:
+                    return {"events": []}
+                return {"season": {"year": 2026, "type": 2},
+                        "week": {"number": 5}, "events": [event()]}
+            with patch.object(build_game_pages, "fetch_json", side_effect=schedule):
+                build_game_pages.build(root, [2026, 2027], weeks=[5])
+            self.assertTrue((root / "game-401872980.html").exists())
+            self.assertEqual((root / "js/game-pages.js").read_text().count('401872980'), 1)

@@ -66,6 +66,10 @@ self.addEventListener('fetch', (e) => {
     try { return await remember(cache, e.request, await fetch(e.request)); }
     catch (error) {
       if (navigation) {
+        if (/^\/game-[0-9]+\.html$/.test(url.pathname)) {
+          const gameShell = await cache.match(new URL('/game.html', url.origin).href);
+          if (gameShell) return gameShell;
+        }
         const fallback = await cache.match(new URL('/404.html', url.origin).href);
         if (fallback) return fallback;
       }
