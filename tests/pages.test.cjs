@@ -133,6 +133,13 @@ test('missing game ID gives recovery without requesting a summary', async t => {
   assert.equal(p.requests.length, 0);
 });
 
+test('offline game shell reads the ID from a generated game URL', async t => {
+  const p = page(t, 'game.html', { urlPath: 'game-1003.html' });
+  await until(() => p.doc.querySelector('.game-hero'));
+  assert.ok(p.requests.some(url => url.endsWith('/summary?event=1003')));
+  assert.equal(p.w.location.pathname, '/game-1003.html');
+});
+
 test('invalid/unavailable game summary offers recovery and resolves its skeletons', async t => {
   const p = page(t, 'game.html', { query: '?id=invalid&week=5', fetch: url => {
     if (url.pathname.endsWith('/summary')) return { ok: false, status: 404 };

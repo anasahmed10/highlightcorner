@@ -72,7 +72,7 @@
             ${highlight
               ? `<a class="btn btn-primary" href="${HC.esc(highlight.url)}" target="_blank" rel="noopener">▶ Watch highlights on ${HC.esc(highlight.source)}</a>`
               : `<p class="page-sub">${HC.esc(HC.highlightPending(links, g.completed))}</p>`}
-            <a class="btn btn-ghost" href="${HC.gameURL(g.id)}">Game page</a>
+            <a class="btn btn-ghost" href="${HC.esc(HC.gameURL(g.id))}">Game page</a>
             ${highlight ? `<button class="chip copy-btn" data-url="${HC.esc(highlight.url)}">⧉ Copy highlight link</button>` : ''}
           </div>
         </div>`;

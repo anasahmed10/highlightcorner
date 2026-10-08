@@ -301,6 +301,10 @@
   /* One regular-season context shared by scores, highlights, fantasy and game links. */
   HC.context = null;
   HC.gameURL = (id, context = HC.context) => {
+    const value = String(id);
+    if (/^[0-9]+$/.test(value) && Number(window.HC_GAME_PAGES?.[value]) === Number(context?.season)) {
+      return `game-${value}.html`;
+    }
     const query = new URLSearchParams({ id: String(id) });
     if (context?.season) query.set('season', String(context.season));
     if (context?.week) query.set('week', String(context.week));
@@ -314,7 +318,8 @@
       url.searchParams.set('week', String(week));
       link.setAttribute('href', url.pathname.split('/').pop() + url.search);
     });
-    if (location.pathname.endsWith('.html') && !location.pathname.endsWith('recaps.html')) {
+    if (location.pathname.endsWith('.html') && !location.pathname.endsWith('recaps.html') &&
+        !/\/game-[0-9]+\.html$/.test(location.pathname)) {
       const url = new URL(location.href);
       url.searchParams.set('season', String(season));
       url.searchParams.set('week', String(week));

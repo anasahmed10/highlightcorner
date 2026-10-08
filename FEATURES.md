@@ -28,6 +28,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | AdSense | Manual in-flow units use the existing Board/Game IDs; desktop rails (≥1280px) use a dedicated Rail ID. Privacy page and `ads.txt` remain in place. |
 | In-flow ad placement | The existing unit appears after five score cards, three highlight cards, or the first recap; these pages keep one stable unit across renders. Revenue impact requires AdSense reporting after ads serve. |
 | SEO basics | Meta/OG/canonical, sitemap.xml, robots.txt, favicon, 404 page |
+| Matchup sharing | Build-time regular-season game pages from 2026 through the current year expose matchup-specific HTML metadata and canonical URLs; sitemap lists only generated valid matchups, while legacy query links remain usable and noindex |
 | PWA | Manifest, icons, offline shell, iOS/Android install guidance, native prompt when supported, dismissed/standalone promotion handling; physical-device installation pending |
 | Recap supporting statistics | `tools/nflverse_week.py` emits nflverse evidence for regular-season recaps; does not write recap prose |
 | Recap content port | Longer Week 4 recaps stored in `data/recaps.json`; external dashboard/refresh status is unverified |
@@ -51,7 +52,7 @@ Implementation priorities live in [docs/roadmap.md](docs/roadmap.md):
 
 1. Reliability: broader failure recovery.
 2. Trust and usability: device/screen-reader verification, accessibility, reproducible content refresh.
-3. Release quality: deployed update verification, search/share metadata, measured performance.
+3. Release quality: deployed update verification and measured performance; matchup search/share metadata shipped.
 
 | Follow-up | Current evidence / next action |
 |---|---|

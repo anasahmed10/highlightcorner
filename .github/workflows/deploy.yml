@@ -40,7 +40,7 @@ jobs:
       - name: Verify and compile styles
         run: |
           npm test
-          python3 -m unittest discover -s tests -p 'test_highlights.py'
+          python3 -m unittest discover -s tests -p 'test_*.py'
           npm run build:css
           for script in js/*.js sw.js; do node --check "$script"; done
           python3 -m json.tool manifest.webmanifest > /dev/null
@@ -50,6 +50,8 @@ jobs:
           cp *.html sw.js manifest.webmanifest favicon.svg ads.txt robots.txt sitemap.xml CNAME _site/
           cp css/style.css css/utilities.css _site/css/
           cp -R js icons data _site/
+      - name: Build matchup pages and sitemap
+        run: python3 tools/build_game_pages.py --out _site
       - name: Refresh official game highlight links
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}

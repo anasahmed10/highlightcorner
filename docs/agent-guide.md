@@ -76,6 +76,11 @@ data failures.
   regular-season context. `id` is required; missing IDs display a recovery link.
   Older ID/week URLs still load by deriving the year from the summary/date.
   Preserve season/week in sibling navigation.
+- `game-<espnGameId>.html` is the canonical generated game page. Static HTML
+  contains the matchup, description, canonical and share tags; `js/game.js`
+  fills live details using embedded game ID, season and week. `HC.gameURL`
+  chooses that page when the published ID index matches the requested season,
+  otherwise it uses the legacy query URL. The generic `game.html` is `noindex`.
 - `HC.highlightLink(map, id)` resolves a verified game-specific link. It accepts
   direct NFL.com video pages or official NFL-channel YouTube watch URLs, rejects
   collection/search pages and unsafe destinations, and expires links after 30 days.
@@ -112,6 +117,17 @@ The matcher supports regular-season numeric weeks only; postseason titles need
 a separately verified matching contract. Run `python3 tools/refresh_highlights.py`
 for local refresh with an environment key, and `python3 -m unittest discover -s
 tests -p 'test_highlights.py'` for the offline matcher checks.
+
+`tools/build_game_pages.py` fetches all 18 regular-season weeks from 2026
+through ESPN's current year during Pages deployment. It skips empty, unpublished
+weeks only in the newest season, rejects contradictory season/week metadata and incomplete
+matchups, then writes flat `game-<id>.html` files,
+`js/game-pages.js`, and matching sitemap entries into `_site`. The source
+`js/game-pages.js` has no IDs, so a source-root preview uses legacy query links;
+preview `_site` to check generated pages. The generic `game.html` is `noindex`
+and omitted from the sitemap. Generated HTML has no scores or result text.
+The service worker falls back to its cached generic game shell for an unvisited
+generated URL while offline; `js/game.js` recovers its ID from the URL path.
 
 `data/players.json` is an object keyed by Sleeper player ID. Each value has `n`
 (name), `p` (position), and `t` (team). Existing defense entries use team IDs and

@@ -21,6 +21,12 @@ test('offline game query URLs resolve to the cached game shell', async () => {
   assert.equal(await (await response).text(), 'game shell');
 });
 
+test('offline generated game URLs resolve to the cached game shell', async () => {
+  const w = worker(); let response;
+  w.handlers.fetch({ request: { method: 'GET', mode: 'navigate', url: 'https://highlightcorner.com/game-401872980.html' }, respondWith: p => { response = p; } });
+  assert.equal(await (await response).text(), 'game shell');
+});
+
 test('worker activation preserves other apps caches', async () => {
   const w = worker(); let done;
   w.handlers.activate({ waitUntil: p => { done = p; } });

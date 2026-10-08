@@ -42,7 +42,7 @@
     const recap = recaps.find(r => r.season === HC.context.season && String(r.gameId) === g.id);
     const watched = HC.isWatched(g.id);
     const highlight = g.state === 'post' ? HC.highlightLink(highlightMap, g.id) : null;
-    return `<div class="game-card" style="--ga:${c.away};--gh:${c.home}" data-href="${HC.gameURL(g.id)}" tabindex="0" role="link"
+    return `<div class="game-card" style="--ga:${c.away};--gh:${c.home}" data-href="${HC.esc(HC.gameURL(g.id))}" tabindex="0" role="link"
         aria-label="${HC.esc(g.away.abbr)} at ${HC.esc(g.home.abbr)}">
       <div class="game-meta">
         <span ${g.state === 'pre' ? '' : 'data-outcome'} class="status ${HC.statusClass(g)}">${g.state === 'pre' ? 'Upcoming' : HC.esc(HC.statusLabel(g))}</span>
@@ -53,7 +53,7 @@
         ${recap ? `<span data-outcome class="chip"><span class="verdict ${HC.esc(recap.verdict)}" style="margin:0">${HC.esc(String(recap.verdict).replace(/-/g, ' '))}</span></span>` : ''}
         <button class="chip watched-toggle" data-id="${g.id}">${watched ? '✓ Watched' : 'Mark watched'}</button>
         <span class="card-actions">
-          <a class="chip" href="${HC.gameURL(g.id)}">View game →</a>
+          <a class="chip" href="${HC.esc(HC.gameURL(g.id))}">View game →</a>
           ${highlight ? `<a class="chip highlight-link" href="${HC.esc(highlight.url)}" target="_blank" rel="noopener noreferrer" aria-label="View Highlights on ${HC.esc(highlight.source)} for ${HC.esc(g.away.abbr)} at ${HC.esc(g.home.abbr)}">View Highlights</a>` : ''}
         </span>
       </div>

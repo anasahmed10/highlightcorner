@@ -39,7 +39,8 @@ preview origin's cache in browser developer tools.
 | `highlights.html` | Legacy standalone page for matched official game videos and copied links |
 | `fantasy.html` | Weekly leaders by position, scoring format and sortable tables |
 | `recaps.html` | Original recaps grouped by season and week |
-| `game.html?id=<espnGameId>&season=<year>&week=<n>` | Game center and previous/next weekly navigation; older ID/week links still load |
+| `game-<espnGameId>.html` (generated at deployment) | Matchup-specific game center and share metadata |
+| `game.html?id=<espnGameId>&season=<year>&week=<n>` | Legacy game links and fallback for IDs without a generated page |
 | `privacy.html` | Privacy disclosures |
 | `404.html` | Missing-page recovery |
 
@@ -109,6 +110,16 @@ The production branch is `main`.
 GitHub Pages on pushes to `main` or manual dispatch. It stamps the commit SHA into
 the service-worker cache name. Keep `__BUILD_ID__` in the source `sw.js`.
 `CNAME` declares `highlightcorner.com`; GitHub hosting was verified October 6, 2026.
+
+The workflow builds matchup pages from ESPN's regular-season schedules with
+`python3 tools/build_game_pages.py --out _site`. It generates seasons from 2026
+through ESPN's current year, and writes `game-<id>.html` pages, a game-ID index,
+and matching sitemap entries. The build skips an unpublished future schedule
+and fails if ESPN returns inconsistent season/week data. To preview generated
+links locally, prepare `_site` as the
+workflow does, run that command, and serve `_site` over HTTP. A source-root
+preview uses legacy query links.
+
 The ignored `.vercel/` folder is historical deployment output.
 
 The Pages workflow runs regression checks, syntax checks, and the Tailwind build,

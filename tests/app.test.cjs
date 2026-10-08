@@ -40,6 +40,15 @@ test('fresh week selection uses the provider current week', async () => {
   dom.window.close();
 });
 
+test('game links use generated matchup pages only for matching season and published IDs', () => {
+  const dom = app();
+  dom.window.HC_GAME_PAGES = { '401872980': 2026 };
+  assert.equal(dom.window.HC.gameURL('401872980', { season: 2026, week: 5 }), 'game-401872980.html');
+  assert.equal(dom.window.HC.gameURL('unknown', { season: 2026, week: 5 }), 'game.html?id=unknown&season=2026&week=5');
+  assert.equal(dom.window.HC.gameURL('401872980', { season: 2027, week: 6 }), 'game.html?id=401872980&season=2027&week=6');
+  dom.window.close();
+});
+
 test('visible polling pauses in the background and refreshes when the page returns', async () => {
   const dom = app();
   const w = dom.window;

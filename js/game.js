@@ -5,9 +5,10 @@
   const box = document.getElementById('game');
   const adBox = document.getElementById('gameAd');
   const params = new URLSearchParams(location.search);
-  const gameId = params.get('id');
-  const weekParam = params.get('week');
-  const seasonParam = params.get('season');
+  const pathGameId = location.pathname.match(/\/game-([0-9]+)\.html$/)?.[1];
+  const gameId = box.dataset.gameId || params.get('id') || pathGameId;
+  const weekParam = box.dataset.week || params.get('week');
+  const seasonParam = box.dataset.season || params.get('season');
   let gameState = '';
   let currentTeams = null;
   let syncRecapToggle = () => {};
@@ -279,7 +280,7 @@
         if (idx >= 0 && events.length > 1) {
           const lbl = e => `${e.info.away.abbr} @ ${e.info.home.abbr}`;
           const btn = (e, dir) =>
-            `<a class="btn btn-ghost game-nav-btn" href="${HC.gameURL(e.id, { season, week })}">${dir === 'prev' ? '← ' : ''}${HC.esc(lbl(e))}${dir === 'next' ? ' →' : ''}</a>`;
+            `<a class="btn btn-ghost game-nav-btn" href="${HC.esc(HC.gameURL(e.id, { season, week }))}">${dir === 'prev' ? '← ' : ''}${HC.esc(lbl(e))}${dir === 'next' ? ' →' : ''}</a>`;
           const prev = events[idx - 1], next = events[idx + 1];
           navHtml = (prev && next)
             ? `<nav class="game-nav" aria-label="Other games this week">${btn(prev, 'prev')}${btn(next, 'next')}</nav>`
