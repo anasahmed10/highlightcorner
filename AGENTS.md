@@ -55,6 +55,22 @@ These instructions apply throughout this repository, regardless of agent model.
   ships, and roadmap status when an upgrade's acceptance criteria are met.
 - Report what changed, what was checked, and any checks unavailable or failing.
   Do not claim tests passed when they were not run.
-- A push to `main` triggers production deployment. Commit, push, or publish only
-  within the user's authorized scope. Do not change DNS or external account
-  settings as part of an ordinary code edit.
+- A push to `main` triggers production deployment. Do not change DNS or external
+  account settings as part of an ordinary code edit.
+
+## Pull request and merge workflow
+
+- For requested repository changes, create a focused branch and pull request.
+  Include only the work authorized by the user; preserve unrelated working-tree
+  changes. The user's request to make the change authorizes committing, pushing,
+  opening the PR, and merging it through this workflow without another approval.
+- Before merging, review the PR as if another agent wrote it: inspect the complete
+  diff against the base branch, look for correctness, regressions, security and
+  privacy issues, and check that the stated tests and documentation match the
+  change. Fix findings and review the updated diff again.
+- Wait for required CI checks to pass. Merge only when the review is satisfactory
+  and branch protection permits it. Do not bypass failed checks or protections.
+  If the PR cannot be safely merged, report the concrete blocker and leave it open.
+- After merging, confirm the merge result and, for site changes, the Pages
+  deployment and affected live pages. Report the PR link, review findings, checks,
+  merge status, and any deployment limits.
