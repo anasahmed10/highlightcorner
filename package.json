@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build:css": "tailwindcss -i css/tailwind.css -o css/utilities.css --minify",
-    "test": "node --test tests/*.test.cjs"
+    "test": "node --test tests/*.test.cjs && python3 -m unittest discover -s tests -p 'test_content_refresh.py'"
   },
   "devDependencies": {
     "@tailwindcss/cli": "4.3.0",
