@@ -11,6 +11,7 @@ from urllib.request import urlopen
 
 SOURCE = "https://api.sleeper.app/v1/players/nfl"
 POSITIONS = {"QB", "RB", "WR", "TE", "K"}
+TEAMS = set("ARI ATL BAL BUF CAR CHI CIN CLE DAL DEN DET GB HOU IND JAX KC LAC LAR LV MIA MIN NE NO NYG NYJ PHI PIT SEA SF TB TEN WAS WSH".split())
 
 
 def build_map(source, existing):
@@ -25,19 +26,28 @@ def build_map(source, existing):
             continue
         if str(player.get("player_id", player_id)) != player_id:
             continue
-        if not player.get("active") or player.get("position") not in POSITIONS:
+        if not player.get("active") or not isinstance(player.get("position"), str) or player["position"] not in POSITIONS:
             continue
-        name = player.get("full_name") or " ".join(filter(None, (player.get("first_name"), player.get("last_name"))))
+        name = player.get("full_name")
+        if not name:
+            parts = (player.get("first_name"), player.get("last_name"))
+            if not all(part is None or isinstance(part, str) for part in parts):
+                continue
+            name = " ".join(part for part in parts if part)
         team = player.get("team")
-        if not isinstance(name, str) or not name.strip() or not isinstance(team, str) or not team.isalpha() or not 2 <= len(team) <= 3:
+        if not isinstance(name, str) or not name.strip() or not isinstance(team, str) or team.upper() not in TEAMS:
             continue
         result[player_id] = {"n": name.strip(), "p": player["position"], "t": team.upper()}
         refreshed += 1
     if refreshed < 100:
         raise ValueError("Too few eligible active players; refusing to replace the map")
     for player_id, info in result.items():
-        defense = isinstance(info, dict) and player_id.isalpha() and info.get("p") == "DEF" and info.get("t") == player_id
-        if not (player_id.isdigit() or defense) or not isinstance(info, dict) or set(info) != {"n", "p", "t"}:
+        if not isinstance(player_id, str) or not isinstance(info, dict) or set(info) != {"n", "p", "t"}:
+            raise ValueError(f"Invalid player entry: {player_id}")
+        defense = player_id in TEAMS and info["p"] == "DEF" and info["t"] == player_id
+        player = player_id.isascii() and player_id.isdigit() and isinstance(info["p"], str) and info["p"] in POSITIONS
+        if (not (player or defense) or not isinstance(info["n"], str) or not info["n"].strip() or
+                not isinstance(info["t"], str) or info["t"] not in TEAMS):
             raise ValueError(f"Invalid player entry: {player_id}")
     return dict(sorted(result.items(), key=lambda item: (not item[0].isdigit(), int(item[0]) if item[0].isdigit() else item[0]))), refreshed
 
