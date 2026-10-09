@@ -10,9 +10,16 @@
   let cached = null;
   let cachedLinks = null;
   let request = 0;
+  let loading = false;
+  const status = document.createElement('p');
+  status.className = 'page-sub';
+  status.setAttribute('role', 'status');
+  box.before(status);
 
   async function load(renderOnly = false, quiet = false) {
-    const token = ++request;
+    if (quiet && loading) return;
+    const token = renderOnly ? request : ++request;
+    if (!renderOnly) loading = true;
     const week = parseInt(sel.value, 10) || 1;
     HC.setContext(seasonSel.value, week, HC.seasonWindow.verified);
     if (!quiet) {
@@ -26,6 +33,8 @@
         useCache ? cachedLinks : HC.fetchJSON('data/highlights.json').catch(() => null)
       ]);
       if (token !== request) return;
+      loading = false;
+      status.textContent = '';
       cached = sb;
       cachedLinks = links;
       const events = sb.events || [];
@@ -86,6 +95,8 @@
       HC.contentReady(box);
     } catch (e) {
       if (token !== request) return;
+      loading = false;
+      if (quiet && cached) status.textContent = 'Couldn’t refresh — showing the last update';
       if (!quiet || !cached) {
         lead.innerHTML = '<div class="error"><p>Couldn’t load the games. Blame the refs.</p><button class="btn btn-ghost" id="retryHighlights">Try again</button></div>';
         rest.innerHTML = '';
@@ -94,7 +105,7 @@
     }
   }
 
-  document.addEventListener('hc:theme', () => { if (cached) load(true); });
+  document.addEventListener('hc:theme', () => { if (cached && !loading) load(true); });
   (async function init() {
     await HC.initSeasonWeek(seasonSel, sel);
     sel.addEventListener('change', () => { cached = null; load(); });

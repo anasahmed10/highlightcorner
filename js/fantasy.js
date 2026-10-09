@@ -11,9 +11,12 @@
   let posFilter = 'ALL';
   let players = null;
   let request = 0;
+  let loading = false;
+  let statsReady = false;
   const byPos = {};   // pos -> rows for current week/format
 
   function renderTables() {
+    if (loading || !statsReady) return;
     const positions = posFilter === 'ALL' ? POSITIONS : POSITIONS.filter(([p]) => p === posFilter);
     box.innerHTML = positions.map(([pos, label]) => {
       const list = byPos[pos] || [];
@@ -49,14 +52,23 @@
     const week = parseInt(sel.value, 10) || 1;
     HC.setContext(seasonSel.value, week, HC.seasonWindow.verified);
     const season = HC.context.season;
+    loading = true;
+    statsReady = false;
+    for (const [position] of POSITIONS) byPos[position] = [];
     box.innerHTML = HC.skeletons(3);
     try {
-      if (!players) players = await HC.fetchJSON('data/players.json');
+      if (!players) {
+        const map = await HC.fetchJSON('data/players.json');
+        if (!map || typeof map !== 'object' || Array.isArray(map)) throw new Error('Invalid player map');
+        players = map;
+      }
       const stats = await HC.fetchJSON(`https://api.sleeper.app/v1/stats/nfl/regular/${season}/${week}`);
       if (token !== request) return;
+      if (!stats || typeof stats !== 'object' || Array.isArray(stats)) throw new Error('Invalid fantasy stats');
       const key = FMT_KEY[fmt];
       const rows = [];
       for (const [pid, s] of Object.entries(stats)) {
+        if (!s || typeof s !== 'object') continue;
         const pts = Number(s[key] || 0);
         if (pts === 0 || !Number.isFinite(pts)) continue;
         let pos, name, team;
@@ -70,9 +82,12 @@
       }
       rows.sort((a, b) => b.pts - a.pts);
       for (const p of POSITIONS) byPos[p[0]] = rows.filter(r => r.pos === p[0]);
+      loading = false;
+      statsReady = true;
       renderTables();
     } catch (e) {
       if (token !== request) return;
+      loading = false;
       box.innerHTML = '<div class="error">Couldn’t load fantasy stats. Your quarterback isn’t the only one having a rough week.<p><button class="btn btn-ghost" id="retryFantasy">Try again</button></p></div>';
       document.getElementById('retryFantasy').addEventListener('click', load);
     }

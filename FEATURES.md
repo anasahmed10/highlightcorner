@@ -10,6 +10,9 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 
 ## ✅ Shipped
 
+- **Resilient data recovery (R2):** retries on all data pages, malformed optional
+  recap isolation, pending fantasy filter protection, and labeled retained live updates.
+
 | Feature | Notes |
 |---|---|
 | Weekly scoreboard | ESPN data, current-week selection, day grouping, pregame labels without implied 0–0 results, Refresh and labeled updated time; stale responses are ignored; visible pages refresh live scores every minute and pause in the background |

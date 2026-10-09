@@ -39,7 +39,7 @@
 
   function cardHTML(g) {
     const c = HC.teamTextColors(g.away, g.home);
-    const recap = recaps.find(r => r.season === HC.context.season && String(r.gameId) === g.id);
+    const recap = recaps.find(r => r?.season === HC.context.season && String(r.gameId) === g.id);
     const watched = HC.isWatched(g.id);
     const highlight = g.state === 'post' ? HC.highlightLink(highlightMap, g.id) : null;
     return `<div class="game-card" style="--ga:${c.away};--gh:${c.home}" data-href="${HC.esc(HC.gameURL(g.id))}" tabindex="0" role="link"
@@ -105,6 +105,7 @@
   }
 
   async function load(quiet = false) {
+    if (quiet && loading) return;
     const token = ++request;
     const week = parseInt(sel.value, 10) || 1;
     HC.setContext(seasonSel.value, week, HC.seasonWindow.verified);
@@ -138,11 +139,11 @@
         freshness.textContent = navigator.onLine ? 'Scores unavailable' : 'You’re offline';
         lead.innerHTML = '<div class="error"><p>Couldn’t load scores. Try again when you’re connected.</p><button class="btn btn-ghost" id="retryScores">Try again</button></div>';
         rest.innerHTML = '';
-        document.getElementById('retryScores').addEventListener('click', load);
+        document.getElementById('retryScores').addEventListener('click', () => load());
       }
     } finally { if (token === request && !quiet) refresh.disabled = false; }
   }
-  refresh.addEventListener('click', load);
+  refresh.addEventListener('click', () => load());
   document.addEventListener('hc:theme', render);
   document.addEventListener('hc:spoilers', render);
 
@@ -153,10 +154,13 @@
   }));
 
   (async function init() {
-    try { recaps = await HC.fetchJSON('data/recaps.json'); } catch (e) { recaps = []; }
-    await HC.initSeasonWeek(seasonSel, sel);
+    const [stored] = await Promise.all([
+      HC.fetchJSON('data/recaps.json').catch(() => []),
+      HC.initSeasonWeek(seasonSel, sel)
+    ]);
+    recaps = Array.isArray(stored) ? stored : [];
     document.querySelectorAll("#filterRow button").forEach(b => b.setAttribute("aria-pressed", String(b.classList.contains("active"))));
-    sel.addEventListener('change', load);
+    sel.addEventListener('change', () => load());
     seasonSel.addEventListener('change', () => { HC.selectSeasonWeek(seasonSel, sel); load(); });
     renderFavGrid();
     load();

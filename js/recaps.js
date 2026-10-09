@@ -6,11 +6,16 @@
   const lead = document.getElementById('recapsLead');
   const rest = document.getElementById('recapsRest');
 
-  (async function init() {
+  async function load() {
     lead.innerHTML = HC.skeletons(4);
     try {
       const recaps = await HC.fetchJSON('data/recaps.json');
-      if (!recaps.length) throw new Error('empty');
+      if (!Array.isArray(recaps)) throw new Error('Invalid recap archive');
+      if (!recaps.length) {
+        lead.innerHTML = '<div class="empty">Recaps are still being written — good jokes take a minute.</div>';
+        rest.innerHTML = '';
+        return;
+      }
       const weeks = [...new Map(recaps.map(r => [`${r.season}-${r.week}`, { season: r.season, week: r.week }])).values()]
         .sort((a, b) => b.season - a.season || b.week - a.week);
       const gamesById = new Map();
@@ -42,8 +47,10 @@
       rest.innerHTML = entries.slice(1).join('');
       HC.contentReady(box);
     } catch (e) {
-      lead.innerHTML = '<div class="empty">Recaps are still being written — good jokes take a minute.</div>';
+      lead.innerHTML = '<div class="error"><p>Couldn’t load recaps. Try again when you’re connected.</p><button class="btn btn-ghost" id="retryRecaps">Try again</button></div>';
       rest.innerHTML = '';
+      document.getElementById('retryRecaps').addEventListener('click', load);
     }
-  })();
+  }
+  load();
 })();
