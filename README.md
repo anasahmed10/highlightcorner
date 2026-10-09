@@ -96,10 +96,13 @@ python3 tools/refresh_players.py --out data/players.json
 python3 tools/prepare_recaps.py --season 2026 --week 5 --out /tmp/hc-week5.json
 ```
 
-The preparation tool validates existing recaps but never writes recap prose.
+The preparation tool validates existing recaps, checks final summary teams/scores,
+and records source URLs and fetch time. It rejects duplicate game IDs and refuses
+to overwrite editorial recap archives. It never writes recap prose.
 `tools/nflverse_week.py` can add advanced-stat context; it requires Python 3,
 `curl`, and `duckdb`. See the maintenance guide for review and attribution.
-No recap scheduler was found in this repo or the local Codex automation list.
+No Highlight Corner recap scheduler was found in this repo or the local Codex
+automation definitions on October 9, 2026.
 
 ## Deployment
 

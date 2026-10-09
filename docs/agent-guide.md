@@ -225,7 +225,9 @@ are not supported by the regular-season selectors.
 
 1. Refresh the Sleeper name map when needed with
    `python3 tools/refresh_players.py --out data/players.json`. This merges active
-   player details into the existing map, retaining older IDs. Review its diff.
+   player details into the existing map, retaining older IDs. Invalid names,
+   positions, teams, and small upstream responses are rejected before writing.
+   Review its diff.
    Source: `https://api.sleeper.app/v1/players/nfl`.
 2. Prepare the intended regular-season week with
    `python3 tools/prepare_recaps.py --season 2026 --week 5 --out /tmp/hc-week5.json`.
@@ -233,7 +235,10 @@ are not supported by the regular-season selectors.
    sources and separates verified finals (`ready`) from incomplete or delayed
    games (`flagged`). It validates every stored recap's season, week, ID,
    verdict, required prose and scores, and compares the selected week with ESPN.
-   It never writes `data/recaps.json`.
+   It refuses to write to the input archive or production `data/recaps.json`.
+   Evidence includes a UTC fetch timestamp and each game-summary source URL.
+   A final summary must agree on both teams and scores; a stale nonfinal
+   summary is flagged. ESPN game IDs must be unique across the full archive.
 3. Review the preparation file and ESPN game pages. Check chronology and
    supporting box-score/scoring information; do not infer missing facts.
 4. If advanced-stat context is needed, the optional Python tool requires Python 3,
@@ -254,12 +259,13 @@ are not supported by the regular-season selectors.
 6. Preserve the array contract and other weeks. Include numeric `season` on every
    entry. Re-run preparation for that week, then check rendering on Recaps and
    game pages. Run `python3 -m unittest discover -s tests -p 'test_*.py'`;
-   this offline suite also runs in pull-request and Pages workflows.
+   content-refresh checks run through `npm test` in pull-request and Pages
+   workflows. Run the broader Python suite locally for content-tool changes.
 7. Preserve visible nflverse attribution when using its data. The tool identifies
    the dataset as CC-BY-4.0; verify current upstream terms for new uses.
 
 Earlier documentation described an external `weekly-nfl-recaps` Tuesday schedule.
-On October 7, 2026, no recap scheduler was found in this repository's workflows
+On October 9, 2026, no Highlight Corner recap scheduler was found in this repository's workflows
 or the local Codex automation definitions. Its existence elsewhere remains
 unverified. Recap preparation and publishing are manual; do not promise automatic
 weekly updates.
@@ -452,3 +458,16 @@ restored to its original off state. This is not a completed spoken-output audit:
 issue #6 remains open until a human checks tab names/selection, sort announcements,
 dialog focus and spoiler hiding with a screen reader. Physical iOS/Android
 installation also remains unverified, as tracked by the PWA follow-up.
+
+### Content-refresh verification (R6, October 9, 2026)
+
+The tools from PR #22 were rechecked and hardened. Live ESPN Week 4 preparation
+returned 16 verified finals and no flagged games; the ongoing Week 5 returned
+one verified final and 14 upcoming games flagged as not final. A live Sleeper refresh produced
+915 mapped entries in a temporary file, retaining historical IDs and defenses.
+These checks did not publish supporting facts or replace editorial recaps.
+Regression checks reject mismatched summary teams, nonfinal summaries, duplicate
+IDs across weeks, malformed preserved player fields, and recap output-path
+collisions. Repository workflows and local Codex automation definitions were
+inspected; no Highlight Corner recap-writing scheduler was found. This does not
+verify schedulers hosted elsewhere. Editorial preparation/review remains manual.
