@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "None",
+    "lib": ["ES2022", "WebWorker"],
+    "strict": true,
+    "noEmitOnError": true,
+    "rootDir": "src/worker",
+    "outDir": ".",
+    "skipLibCheck": true
+  },
+  "include": ["src/worker/**/*.ts"],
+  "exclude": ["node_modules"]
+}
