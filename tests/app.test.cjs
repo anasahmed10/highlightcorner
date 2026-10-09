@@ -89,6 +89,34 @@ test('mobile and desktop nav expose current-page state, settings has install hel
   dom.window.close();
 });
 
+test('manual home-screen action reveals instructions from settings and promotion', () => {
+  const dom = app();
+  const doc = dom.window.document;
+  const help = doc.getElementById('installHelp');
+  const settingsAction = doc.querySelector('#settingsDialog .install-action');
+  const promoAction = doc.getElementById('installPromoAction');
+  assert.equal(help.hidden, true);
+  assert.match(settingsAction.textContent, /Show home screen steps/);
+  doc.querySelector('.settings-toggle').click();
+  settingsAction.click();
+  assert.equal(help.hidden, false);
+  assert.equal(settingsAction.getAttribute('aria-expanded'), 'true');
+  assert.equal(doc.activeElement, help);
+  assert.match(help.textContent, /More, then Share/);
+  assert.match(help.textContent, /Edit Actions/);
+
+  settingsAction.click();
+  assert.equal(help.hidden, true);
+  assert.equal(settingsAction.getAttribute('aria-expanded'), 'false');
+
+  doc.getElementById('settingsDialog').close();
+  promoAction.click();
+  assert.equal(doc.getElementById('settingsDialog').open, true);
+  assert.equal(help.hidden, false);
+  assert.equal(doc.activeElement, help);
+  dom.window.close();
+});
+
 test('installation calls the browser prompt only on user action and consumes it once', async () => {
   const dom = app();
   const w = dom.window;
