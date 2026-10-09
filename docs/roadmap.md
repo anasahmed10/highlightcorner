@@ -85,9 +85,12 @@ not every acceptance criterion:
 - **R4 — in progress:** native hidden outcomes and safe matchup links replace
   blur across sports pages. Browser accessibility-tree checks performed; manual
   screen-reader checks and full live/pregame fixture coverage remain.
-- **R5 — in progress:** bottom tabs, modal settings, touch targets, focus states,
-  keyboard fantasy sorting, reduced-motion scrolling, safe areas, and layout
-  checks added. Full screen-reader and game-tab audit remain.
+- **R5 — in progress (October 9, 2026):** named/linked game tab panels, roving
+  arrow/Home/End navigation, stable focus through rerenders, pressed watched
+  controls and live sort announcements are implemented. Browser keyboard,
+  light/dark, reduced-motion and 320/390/768/1440px checks pass. Native VoiceOver
+  was started, but its spoken/caption output could not be observed through the
+  available automation; manual spoken-output verification remains required.
 - **R7 — in progress:** explicit public-asset artifact, successful-response-only
   caching, cache ownership, offline query-bearing game navigation. Production
   release/update and physical-device checks remain before marking shipped.

@@ -427,3 +427,28 @@ header status is absent, as in current ESPN responses.
 Run `node --test tests/reliability.test.cjs tests/sports.test.cjs` for focused
 failure and race checks. Browser validation used real ESPN data plus blocked
 requests and retry recovery; fixture data remains isolated from production.
+
+### Accessibility audit (R5, October 9, 2026)
+
+`HC.initTabs` links each team tab to its named panel, keeps one tab in the tab
+order, and activates with Left/Right (wrapping), Home and End. Inactive panels
+use native `hidden`. `HC.captureFocus` restores stable control identities after
+synchronous rerenders without scrolling. Game polling preserves changes made
+while the request is pending and identifies sections/groups by stable names.
+Sorting describes the next action on the button, exposes the current direction
+on the heading, and announces table/column/direction in a polite live region.
+
+Verification: all seven public pages had no page overflow at 320, 390, 768 and
+1440px in the browser. Game tabs, sorting, Settings Escape/focus return, light
+and dark themes, and reduced-motion animation/transition suppression were
+checked. Regression tests cover tab/panel associations, one tab stop,
+arrow/Home/End wrapping, pressed states, focus restoration, live sort messages
+and tab changes during pending updates. Primary compact controls aim for 44px
+targets; inline prose links retain their normal text layout.
+
+Native Chrome/VoiceOver was started for the manual screen-reader check, but the
+automation could not expose VoiceOver's spoken/caption output. VoiceOver was
+restored to its original off state. This is not a completed spoken-output audit:
+issue #6 remains open until a human checks tab names/selection, sort announcements,
+dialog focus and spoiler hiding with a screen reader. Physical iOS/Android
+installation also remains unverified, as tracked by the PWA follow-up.
