@@ -29,14 +29,18 @@ python3 -m http.server 8080
 Open `http://localhost:8080`. Committed JavaScript and styles work immediately
 without installing anything. Browser TypeScript lives in `src/browser/` and the
 service worker source lives in `src/worker/sw.ts`. After editing either, use
-Node 24+ and run `npm ci` then `npm run build:js`; commit the generated `js/`
-files and `sw.js` with the source. `npm run check:js` checks types without
-writing output. When editing Tailwind utility classes, run `npm run build:css`
-and commit the generated `css/utilities.css`.
-`npm test` runs fixture-based JavaScript page, data-contract, DOM and worker
-checks, followed by Python content-refresh tests. It requires Node 24+, Python 3
-and `npm ci`. Run `python3 -m unittest discover -s tests -p 'test_*.py'` for
-all Python tools, including highlight matching and matchup-page generation.
+Node 24+ and run `npm ci` then `npm run build:js`; commit the generated `js/*.js`
+and `sw.js` with the source. `npm run check:js` checks both strict TypeScript
+projects without writing output. HTML loads the compiled JavaScript in its
+existing order, with `js/app.js` providing `window.HC`. When editing Tailwind
+utility classes, run `npm run build:css` and commit `css/utilities.css`.
+
+`npm test` first compiles TypeScript into a temporary directory and compares it
+with every committed browser script and `sw.js`. It then runs fixture-based
+JavaScript page, data-contract, DOM and worker checks, followed by Python
+content-refresh tests. It requires Node 24+, Python 3 and `npm ci`. Run
+`python3 -m unittest discover -s tests -p 'test_*.py'` for all Python tools,
+including highlight matching and matchup-page generation.
 These checks use fixtures without live providers or advertising services.
 Preview over HTTP rather than opening HTML files directly.
 If the service worker keeps showing old local files, unregister it and clear the
@@ -124,7 +128,9 @@ The production branch is `main`.
 
 `.github/workflows/deploy.yml` deploys the static root through GitHub Actions to
 GitHub Pages on pushes to `main`, manual dispatch and scheduled highlight
-refreshes. It stamps the commit SHA into the service-worker cache name. Keep `__BUILD_ID__` in the source `sw.js`.
+refreshes. It stamps the commit SHA into the service-worker cache name. Keep
+`__BUILD_ID__` in `src/worker/sw.ts`; its compiled `sw.js` also retains the
+placeholder until deployment.
 `CNAME` declares `highlightcorner.com`; GitHub hosting was verified October 6, 2026.
 
 The workflow builds matchup pages from ESPN's regular-season schedules with
@@ -138,8 +144,9 @@ preview uses legacy query links.
 
 The ignored `.vercel/` folder is historical deployment output.
 
-The Pages workflow runs regression and syntax checks, all Python tool tests and
-the Tailwind build. It generates matchup pages, refreshes highlight links,
+The Pages workflow checks TypeScript types and committed JavaScript output through
+`npm test`, runs syntax and Python tool checks, then builds Tailwind utilities.
+It generates matchup pages, refreshes highlight links,
 then uploads an explicit public asset directory. Development dependencies, tests,
 tools, and agent documentation are excluded. Run the browser checks in the
 maintenance guide before publication.

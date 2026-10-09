@@ -47,8 +47,9 @@ These instructions apply throughout this repository, regardless of agent model.
   and week. Explicit year/week travel in game and navigation links; fantasy uses
   the selected year. Discovery failures and unavailable weeks are labeled.
   Check rollover and recap season fields when changing time/data selection.
-- Keep `__BUILD_ID__` in the source service worker. The Pages workflow substitutes
-  the commit SHA at deployment. New shell assets may need `APP_SHELL` updates.
+- Keep `__BUILD_ID__` in `src/worker/sw.ts` and its compiled `sw.js`. The Pages
+  workflow substitutes the commit SHA in its staged copy at deployment. New
+  shell assets may need `APP_SHELL` updates in the TypeScript source.
 
 ## Verify and report
 

@@ -8,15 +8,19 @@ behavior. External schedules and account status require separate verification.
 ## Architecture and file map
 
 The repository root is the static site. Browser TypeScript in `src/browser/`
-compiles to committed `js/` files, and `src/worker/sw.ts` compiles to committed
-`sw.js`. Use `npm run build:js` after TypeScript edits and commit both source and
-output. `npm run check:js` checks strict types without writing files. Plain
-compiled scripts keep the existing browser loading order and direct HTTP preview.
-Tailwind utilities compile locally;
-deployment also generates static matchup HTML,
-a game-ID index, sitemap entries and the highlight map. There is no application
-backend or JavaScript bundler. Committed CSS
-allows immediate local preview. Run `npm ci` and `npm run build:css` when changing
+compiles to committed `js/*.js`, and `src/worker/sw.ts` compiles to committed
+`sw.js`. Shared `window.HC`, provider, stored-data and normalized-game types live
+in `src/browser/types.d.ts`. The browser and worker have separate strict compiler
+configs (`tsconfig.browser.json` and `tsconfig.worker.json`) so the worker uses
+Web Worker library types. Use `npm run build:js` after TypeScript edits and commit
+both source and output. `npm run check:js` checks both projects without writing
+files. HTML loads ordinary compiled scripts in their existing order, including
+the external `js/privacy.js` and `js/not-found.js` page initializers.
+
+Tailwind utilities compile locally; deployment also generates static matchup
+HTML, a game-ID index, sitemap entries and the highlight map. There is no
+application backend or JavaScript bundler. Committed CSS allows immediate local
+preview. Run `npm ci` and `npm run build:css` when changing
 utility classes; commit `css/utilities.css`. Tailwind Preflight is deliberately
 omitted to preserve the existing stylesheet. Pages with game links load
 `js/game-pages.js` before `js/app.js`; then load `js/ads.js` and their page script
@@ -305,9 +309,10 @@ rather than a browser engine. If browser checks cannot be performed, report that
 limit explicitly.
 
 For TypeScript changes, run `npm run check:js` and `npm run build:js`, then
-check that the generated `js/` files and `sw.js` are committed. The `npm test`
-pretest hook compiles into a temporary directory and fails if committed output
-differs; PR and Pages workflows both run it. For changed compiled JavaScript, run
+check that the generated `js/*.js` files and `sw.js` are committed. Edit the
+TypeScript source rather than the compiled JavaScript. The `npm test` pretest
+hook compiles into a temporary directory and fails if committed output differs;
+PR and Pages workflows both run it. For changed compiled JavaScript, run
 `node --check path/to/changed-file.js`. For changed JSON, run
 `python3 -m json.tool data/recaps.json > /dev/null`
 (or the other changed JSON file). Run `git diff --check` for all changes.
@@ -406,9 +411,10 @@ findings prevent a safe merge.
   are stored. Query-bearing navigation uses the matching cached HTML shell;
   unvisited generated game URLs fall back to the cached generic game shell, while
   other failed navigations fall back to the cached recovery page. Offline shell support does not imply offline live sports data.
-- Keep the literal `__BUILD_ID__` in source. Local runs lack deploy stamping, so
-  unregister the worker/clear this preview origin's cache in browser tools when
-  changes appear stale. Do not erase production browser storage for debugging.
+- Keep the literal `__BUILD_ID__` in `src/worker/sw.ts` and compiled `sw.js`.
+  Local runs lack deploy stamping, so unregister the worker and clear this
+  preview origin's cache in browser tools when changes appear stale. Do not erase
+  production browser storage for debugging.
 - When publication is authorized, confirm the Pages run succeeded and check
   affected live pages and cache updates. Check `/ads.txt`, `/privacy.html`, the
   manifest and SEO assets when changes touch them. Do not deploy just to validate
