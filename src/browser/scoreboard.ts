@@ -52,7 +52,7 @@
       </div>
       ${teamRow({ ...g.away, score: g.state === 'pre' ? null : g.away.score }, c.away)}${teamRow({ ...g.home, score: g.state === 'pre' ? null : g.home.score }, c.home)}
       <div class="card-foot">
-        ${recap ? `<span data-outcome class="chip"><span class="verdict ${HC.esc(recap.verdict)}" style="margin:0">${HC.esc(String(recap.verdict).replace(/-/g, ' '))}</span></span>` : ''}
+        ${recap ? `<span data-outcome class="chip verdict ${HC.esc(recap.verdict)}">${HC.esc(String(recap.verdict).replace(/-/g, ' '))}</span>` : ''}
         <button class="chip watched-toggle" data-id="${g.id}" data-focus-key="watched-${g.id}" aria-pressed="${watched}">${watched ? '✓ Watched' : 'Mark watched'}</button>
         <span class="card-actions">
           <a class="chip" data-focus-key="view-${g.id}" href="${HC.esc(HC.gameURL(g.id))}">View game →</a>
