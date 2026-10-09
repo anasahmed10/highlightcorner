@@ -1,14 +1,21 @@
 # Highlight Corner maintenance guide
 
-Verified against the repository on October 7, 2026. This guide describes the
+Checked against `main` on October 9, 2026. This guide describes the
 current implementation; [roadmap.md](roadmap.md) describes proposed changes.
 Source code and the deployment workflow are the authority for implementation
 behavior. External schedules and account status require separate verification.
 
 ## Architecture and file map
 
-The repository root is the static site. Only Tailwind utilities have a compilation step; HTML and JavaScript remain plain static files. Committed CSS allows immediate local preview. Run `npm ci` and `npm run build:css` when changing utility classes; commit `css/utilities.css`. Tailwind Preflight is deliberately omitted to preserve the existing stylesheet. Most pages
-load `js/app.js`, then `js/ads.js`, then their page script at the end of the body.
+The repository root is the static site. Tailwind utilities compile locally;
+deployment also generates static matchup HTML,
+a game-ID index, sitemap entries and the highlight map. Browser code remains plain
+JavaScript with no application backend or JavaScript bundler. Committed CSS
+allows immediate local preview. Run `npm ci` and `npm run build:css` when changing
+utility classes; commit `css/utilities.css`. Tailwind Preflight is deliberately
+omitted to preserve the existing stylesheet. Pages with game links load
+`js/game-pages.js` before `js/app.js`; then load `js/ads.js` and their page script
+at the end of the body.
 `app.js` assigns a fresh `window.HC` object, so reordering it after consumers can
 break the site. Shared navigation/header markup is repeated across HTML files. Navigation has Scores, Fantasy, and Recaps; highlights are available beside View game on completed score cards. The old highlights URL remains accessible for existing links. Place both desktop and mobile navigation before `js/app.js` so page initialization can set the active tab. The shared script creates the Settings dialog, install promotion, and offline notice before page scripts initialize theme/preferences.
 
@@ -18,11 +25,13 @@ break the site. Shared navigation/header markup is repeated across HTML files. N
 | `highlights.html` | `js/highlights.js` | Legacy standalone page: matched official videos, featured completed game, copied links |
 | `fantasy.html` | `js/fantasy.js` | Weekly Sleeper leaders, scoring formats, position filters, sorting |
 | `recaps.html` | `js/recaps.js` | Stored recaps grouped by descending season/week |
+| `game-<espnGameId>.html` (generated) | `js/game.js` | Canonical matchup shell and share metadata, then live game details |
 | `game.html` | `js/game.js` | Matchup, weekly navigation, recap, box score, stats, fantasy, injuries |
 | `privacy.html` | Inline initialization | Privacy text and shared controls |
 | `404.html` | Inline script | Missing-page recovery and theme |
 
-`css/style.css` owns all site styles. `js/app.js` owns theme/navigation setup,
+`css/style.css` owns shared styles; `css/utilities.css` contains generated Tailwind
+utilities from `css/tailwind.css`. `js/app.js` owns theme/navigation setup,
 HTTP/ESPN helpers, game normalization, formatting, colors, escaping, preferences,
 season/week context, clipboard feedback, skeletons, sortable table behavior, scroll-to-top, and worker registration.
 `js/ads.js` initializes manual advertising and desktop rails; dynamic game content
@@ -164,7 +173,8 @@ preparation must include the season when adding future entries.
 | `hc:install-dismissed` | JSON timestamp; suppress suggestion for 30 days |
 
 `HC.prefs` reads/writes the JSON-backed settings, with session-only fallback when storage is blocked; theme storage is separate.
-Theme changes dispatch `hc:theme`; page listeners may rerender or refetch.
+Theme changes dispatch `hc:theme`; data pages reuse loaded data rather than
+requesting sports data solely for a theme change.
 Spoiler changes update `data-spoilers` on the document. Outcome elements use `data-outcome`; `HC.applySpoilers()` toggles their native
 `hidden` attribute, including accessible content. Add `data-spoiler-placeholder`
 for safe replacement text. Every dynamic renderer must call `HC.contentReady(box)`
@@ -177,7 +187,7 @@ screen-reader coverage remains an accessibility follow-up.
 - Use theme variables (`--bg`, `--card`, `--text`, `--muted`, `--border`,
   `--accent`, and related tokens) rather than independent page palettes.
 - Preserve the centered 860px content area, responsive tables, sticky header,
-  and prominent Watch highlights buttons. Existing key breakpoints are 700px
+  and direct highlight actions. Existing key breakpoints are 700px
   for desktop content/recap expansion, 800px for switching bottom tabs to desktop
   navigation, and 1280px for advertising rails. Safe-area insets pad headers,
   bottom tabs, and page bottoms. Settings uses a native modal dialog with Escape
@@ -279,10 +289,12 @@ python3 -m http.server 8080
 ```
 
 Open `http://localhost:8080`. A real HTTP origin is needed for JSON loading and
-service-worker behavior. Run `npm test` for fixture-based page, data-contract, DOM and worker regressions and `npm run build:css`
-for Tailwind. Pull requests run these checks before merging; Pages runs them
-again before deployment. Page smoke checks use jsdom rather than a browser engine. Use tools available in your session; if browser checks cannot
-be performed, report that limit explicitly.
+service-worker behavior. Install dev dependencies with `npm ci`; Node 24+ and
+Python 3 are required for `npm test`. It runs the JavaScript fixture suite followed
+by Python content-refresh checks. Run `npm run build:css` for Tailwind. Pull requests run these checks before
+merging; Pages runs them again before deployment. Page smoke checks use jsdom
+rather than a browser engine. If browser checks cannot be performed, report that
+limit explicitly.
 
 For changed JavaScript, run `node --check path/to/changed-file.js` if Node is
 available. For changed JSON, run `python3 -m json.tool data/recaps.json > /dev/null`
@@ -292,7 +304,15 @@ available. For changed JSON, run `python3 -m json.tool data/recaps.json > /dev/n
 
 Use Node 24+ and the existing dev dependencies (`npm ci`), then run `npm test`.
 For a focused run, use `node --test tests/sports.test.cjs tests/pages.test.cjs`
-or `node --test tests/source.test.cjs`. No new dependencies are required.
+or `node --test tests/source.test.cjs`. Run all Python tool checks with:
+
+```sh
+python3 -m unittest discover -s tests -p 'test_*.py'
+```
+
+PR CI additionally runs `test_highlights.py`; Pages runs the full Python suite,
+including `test_game_pages.py`, before generation. Python tool tests use the
+standard library; only the optional nflverse tool needs DuckDB.
 
 - `tests/fixtures/sports.json` contains synthetic ESPN pre/live/final events,
   a game summary, verified highlight links, Sleeper scoring formats, player mappings and editorial recaps.
@@ -313,10 +333,13 @@ or `node --test tests/source.test.cjs`. No new dependencies are required.
   Both PR checks and Pages deployment already run `npm test`; these validations
   therefore run before the public deployment artifact is prepared.
 
-On October 7, 2026, all 80 checks passed locally. Removing stale-response guards
-in temporary copies of scoreboard, highlights and fantasy made each corresponding
-race check fail. This proves regression detection without modifying site source.
-`tests/context.test.cjs` additionally checks shared season/week requests, links,
+The regression suite grows with shipped changes; use the current test output
+rather than a historical test count. Earlier mutation checks removed stale-response
+guards in temporary copies and confirmed that their race tests failed.
+`tests/reliability.test.cjs`, `tests/accessibility.test.cjs`, and
+`tests/sorting.test.cjs` cover recovery, keyboard controls, focus and sorting.
+Highlight and ad tests cover map destinations, score-card actions and stable ad
+units. `tests/context.test.cjs` additionally checks shared season/week requests, links,
 rollover, offseason, unavailable weeks, provider mismatch and recap grouping.
 jsdom does not verify CSS layout, screen readers, service-worker browser lifecycle,
 physical-device installation, or provider availability. Keep the manual browser
@@ -331,8 +354,8 @@ checks below; the worker unit tests execute separately in a simulated worker con
 | Highlights | Game-specific destination and copied URL, unmatched/future games, failed map request, featured game, game links, live refresh and background-tab pause |
 | Fantasy | All three formats, position filter, both sort directions, missing players, no stats |
 | Game center | Missing/invalid ID, pregame/live/final examples, live refresh preserves open sections and selected team tabs, polling stops after final status, copied URL, previous/next boundaries |
-| Recaps | Multiple weeks, matching game ID, paragraph rendering, verdict style, mobile expand/collapse and desktop full text |
-| Preferences | Persistence across navigation/reload, fresh storage, blocked storage, spoiler blur without layout breakage |
+| Recaps | Multiple seasons/weeks, matching game ID, final-score panels, spoiler behavior, paragraph rendering, verdict style; game recap mobile expansion and desktop full text |
+| Preferences | Persistence across navigation/reload, fresh storage, blocked storage, native hidden outcomes and safe placeholders without layout breakage |
 | Accessibility/layout | Keyboard focus, control names/states, reduced motion, long names, horizontal table scrolling, no page overflow |
 | Failure recovery | Block ESPN/Sleeper/JSON requests, inspect errors and unresolved skeletons; rapidly change weeks and themes |
 | PWA/ads | Warm-cache offline shell, uncached/live-data limits, new-release shell, empty/blocked ads, rails at/above 1280px |
@@ -353,9 +376,11 @@ the PR open and report a concrete blocker when checks, protections, or review
 findings prevent a safe merge.
 
 - Remote: `https://github.com/anasahmed10/highlightcorner`; production branch `main`.
-- `.github/workflows/deploy.yml` runs on pushes to `main` and manual dispatch,
-  substitutes the commit SHA for `__BUILD_ID__` in `sw.js`, after compiling utilities and running tests/syntax checks, then uploads an
-  explicit `_site/` directory of public assets to GitHub Pages. Dependencies,
+- `.github/workflows/deploy.yml` runs on pushes to `main`, manual dispatch and
+  scheduled highlight refreshes. It runs tests/syntax checks, compiles utilities,
+  generates matchup pages and refreshes staged highlights. It substitutes the
+  commit SHA for `__BUILD_ID__` in the staged worker, then uploads the explicit
+  `_site/` directory of public assets to GitHub Pages. Dependencies,
   CSS input, tests, tools, and documentation stay out of the deployment.
 - Root `CNAME` declares `highlightcorner.com`. On October 6, 2026, an HTTPS check
   showed `www.highlightcorner.com` redirecting to the apex, which returned HTTP 200
@@ -365,7 +390,8 @@ findings prevent a safe merge.
   on this origin. Shell requests use cache first; `data/` requests use network
   first with cached fallback. All cross-origin requests bypass worker caching. Only successful responses
   are stored. Query-bearing navigation uses the matching cached HTML shell;
-  failed navigation falls back to the cached recovery page. Offline shell support does not imply offline live sports data.
+  unvisited generated game URLs fall back to the cached generic game shell, while
+  other failed navigations fall back to the cached recovery page. Offline shell support does not imply offline live sports data.
 - Keep the literal `__BUILD_ID__` in source. Local runs lack deploy stamping, so
   unregister the worker/clear this preview origin's cache in browser tools when
   changes appear stale. Do not erase production browser storage for debugging.
@@ -405,7 +431,8 @@ manifest ID is `/index.html`, matching the previous start URL identity.
 Scores, Highlights, and open game centers refresh every 60 seconds while the
 page is visible, pause polling in background tabs, and refresh immediately when
 the page returns. Game-center polling stops after ESPN reports the final state.
-Fantasy fetches on page/week selection. Scores and Highlights ignore stale
+Fantasy fetches on initial load, season/week or scoring-format changes, and retry;
+position filters rerender loaded tables. Scores and Highlights ignore stale
 responses; Fantasy guards stale selections. Theme changes reuse loaded data.
 Static in-flow ads appear within
 the Scores, Highlights, and Recaps content lists; Fantasy follows its tables and

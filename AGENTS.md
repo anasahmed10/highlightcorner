@@ -18,13 +18,17 @@ These instructions apply throughout this repository, regardless of agent model.
 
 - Plain static HTML, shared `css/style.css`, compiled Tailwind utilities, and
   browser JavaScript. No application backend or JavaScript bundler. Node 24+
-  runs `npm test` and `npm run build:css`; commit generated `css/utilities.css`.
+  and Python 3 run `npm test`; `npm run build:css` compiles styles. Commit
+  generated `css/utilities.css`. Deployment also generates static matchup pages
+  and refreshes the public highlight map.
 - Run `python3 -m http.server 8080` from the repository root; open
   `http://localhost:8080`. Do not preview through `file://`.
-- `js/app.js` defines `window.HC`; load it before `js/ads.js` and page scripts.
+- Load `js/game-pages.js` before `js/app.js` on pages that link to games.
+  `js/app.js` defines `window.HC`; load it before `js/ads.js` and page scripts.
   Page scripts use strict-mode IIFEs, shared helpers, and existing DOM hooks.
 - ESPN provides scores/game summaries; Sleeper provides weekly fantasy stats.
-  Recaps and the player-name map live in `data/`. Requests run in the browser.
+  Recaps, players and verified highlight links live in `data/`. Live sports
+  requests run in the browser; Python tools prepare content and deployment data.
 
 ## Rules for changes
 
