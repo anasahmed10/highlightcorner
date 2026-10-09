@@ -34,6 +34,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | In-flow ad placement | The existing unit appears after five score cards, three highlight cards, or the first recap; these pages keep one stable unit across renders. Revenue impact requires AdSense reporting after ads serve. |
 | SEO basics | Meta/OG/canonical, sitemap.xml, robots.txt, favicon, 404 page |
 | Matchup sharing | Build-time regular-season game pages from 2026 through the current year expose matchup-specific HTML metadata and canonical URLs; sitemap lists only generated valid matchups, while legacy query links remain usable and noindex |
+| Matchup release checks | PR CI runs every Python tool test; Pages verifies generated matchup files, sitemap URLs, and the game-page lookup before uploading the site |
 | PWA | Manifest, icons, offline shell, iOS/Android install guidance, native prompt when supported, dismissed/standalone promotion handling; physical-device installation pending |
 | Recap supporting statistics | `tools/nflverse_week.py` emits nflverse evidence for regular-season recaps; does not write recap prose |
 | Recap content port | Longer Week 4 recaps stored in `data/recaps.json`; external dashboard/refresh status is unverified |

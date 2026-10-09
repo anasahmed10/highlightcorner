@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from tools import build_game_pages
+from tools import build_game_pages, verify_game_pages
 
 
 def event(game_id="401872980", away="Tampa Bay Buccaneers", home="Dallas Cowboys"):
@@ -41,6 +41,11 @@ class GamePageTests(unittest.TestCase):
             sitemap = (root / "sitemap.xml").read_text()
             self.assertIn("game-401872980.html", sitemap)
             self.assertNotIn("https://highlightcorner.com/game.html</loc>", sitemap)
+            verify_game_pages.verify(root)
+
+            (root / "game-401872980.html").unlink()
+            with self.assertRaisesRegex(RuntimeError, "files do not match"):
+                verify_game_pages.verify(root)
 
     def test_invalid_games_are_not_published(self):
         with tempfile.TemporaryDirectory() as directory:

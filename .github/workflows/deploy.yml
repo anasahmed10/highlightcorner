@@ -52,6 +52,8 @@ jobs:
           cp -R js icons data _site/
       - name: Build matchup pages and sitemap
         run: python3 tools/build_game_pages.py --out _site
+      - name: Verify generated matchup assets
+        run: python3 tools/verify_game_pages.py --out _site
       - name: Refresh official game highlight links
         env:
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
