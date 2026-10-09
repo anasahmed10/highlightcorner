@@ -102,6 +102,7 @@
       if (stopped || running || document.visibilityState === 'hidden') return;
       running = true;
       try { await callback(); }
+      catch (e) { /* A failed update must not stop future polling or reject a timer callback. */ }
       finally {
         running = false;
         schedule();
@@ -127,6 +128,8 @@
     const query = new URLSearchParams({ dates: String(season), seasontype: '2' });
     if (week) query.set('week', String(week));
     const data = await HC.fetchJSON(`${SB}?${query}`);
+    if (!data || typeof data !== 'object' || Array.isArray(data) ||
+        (data.events != null && !Array.isArray(data.events))) throw new Error('Invalid ESPN scoreboard');
     if (data.season && (Number(data.season.year) !== Number(season) || Number(data.season.type) !== 2)) {
       throw new Error('ESPN season mismatch');
     }

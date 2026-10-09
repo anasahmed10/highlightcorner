@@ -413,3 +413,17 @@ caching. Test real data, touch/keyboard controls, layouts, provider failure, and
 service-worker releases separately in the browser. Local `__BUILD_ID__` remains
 unstamped: use a fresh preview origin or clear only the local preview cache
 when old assets appear; do not erase production preferences.
+
+### Failure recovery (R2, October 9, 2026)
+
+Every data page offers a retry when its required response fails. An empty recap
+archive is distinguished from an unavailable or malformed archive. Optional
+recap/highlight maps cannot break core scores or game summaries. Manual score
+refresh and week selection use explicit non-quiet loads; polling keeps the last
+successful rendering and labels failed updates. Fantasy position changes leave
+pending and failed requests intact. Game summaries use competition status when
+header status is absent, as in current ESPN responses.
+
+Run `node --test tests/reliability.test.cjs tests/sports.test.cjs` for focused
+failure and race checks. Browser validation used real ESPN data plus blocked
+requests and retry recovery; fixture data remains isolated from production.

@@ -71,9 +71,11 @@ not every acceptance criterion:
   labels, and season-tagged recaps. Fixture checks cover rollover, postseason,
   offseason, missing provider metadata and legacy game URLs. Postseason stats
   remain outside the regular-season scope.
-- **R2 — in progress:** 12-second request bound, week-discovery recovery, retry
-  on scores/highlights/fantasy, stale-response guards, and cached theme rendering.
-  Broader failure/race fixtures remain.
+- **R2 — shipped (October 9, 2026):** bounded requests and stale-response guards;
+  explicit manual score refresh; retry on every data page; malformed optional
+  recaps cannot break scores or games; fantasy filters preserve pending/error
+  states; failed live updates retain the last successful view with a notice.
+  Failure/race fixtures and browser blocked-request/retry checks cover the paths.
 - **R3 — shipped (issue #4, October 7):** 67 checks pass locally with synthetic
   provider fixtures, all seven page smoke checks, normalization/context/preferences,
   failure/retry/race coverage, and committed source/data validation. Both CI workflows

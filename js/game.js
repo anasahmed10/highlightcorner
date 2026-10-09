@@ -14,6 +14,11 @@
   let syncRecapToggle = () => {};
   let stopPolling = () => {};
   let adsInitialized = false;
+  let request = 0;
+  const updateStatus = document.createElement('p');
+  updateStatus.className = 'page-sub';
+  updateStatus.setAttribute('role', 'status');
+  box.before(updateStatus);
 
   document.addEventListener('hc:spoilers', () => syncRecapToggle());
   window.addEventListener('resize', () => syncRecapToggle());
@@ -225,6 +230,7 @@
   }
 
   async function loadGame(quiet = false) {
+    const token = ++request;
     if (!gameId) { box.innerHTML = '<div class="empty">No game selected. <a href="index.html">Back to scores</a>.</div>'; return; }
     const uiState = {
       openSections: Array.from(box.querySelectorAll('details'), section => section.open),
@@ -241,6 +247,10 @@
         HC.fetchJSON('data/recaps.json').catch(() => []),
         HC.fetchJSON('data/highlights.json').catch(() => null)
       ]);
+      if (token !== request) return;
+      const competitors = d?.header?.competitions?.[0]?.competitors;
+      if (!Array.isArray(competitors) || !competitors.some(t => t.homeAway === 'away') ||
+          !competitors.some(t => t.homeAway === 'home')) throw new Error('Game summary unavailable');
       const comp = ((d.header || {}).competitions || [])[0] || {};
       const gameDate = new Date(comp.date);
       const dateSeason = Number.isNaN(gameDate.getTime()) ? null :
@@ -255,10 +265,11 @@
         ? requestedWeek : Number.isInteger(reportedWeek) && reportedWeek >= 1 && reportedWeek <= 18 ? reportedWeek : 1;
       if (Number.isInteger(season) && season >= 2000 && season <= 2100) HC.setContext(season, week);
       const sb = await HC.scoreboard(week, season || undefined).catch(() => null);
+      if (token !== request) return;
       const teams = comp.competitors || [];
       const away = teams.find(t => t.homeAway === 'away') || {};
       const home = teams.find(t => t.homeAway === 'home') || {};
-      const st = (d.header || {}).status || {};
+      const st = (d.header || {}).status || comp.status || {};
       const state = ((st.type || {}).state) || '';
       gameState = state;
       currentTeams = {
@@ -266,7 +277,7 @@
         awayAbbr: (away.team || {}).abbreviation || ''
       };
       const c = HC.teamTextColors(away.team || {}, home.team || {});
-      const recap = (recaps || []).find(r => r.season === season && String(r.gameId) === String(gameId));
+      const recap = (Array.isArray(recaps) ? recaps : []).find(r => r?.season === season && String(r.gameId) === String(gameId));
       const venue = (((d.gameInfo || {}).venue) || {}).fullName || '';
       const highlight = HC.highlightLink(highlightMap, gameId);
 
@@ -365,6 +376,7 @@
         html += `<div class="empty">This game hasn't started yet — box score, fantasy and injuries will appear here after kickoff.</div>`;
       }
 
+      updateStatus.textContent = '';
       box.innerHTML = html;
       HC.contentReady(box);
       Array.from(box.querySelectorAll('details')).forEach((section, i) => {
@@ -421,7 +433,13 @@
       }
       document.title = `Highlight Corner — ${(away.team || {}).abbreviation} @ ${(home.team || {}).abbreviation}`;
     } catch (e) {
-      if (!quiet) box.innerHTML = '<div class="error">Couldn’t load this game — it may have been flexed out of existence. <a href="index.html">Back to scores</a>.</div>';
+      if (token !== request) return;
+      if (quiet && box.querySelector('.game-hero')) {
+        updateStatus.textContent = 'Couldn’t refresh — showing the last update';
+      } else {
+        box.innerHTML = '<div class="error"><p>Couldn’t load this game. Try again when you’re connected.</p><button class="btn btn-ghost" id="retryGame">Try again</button> <a href="index.html">Back to scores</a>.</div>';
+        document.getElementById('retryGame').addEventListener('click', () => loadGame());
+      }
     }
   }
 
