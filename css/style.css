@@ -94,6 +94,7 @@ select, .seg button {
 /* Recap cards */
 .verdict { font-size: .75rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
   padding: 4px 10px; border-radius: 999px; display: inline-block; margin-bottom: 8px; }
+.card-foot .chip.verdict { display: inline-flex; justify-content: center; font-size: .8rem; padding: 6px 10px; margin-bottom: 0; }
 .verdict.nail-biter { background: #1f6feb; color: #fff; }
 .verdict.blowout { background: #6e40c9; color: #fff; }
 .verdict.garbage-time { background: #b54708; color: #fff; }
