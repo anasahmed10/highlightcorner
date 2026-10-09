@@ -421,3 +421,17 @@ button.chip { min-height: 44px; font-size: .8rem; }
 .card-actions .chip { min-height: 44px; }
 .card-actions .highlight-link { background: var(--accent); color: var(--highlight-text); }
 .card-actions .highlight-link:hover { filter: brightness(.95); }
+
+/* Accessible controls and long content stay within narrow viewports. */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.team-pane[hidden] { display: none; }
+.game-meta > span { min-width: 0; overflow-wrap: anywhere; }
+.chip { min-height: 44px; }
+.controls > select { max-width: 100%; }
+.settings-row > div { min-width: 0; }
+.recap-card, .injury .cm { overflow-wrap: anywhere; }
+
+.brand { min-height: 44px; display: inline-flex; align-items: center; }
+.table-sort { min-width: 44px; }
+.site-footer a { min-height: 44px; display: inline-flex; align-items: center; }

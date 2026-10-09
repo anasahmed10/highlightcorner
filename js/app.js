@@ -27,7 +27,7 @@
   const promo = document.createElement('aside');
   promo.id = 'installPromo'; promo.className = 'install-promo'; promo.hidden = true;
   promo.setAttribute('aria-label', 'Add Highlight Corner to your home screen');
-  promo.innerHTML = `<div class="flex items-start justify-between gap-3"><div><p class="eyebrow">YOUR HOME-SCREEN HUDDLE</p><h2>Keep game day close.</h2><p>Scores, highlights, and recaps. One tap away.</p></div><button class="icon-button" id="dismissInstall" aria-label="Dismiss home-screen suggestion"><img src="icons/ui/x.svg" alt="" width="20" height="20"></button></div><button class="btn btn-primary install-action">Add to Home Screen</button>`;
+  promo.innerHTML = `<div class="flex items-start justify-between gap-3"><div><p class="eyebrow">YOUR HOME-SCREEN HUDDLE</p><h2>Keep game day close.</h2><p>Scores, highlights, and recaps. One tap away.</p></div><button class="icon-button" id="dismissInstall" aria-label="Dismiss home-screen suggestion"><img src="icons/ui/x.svg" alt="" width="20" height="20"></button></div><button class="btn btn-primary install-action" id="installPromoAction">Add to Home Screen</button>`;
   document.querySelector('main').appendChild(promo);
 
   /* ---------- theme ---------- */
@@ -487,6 +487,64 @@
   document.getElementById('dismissInstall').addEventListener('click', () => {
     store.set('hc:install-dismissed', Date.now()); promo.hidden = true;
   });
+  /* Preserve an existing keyboard target through synchronous content replacement. */
+  HC.captureFocus = function (root) {
+    const active = document.activeElement;
+    const key = root.contains(active) ? active.dataset.focusKey || active.id : null;
+    return () => {
+      if (!key) return;
+      const next = Array.from(root.querySelectorAll('[data-focus-key], [id]'))
+        .find(el => (el.dataset.focusKey || el.id) === key);
+      if (next && !next.closest('[hidden]')) next.focus({ preventScroll: true });
+    };
+  };
+
+  HC.initTabs = function (root) {
+    root.querySelectorAll('[data-tabgroup]').forEach((group, index) => {
+      const tabs = [...group.querySelectorAll('.team-tab')];
+      const panes = [...group.querySelectorAll('.team-pane')];
+      const prefix = `${root.id}-${group.dataset.tabgroup || `teams-${index}`}`;
+      const list = group.querySelector('[role="tablist"]');
+      const label = group.closest('details')?.querySelector('summary span')?.textContent.trim() || 'Game';
+      list.setAttribute('aria-label', label + ' teams');
+      const activate = selected => {
+        tabs.forEach((tab, i) => {
+          const on = tab === selected;
+          tab.classList.toggle('active', on);
+          tab.setAttribute('aria-selected', String(on));
+          tab.tabIndex = on ? 0 : -1;
+          panes[i].classList.toggle('active', on);
+          panes[i].hidden = !on;
+        });
+      };
+      tabs.forEach((tab, i) => {
+        tab.id = `${prefix}-tab-${i}`;
+        tab.setAttribute('aria-controls', `${prefix}-panel-${i}`);
+        panes[i].id = `${prefix}-panel-${i}`;
+        panes[i].setAttribute('aria-labelledby', tab.id);
+        panes[i].tabIndex = 0;
+        tab.addEventListener('click', () => activate(tab));
+        tab.addEventListener('keydown', event => {
+          let next;
+          if (event.key === 'ArrowRight') next = (i + 1) % tabs.length;
+          else if (event.key === 'ArrowLeft') next = (i - 1 + tabs.length) % tabs.length;
+          else if (event.key === 'Home') next = 0;
+          else if (event.key === 'End') next = tabs.length - 1;
+          else return;
+          event.preventDefault();
+          activate(tabs[next]);
+          tabs[next].focus();
+        });
+      });
+      if (tabs.length) activate(tabs.find(tab => tab.classList.contains('active')) || tabs[0]);
+    });
+  };
+
+  const sortStatus = document.createElement('p');
+  sortStatus.className = 'sr-only';
+  sortStatus.setAttribute('role', 'status');
+  sortStatus.setAttribute('aria-atomic', 'true');
+  document.body.append(sortStatus);
   const tableSorts = new Map();
   const sortValue = (cell, type) => {
     const raw = (cell.dataset.sortValue ?? cell.textContent).trim();
@@ -523,6 +581,12 @@
         const state = tableSorts.get(id);
         heads.forEach((th, index) => {
           th.setAttribute('aria-sort', state?.column === index ? (state.dir === 1 ? 'ascending' : 'descending') : 'none');
+          const button = th.querySelector('button');
+          if (button) {
+            const direction = state?.column === index && state.dir === 1 ? 'descending' :
+              state?.column === index ? 'ascending' : th.dataset.sortType === 'text' ? 'ascending' : 'descending';
+            button.setAttribute('aria-label', `${button.dataset.label}: sort ${direction}`);
+          }
           const indicator = th.querySelector('.sort-ind');
           if (indicator) indicator.textContent = state?.column === index ? (state.dir === 1 ? ' ▲' : ' ▼') : '';
         });
@@ -546,6 +610,8 @@
         button.type = 'button';
         button.className = 'table-sort';
         button.textContent = label;
+        button.dataset.label = label;
+        button.dataset.focusKey = `sort-${id}-${index}`;
         const indicator = document.createElement('span');
         indicator.className = 'sort-ind';
         indicator.setAttribute('aria-hidden', 'true');
@@ -556,6 +622,8 @@
           const dir = current?.column === index ? -current.dir : th.dataset.sortType === 'text' ? 1 : -1;
           tableSorts.set(id, { column: index, dir });
           apply();
+          const title = table.caption?.textContent.trim() || table.closest('details')?.querySelector('summary span')?.textContent.trim() || 'Statistics';
+          sortStatus.textContent = `${title}: sorted by ${label}, ${dir === 1 ? 'ascending' : 'descending'}.`;
         });
       });
       if (!tableSorts.has(id) && table.dataset.sortDefault != null) {
@@ -566,6 +634,7 @@
   };
   HC.contentReady = function (box) {
     HC.sortTables(box);
+    HC.initTabs(box);
     HC.applySpoilers();
     if (box.id === 'games' && !standalone() && !installedThisSession && Date.now() - store.get('hc:install-dismissed', 0) > 30 * 86400000) {
       const cards = box.querySelectorAll('.game-card');

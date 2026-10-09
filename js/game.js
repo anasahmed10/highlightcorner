@@ -148,7 +148,7 @@
       }).join('') || '<div class="empty">No injuries reported.</div>';
       return `<div class="team-pane${i === 0 ? ' active' : ''}" data-pane="${i}" role="tabpanel">${list}</div>`;
     }).join('');
-    return `<div data-tabgroup><div class="team-tabs" role="tablist">${tabs}</div>${panes}</div>`;
+    return `<div data-tabgroup="injuries"><div class="team-tabs" role="tablist">${tabs}</div>${panes}</div>`;
   }
 
   /* Collapsible game-page sections (dropdowns); scoring summary hides by default */
@@ -203,7 +203,7 @@
       return `<div class="team-pane${i === 0 ? ' active' : ''}" data-pane="${i}" role="tabpanel">
         <div class="table-wrap">${tables || '<div class="empty">No player stats yet.</div>'}</div></div>`;
     }).join('');
-    return `<div data-tabgroup><div class="team-tabs" role="tablist">${tabs}</div>${panes}</div>`;
+    return `<div data-tabgroup="box-score"><div class="team-tabs" role="tablist">${tabs}</div>${panes}</div>`;
   }
 
   function teamStatsSection(teams) {
@@ -232,14 +232,16 @@
   async function loadGame(quiet = false) {
     const token = ++request;
     if (!gameId) { box.innerHTML = '<div class="empty">No game selected. <a href="index.html">Back to scores</a>.</div>'; return; }
-    const uiState = {
-      openSections: Array.from(box.querySelectorAll('details'), section => section.open),
-      activeTabs: Array.from(box.querySelectorAll('[data-tabgroup]'), group => {
+    const readUI = () => ({
+      openSections: new Map(Array.from(box.querySelectorAll('details'), section =>
+        [section.querySelector('summary span')?.textContent, section.open])),
+      activeTabs: new Map(Array.from(box.querySelectorAll('[data-tabgroup]'), group => {
         const active = group.querySelector('.team-tab.active');
-        return active ? active.textContent.trim() : '';
-      }),
+        return [group.dataset.tabgroup, active ? active.textContent.trim() : ''];
+      })),
       recapExpanded: Boolean(box.querySelector('#recapText.expanded'))
-    };
+    });
+    let uiState = readUI();
     if (!quiet) box.innerHTML = HC.skeletons(3);
     try {
       const [d, recaps, highlightMap] = await Promise.all([
@@ -326,7 +328,7 @@
           ? `<a class="btn btn-primary btn-block-center" target="_blank" rel="noopener" href="${HC.esc(highlight.url)}">▶ Watch highlights on ${HC.esc(highlight.source)}</a>`
           : `<p class="page-sub" style="text-align:center;margin:16px 0">${HC.esc(HC.highlightPending(highlightMap, state === 'post'))}</p>`}
         <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn btn-ghost" id="watchedBtn" style="flex:1">${HC.isWatched(gameId) ? '✓ Watched' : 'Mark as watched'}</button>
+          <button class="btn btn-ghost" id="watchedBtn" aria-pressed="${HC.isWatched(gameId)}" style="flex:1">${HC.isWatched(gameId) ? '✓ Watched' : 'Mark as watched'}</button>
           <button class="btn btn-ghost" id="copyGameBtn" style="flex:0 0 auto" aria-label="Copy link to this game" title="Copy link to this game">⧉</button>
         </div>
         ${navHtml}
@@ -376,32 +378,26 @@
         html += `<div class="empty">This game hasn't started yet — box score, fantasy and injuries will appear here after kickoff.</div>`;
       }
 
+      if (quiet) uiState = readUI();
+      const restoreFocus = HC.captureFocus(box);
       updateStatus.textContent = '';
       box.innerHTML = html;
       HC.contentReady(box);
-      Array.from(box.querySelectorAll('details')).forEach((section, i) => {
-        if (uiState.openSections[i] !== undefined) section.open = uiState.openSections[i];
+      Array.from(box.querySelectorAll('details')).forEach(section => {
+        const key = section.querySelector('summary span')?.textContent;
+        if (uiState.openSections.has(key)) section.open = uiState.openSections.get(key);
       });
       box.querySelectorAll('[data-tabgroup]').forEach(group => {
-        const tabs = group.querySelectorAll('.team-tab');
-        const panes = group.querySelectorAll('.team-pane');
-        tabs.forEach(t => t.addEventListener('click', () => {
-          tabs.forEach(x => {
-            const on = x === t;
-            x.classList.toggle('active', on);
-            x.setAttribute('aria-selected', on);
-          });
-          panes.forEach(p => p.classList.toggle('active', p.dataset.pane === t.dataset.tab));
-        }));
-      });
-      box.querySelectorAll('[data-tabgroup]').forEach((group, i) => {
-        const wanted = uiState.activeTabs[i];
+        const wanted = uiState.activeTabs.get(group.dataset.tabgroup);
         const tab = Array.from(group.querySelectorAll('.team-tab')).find(t => t.textContent.trim() === wanted);
         if (tab) tab.click();
       });
+      restoreFocus();
       const wb = document.getElementById('watchedBtn');
       if (wb) wb.addEventListener('click', () => {
-        wb.textContent = HC.toggleWatched(gameId) ? '✓ Watched' : 'Mark as watched';
+        const watched = HC.toggleWatched(gameId);
+        wb.textContent = watched ? '✓ Watched' : 'Mark as watched';
+        wb.setAttribute('aria-pressed', String(watched));
       });
       const cb = document.getElementById('copyGameBtn');
       if (cb) cb.addEventListener('click', () => HC.copyLink(location.href, cb));

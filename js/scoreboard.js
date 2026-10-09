@@ -29,8 +29,10 @@
 
   function renderFavGrid() {
     const favs = HC.getFavorites();
+    const restoreFocus = HC.captureFocus(favGrid);
     favGrid.innerHTML = HC.TEAMS32.map(a =>
-      `<button class="${favs.includes(a) ? 'on' : ''}" data-team="${a}" aria-pressed="${favs.includes(a)}">${a}</button>`).join('');
+      `<button class="${favs.includes(a) ? 'on' : ''}" data-team="${a}" data-focus-key="favorite-${a}" aria-label="${a} favorite team" aria-pressed="${favs.includes(a)}">${a}</button>`).join('');
+    restoreFocus();
     favGrid.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
       HC.toggleFavorite(b.dataset.team);
       renderFavGrid(); render();
@@ -42,7 +44,7 @@
     const recap = recaps.find(r => r?.season === HC.context.season && String(r.gameId) === g.id);
     const watched = HC.isWatched(g.id);
     const highlight = g.state === 'post' ? HC.highlightLink(highlightMap, g.id) : null;
-    return `<div class="game-card" style="--ga:${c.away};--gh:${c.home}" data-href="${HC.esc(HC.gameURL(g.id))}" tabindex="0" role="link"
+    return `<div class="game-card" style="--ga:${c.away};--gh:${c.home}" data-href="${HC.esc(HC.gameURL(g.id))}" data-focus-key="game-${g.id}" tabindex="0" role="link"
         aria-label="${HC.esc(g.away.abbr)} at ${HC.esc(g.home.abbr)}">
       <div class="game-meta">
         <span ${g.state === 'pre' ? '' : 'data-outcome'} class="status ${HC.statusClass(g)}">${g.state === 'pre' ? 'Upcoming' : HC.esc(HC.statusLabel(g))}</span>
@@ -51,10 +53,10 @@
       ${teamRow({ ...g.away, score: g.state === 'pre' ? null : g.away.score }, c.away)}${teamRow({ ...g.home, score: g.state === 'pre' ? null : g.home.score }, c.home)}
       <div class="card-foot">
         ${recap ? `<span data-outcome class="chip"><span class="verdict ${HC.esc(recap.verdict)}" style="margin:0">${HC.esc(String(recap.verdict).replace(/-/g, ' '))}</span></span>` : ''}
-        <button class="chip watched-toggle" data-id="${g.id}">${watched ? '✓ Watched' : 'Mark watched'}</button>
+        <button class="chip watched-toggle" data-id="${g.id}" data-focus-key="watched-${g.id}" aria-pressed="${watched}">${watched ? '✓ Watched' : 'Mark watched'}</button>
         <span class="card-actions">
-          <a class="chip" href="${HC.esc(HC.gameURL(g.id))}">View game →</a>
-          ${highlight ? `<a class="chip highlight-link" href="${HC.esc(highlight.url)}" target="_blank" rel="noopener noreferrer" aria-label="View Highlights on ${HC.esc(highlight.source)} for ${HC.esc(g.away.abbr)} at ${HC.esc(g.home.abbr)}">View Highlights</a>` : ''}
+          <a class="chip" data-focus-key="view-${g.id}" href="${HC.esc(HC.gameURL(g.id))}">View game →</a>
+          ${highlight ? `<a class="chip highlight-link" data-focus-key="highlight-${g.id}" href="${HC.esc(highlight.url)}" target="_blank" rel="noopener noreferrer" aria-label="View Highlights on ${HC.esc(highlight.source)} for ${HC.esc(g.away.abbr)} at ${HC.esc(g.home.abbr)}">View Highlights</a>` : ''}
         </span>
       </div>
     </div>`;
@@ -62,6 +64,7 @@
 
   function render() {
     if (loading) return;
+    const restoreFocus = HC.captureFocus(box);
     let evs = eventsCache;
     const favs = HC.getFavorites();
     if (filter === 'favorites') evs = evs.filter(ev => {
@@ -85,6 +88,7 @@
         : `No games available for the ${HC.context.season} regular season, Week ${HC.context.week}.`}</div>`);
     rest.innerHTML = cards.slice(5).join('');
     HC.contentReady(box);
+    restoreFocus();
     box.querySelectorAll('.game-card').forEach(card => {
       card.addEventListener('click', e => {
         if (e.target.closest('button, a')) return;
@@ -101,6 +105,10 @@
       const on = HC.toggleWatched(b.dataset.id);
       b.textContent = on ? '✓ Watched' : 'Mark watched';
       render();
+      if (filter === 'unwatched' && on) {
+        const next = box.querySelector('.watched-toggle') || document.querySelector('[data-f=unwatched]');
+        next.focus({ preventScroll: true });
+      }
     }));
   }
 

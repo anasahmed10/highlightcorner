@@ -37,6 +37,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | Recap content port | Longer Week 4 recaps stored in `data/recaps.json`; external dashboard/refresh status is unverified |
 | Content refresh preparation | Sleeper player-map refresh and ESPN recap evidence/validation commands; editorial prose remains manual |
 | Copy-link buttons | Highlights cards (copies the matched video URL) + game pages (copies game URL), with "Copied ✓" feedback |
+| Accessible game controls | Named team panels, arrow/Home/End tab navigation, preserved keyboard focus, pressed watched states, and sort-direction announcements; manual spoken-output verification pending |
 | Sortable statistics tables | Every game and fantasy table column sorts with keyboard-accessible headers; sort choices survive in-page refreshes and filters. Box scores show all reported players, and fantasy shows all players with nonzero points. |
 | UI polish | Skeletons, motion-aware scroll-to-top, light/dark themes, three mobile tabs, Settings, focus styles, larger controls and safe-area spacing; full accessibility audit pending |
 | Collapsible game sections | Scoring Summary (hidden by default), Box Score, Team Stats, Fantasy, Injuries — dropdowns with counts |
