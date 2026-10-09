@@ -20,7 +20,7 @@ jobs:
       - name: Test and compile styles
         run: |
           npm test
-          python3 -m unittest discover -s tests -p 'test_highlights.py'
+          python3 -m unittest discover -s tests -p 'test_*.py'
           npm run build:css
           git diff --exit-code -- css/utilities.css
           for script in js/*.js sw.js; do node --check "$script"; done

@@ -327,8 +327,9 @@ or `node --test tests/source.test.cjs`. Run all Python tool checks with:
 python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
-PR CI additionally runs `test_highlights.py`; Pages runs the full Python suite,
-including `test_game_pages.py`, before generation. Python tool tests use the
+PR CI and Pages run the full Python suite, including `test_game_pages.py`,
+before generation. Pages also validates generated matchup pages, sitemap URLs,
+and `js/game-pages.js` before uploading the artifact. Python tool tests use the
 standard library; only the optional nflverse tool needs DuckDB.
 
 - `tests/fixtures/sports.json` contains synthetic ESPN pre/live/final events,
