@@ -59,6 +59,20 @@ test('every public HTML page references existing local assets and valid script s
   }
 });
 
+test('every committed browser script has TypeScript source and page initializers are external', () => {
+  for (const file of fs.readdirSync(path.join(root, 'js')).filter(name => name.endsWith('.js'))) {
+    assert.ok(fs.existsSync(path.join(root, 'src/browser', file.replace(/\.js$/, '.ts'))), `${file}: missing TypeScript source`);
+  }
+  assert.ok(fs.existsSync(path.join(root, 'src/worker/sw.ts')));
+  for (const [page, script] of [['privacy.html', 'js/privacy.js'], ['404.html', 'js/not-found.js']]) {
+    const dom = new JSDOM(fs.readFileSync(path.join(root, page), 'utf8'));
+    try {
+      assert.ok(dom.window.document.querySelector(`script[src="${script}"]`), `${page}: missing ${script}`);
+      assert.equal(dom.window.document.querySelectorAll('script:not([src])').length, 0, `${page}: inline initializer`);
+    } finally { dom.window.close(); }
+  }
+});
+
 test('manifest parses and its start URL and icons exist in the public shell', () => {
   const manifest = readJSON('manifest.webmanifest');
   for (const ref of [manifest.start_url, ...manifest.icons.map(icon => icon.src)]) {

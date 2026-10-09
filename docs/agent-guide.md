@@ -7,10 +7,15 @@ behavior. External schedules and account status require separate verification.
 
 ## Architecture and file map
 
-The repository root is the static site. Tailwind utilities compile locally;
+The repository root is the static site. Browser TypeScript in `src/browser/`
+compiles to committed `js/` files, and `src/worker/sw.ts` compiles to committed
+`sw.js`. Use `npm run build:js` after TypeScript edits and commit both source and
+output. `npm run check:js` checks strict types without writing files. Plain
+compiled scripts keep the existing browser loading order and direct HTTP preview.
+Tailwind utilities compile locally;
 deployment also generates static matchup HTML,
-a game-ID index, sitemap entries and the highlight map. Browser code remains plain
-JavaScript with no application backend or JavaScript bundler. Committed CSS
+a game-ID index, sitemap entries and the highlight map. There is no application
+backend or JavaScript bundler. Committed CSS
 allows immediate local preview. Run `npm ci` and `npm run build:css` when changing
 utility classes; commit `css/utilities.css`. Tailwind Preflight is deliberately
 omitted to preserve the existing stylesheet. Pages with game links load
@@ -27,8 +32,8 @@ break the site. Shared navigation/header markup is repeated across HTML files. N
 | `recaps.html` | `js/recaps.js` | Stored recaps grouped by descending season/week |
 | `game-<espnGameId>.html` (generated) | `js/game.js` | Canonical matchup shell and share metadata, then live game details |
 | `game.html` | `js/game.js` | Matchup, weekly navigation, recap, box score, stats, fantasy, injuries |
-| `privacy.html` | Inline initialization | Privacy text and shared controls |
-| `404.html` | Inline script | Missing-page recovery and theme |
+| `privacy.html` | `js/privacy.js` | Privacy text and shared controls |
+| `404.html` | `js/not-found.js` | Missing-page recovery and theme |
 
 `css/style.css` owns shared styles; `css/utilities.css` contains generated Tailwind
 utilities from `css/tailwind.css`. `js/app.js` owns theme/navigation setup,
@@ -36,6 +41,9 @@ HTTP/ESPN helpers, game normalization, formatting, colors, escaping, preferences
 season/week context, clipboard feedback, skeletons, sortable table behavior, scroll-to-top, and worker registration.
 `js/ads.js` initializes manual advertising and desktop rails; dynamic game content
 calls `HC.renderAds()` after rendering.
+`src/browser/game-pages.ts` compiles to the committed empty game-ID index;
+`tools/build_game_pages.py` replaces its staged JavaScript copy with published
+IDs during deployment.
 
 On Scores, Highlights, and Recaps, the single in-flow ad is a static element
 between lead and remaining content containers. Their page scripts divide rendered
@@ -296,8 +304,12 @@ merging; Pages runs them again before deployment. Page smoke checks use jsdom
 rather than a browser engine. If browser checks cannot be performed, report that
 limit explicitly.
 
-For changed JavaScript, run `node --check path/to/changed-file.js` if Node is
-available. For changed JSON, run `python3 -m json.tool data/recaps.json > /dev/null`
+For TypeScript changes, run `npm run check:js` and `npm run build:js`, then
+check that the generated `js/` files and `sw.js` are committed. The `npm test`
+pretest hook compiles into a temporary directory and fails if committed output
+differs; PR and Pages workflows both run it. For changed compiled JavaScript, run
+`node --check path/to/changed-file.js`. For changed JSON, run
+`python3 -m json.tool data/recaps.json > /dev/null`
 (or the other changed JSON file). Run `git diff --check` for all changes.
 
 ### Automated regression checks (R3)
@@ -377,7 +389,9 @@ findings prevent a safe merge.
 
 - Remote: `https://github.com/anasahmed10/highlightcorner`; production branch `main`.
 - `.github/workflows/deploy.yml` runs on pushes to `main`, manual dispatch and
-  scheduled highlight refreshes. It runs tests/syntax checks, compiles utilities,
+  scheduled highlight refreshes. Through `npm test`, it recompiles TypeScript
+  into a temporary directory and checks the committed output before running
+  tests/syntax checks and compiling utilities. It then
   generates matchup pages and refreshes staged highlights. It substitutes the
   commit SHA for `__BUILD_ID__` in the staged worker, then uploads the explicit
   `_site/` directory of public assets to GitHub Pages. Dependencies,

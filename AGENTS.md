@@ -17,9 +17,10 @@ These instructions apply throughout this repository, regardless of agent model.
 ## Architecture and local preview
 
 - Plain static HTML, shared `css/style.css`, compiled Tailwind utilities, and
-  browser JavaScript. No application backend or JavaScript bundler. Node 24+
-  and Python 3 run `npm test`; `npm run build:css` compiles styles. Commit
-  generated `css/utilities.css`. Deployment also generates static matchup pages
+  TypeScript browser sources in `src/browser/` and `src/worker/`. No application
+  backend or JavaScript bundler. Node 24+ and Python 3 run `npm test`;
+  `npm run build:js` and `npm run build:css` compile scripts and styles. Commit
+  generated `js/*.js`, `sw.js`, and `css/utilities.css`. Deployment also generates static matchup pages
   and refreshes the public highlight map.
 - Run `python3 -m http.server 8080` from the repository root; open
   `http://localhost:8080`. Do not preview through `file://`.
@@ -53,7 +54,8 @@ These instructions apply throughout this repository, regardless of agent model.
 
 - Follow the guide's task-based checks. Check affected pages in the browser;
   shared UI/core changes require checking all consumers.
-- Use `git diff --check`; parse changed JSON; syntax-check changed JavaScript
+- Use `git diff --check`; run `npm run check:js` for changed TypeScript, parse
+  changed JSON, and syntax-check compiled JavaScript
   with `node --check` when Node is available. These do not replace browser checks.
 - Update the guide when architecture/workflows change, `FEATURES.md` when work
   ships, and roadmap status when an upgrade's acceptance criteria are met.

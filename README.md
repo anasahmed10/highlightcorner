@@ -26,9 +26,13 @@ From the repository root:
 python3 -m http.server 8080
 ```
 
-Open `http://localhost:8080`. Committed styles work immediately without installing
-anything. When editing Tailwind utility classes, use Node 24+ and run `npm ci`
-then `npm run build:css`; commit the generated `css/utilities.css`.
+Open `http://localhost:8080`. Committed JavaScript and styles work immediately
+without installing anything. Browser TypeScript lives in `src/browser/` and the
+service worker source lives in `src/worker/sw.ts`. After editing either, use
+Node 24+ and run `npm ci` then `npm run build:js`; commit the generated `js/`
+files and `sw.js` with the source. `npm run check:js` checks types without
+writing output. When editing Tailwind utility classes, run `npm run build:css`
+and commit the generated `css/utilities.css`.
 `npm test` runs fixture-based JavaScript page, data-contract, DOM and worker
 checks, followed by Python content-refresh tests. It requires Node 24+, Python 3
 and `npm ci`. Run `python3 -m unittest discover -s tests -p 'test_*.py'` for
