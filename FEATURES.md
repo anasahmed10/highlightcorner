@@ -1,6 +1,8 @@
 # Highlight Corner — Feature Dashboard
 
-Living tracker for the redesigned static site. Updated as work ships.
+Living tracker for the static site. Checked against `main` and roadmap issues
+on October 9, 2026. Shipped means implemented; remaining device and operational
+checks are called out below.
 Live domain: [highlightcorner.com](https://highlightcorner.com), served through GitHub Pages
 (verified October 6, 2026).
 
@@ -10,11 +12,9 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 
 ## ✅ Shipped
 
-- **Resilient data recovery (R2):** retries on all data pages, malformed optional
-  recap isolation, pending fantasy filter protection, and labeled retained live updates.
-
 | Feature | Notes |
 |---|---|
+| Resilient data recovery (R2) | Retry on every data page, malformed optional recap/highlight isolation, pending fantasy filter protection, and labeled retained live updates |
 | Weekly scoreboard | ESPN data, current-week selection, day grouping, pregame labels without implied 0–0 results, Refresh and labeled updated time; stale responses are ignored; visible pages refresh live scores every minute and pause in the background |
 | Coordinated season/week (R1) | ESPN-discovered regular-season context shared by scores, highlights and fantasy; explicit season/week game and navigation links, rollover/fallback labels, season-tagged recap archive |
 | Game highlights | Colored View Highlights links beside View game on score cards when verified videos are available; three navigation tabs; official YouTube mapping refreshed at deployment and after the usual NFL game windows |
@@ -27,7 +27,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | Spoiler preference | Settings toggle hides scores, records, verdicts, featured picks, recaps and stats from visible/accessibility content; device screen-reader review pending |
 | Favorites + watched | Team favorites w/ filter; watched/unwatched tracking w/ filter |
 | Team colors | Logo-derived, matchup-aware, readable in light/dark |
-| Mobile-first UI | Centered Watch-highlights CTA, responsive layouts; control sizing/accessibility audit proposed |
+| Mobile-first UI | Direct highlight actions, three navigation tabs, responsive layouts, keyboard game tabs, focus restoration and sortable tables; manual screen-reader verification remains |
 | AdSense | Manual in-flow units use the existing Board/Game IDs; desktop rails (≥1280px) use a dedicated Rail ID. Privacy page and `ads.txt` remain in place. |
 | In-flow ad placement | The existing unit appears after five score cards, three highlight cards, or the first recap; these pages keep one stable unit across renders. Revenue impact requires AdSense reporting after ads serve. |
 | SEO basics | Meta/OG/canonical, sitemap.xml, robots.txt, favicon, 404 page |
@@ -47,16 +47,21 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 
 | Feature | Notes |
 |---|---|
-| Automatic highlight discovery | YouTube API matcher verifies official channel, both teams, season/week, and public visibility. YouTube-only key configured in Actions; October 7 live run mapped 61 of 64 completed games. Pages refreshes the map at deployment and after the Thursday, three Sunday, and Monday NFL game windows. |
+| Highlight coverage and operations | Automatic discovery is implemented; missing uploads stay pending, links expire after 30 days without verification, and postseason matching is unsupported. The October 7 live run mapped 61 of 64 completed games; that is historical coverage, not a current completeness claim. |
 | Mobile/PWA upgrade — implemented; device checks pending | Compiled Tailwind utilities and Lucide icons; content before ads; focused regression tests and public-asset deployment. Physical-device install and screen-reader checks remain. |
 
 ## 📋 Proposed upgrades and external follow-ups
 
 Implementation priorities live in [docs/roadmap.md](docs/roadmap.md):
 
-1. Reliability: broader failure recovery.
-2. Trust and usability: device/screen-reader verification, accessibility, reproducible content refresh.
-3. Release quality: deployed update verification and measured performance; matchup search/share metadata shipped.
+1. Finish R4/R5: spoiler coverage and manual screen-reader verification.
+2. Finish R7: browser offline/new-release checks and physical-device installation.
+3. Start R9: measured mobile performance, layout shifts and ad quality.
+4. Scope R10: accounts, community comments and paid data access remain proposed
+   discovery in [issue #14](https://github.com/anasahmed10/highlightcorner/issues/14).
+
+R1, R2, R3, R6 and R8 are shipped. Acceptance criteria and implementation
+references live in the roadmap.
 
 | Follow-up | Current evidence / next action |
 |---|---|

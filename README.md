@@ -4,6 +4,9 @@ A mobile-first NFL hub for scores, outbound official game highlights, weekly fan
 leaders, original humorous recaps, and game centers with box scores, team stats,
 fantasy scorers, and injuries.
 
+Documentation checked against `main` on October 9, 2026. Roadmap statuses and
+remaining verification are tracked in [docs/roadmap.md](docs/roadmap.md).
+
 Live site: [highlightcorner.com](https://highlightcorner.com).
 `www.highlightcorner.com` redirects to the canonical apex domain (checked October 6, 2026).
 
@@ -26,8 +29,12 @@ python3 -m http.server 8080
 Open `http://localhost:8080`. Committed styles work immediately without installing
 anything. When editing Tailwind utility classes, use Node 24+ and run `npm ci`
 then `npm run build:css`; commit the generated `css/utilities.css`.
-`npm test` runs fixture-based page smoke, data-contract, DOM, and service-worker
-regression checks without live providers or advertising services. Preview over HTTP rather than opening HTML files directly.
+`npm test` runs fixture-based JavaScript page, data-contract, DOM and worker
+checks, followed by Python content-refresh tests. It requires Node 24+, Python 3
+and `npm ci`. Run `python3 -m unittest discover -s tests -p 'test_*.py'` for
+all Python tools, including highlight matching and matchup-page generation.
+These checks use fixtures without live providers or advertising services.
+Preview over HTTP rather than opening HTML files directly.
 If the service worker keeps showing old local files, unregister it and clear the
 preview origin's cache in browser developer tools.
 
@@ -60,7 +67,9 @@ visible; polling pauses in background tabs, and game-center polling stops after
 the game is final. Scores, highlights and fantasy share a selectable regular-season
 year and week discovered from ESPN; fantasy requests Sleeper for that year. The
 year and week travel in navigation and game links. Missing discovery data and
-unavailable weeks are labeled. Broader failure recovery remains a roadmap priority.
+unavailable weeks are labeled. Every data page offers retry controls; failed live
+updates retain their last successful view with a notice. Optional recap/highlight
+data failures do not prevent usable scores or game summaries.
 
 Highlight buttons use `data/highlights.json` to open the official video matched
 to that ESPN game ID. `tools/refresh_highlights.py` discovers NFL-channel uploads
@@ -110,8 +119,8 @@ Repository: [anasahmed10/highlightcorner](https://github.com/anasahmed10/highlig
 The production branch is `main`.
 
 `.github/workflows/deploy.yml` deploys the static root through GitHub Actions to
-GitHub Pages on pushes to `main` or manual dispatch. It stamps the commit SHA into
-the service-worker cache name. Keep `__BUILD_ID__` in the source `sw.js`.
+GitHub Pages on pushes to `main`, manual dispatch and scheduled highlight
+refreshes. It stamps the commit SHA into the service-worker cache name. Keep `__BUILD_ID__` in the source `sw.js`.
 `CNAME` declares `highlightcorner.com`; GitHub hosting was verified October 6, 2026.
 
 The workflow builds matchup pages from ESPN's regular-season schedules with
@@ -125,7 +134,8 @@ preview uses legacy query links.
 
 The ignored `.vercel/` folder is historical deployment output.
 
-The Pages workflow runs regression checks, syntax checks, and the Tailwind build,
+The Pages workflow runs regression and syntax checks, all Python tool tests and
+the Tailwind build. It generates matchup pages, refreshes highlight links,
 then uploads an explicit public asset directory. Development dependencies, tests,
 tools, and agent documentation are excluded. Run the browser checks in the
 maintenance guide before publication.
