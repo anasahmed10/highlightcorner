@@ -19,7 +19,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | Coordinated season/week (R1) | ESPN-discovered regular-season context shared by scores, highlights and fantasy; explicit season/week game and navigation links, rollover/fallback labels, season-tagged recap archive |
 | Game highlights | Colored View Highlights links beside View game on score cards when verified videos are available; three navigation tabs; official YouTube mapping refreshed at deployment and after the usual NFL game windows |
 | Regression checks (R3) | Offline provider fixtures; smoke checks for all seven pages; normalization/context/preferences/failure/race coverage; stored-data and source checks in PR and pre-deployment CI |
-| Fantasy leaders | PPR / half-PPR / standard, via Sleeper |
+| Fantasy leaders | PPR / half-PPR / standard, via Sleeper; points beside player names, with stat lines underneath on mobile so points are visible without horizontal scrolling |
 | Recap show more (game page) | Recap body clamps to 3 lines with Show more/less on mobile so the box score sits higher; full text on desktop |
 | Comedic recaps | Original multi-paragraph narratives with verdicts (nail-biter, comfortable, garbage-time, blowout); Week 4 stored in JSON |
 | Recap score panels | Prominent away/home teams in readable team colors and final scores above headlines on Recaps and game pages; respects themes and Hide spoilers |

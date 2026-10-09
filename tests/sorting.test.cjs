@@ -51,6 +51,11 @@ test('fantasy sorts all columns, includes nonzero low and negative scores, and r
   await until(() => p.doc.querySelector('#fantasy table'));
   const wr = () => [...p.doc.querySelectorAll('#fantasy table')].find(table => table.caption.textContent === 'Wide Receivers');
   assert.equal(wr().tBodies[0].rows.length, 2);
+  assert.match(wr().tHead.rows[0].cells[2].textContent, /^Pts/);
+  assert.equal(wr().tHead.rows[0].cells[2].getAttribute('aria-sort'), 'descending');
+  assert.equal(wr().tBodies[0].rows[1].cells[2].textContent, '-2.0');
+  assert.equal(wr().tBodies[0].rows[0].querySelector('.fantasy-mobile-line').textContent,
+    wr().tBodies[0].rows[0].querySelector('.fantasy-line').textContent);
   assert.ok([...wr().querySelectorAll('thead th')].every(th => th.querySelector('button')));
   control(wr(), 'Player').click();
   assert.match(wr().tBodies[0].rows[0].cells[1].textContent, /Fixture Receiver/);

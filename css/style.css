@@ -366,6 +366,18 @@ button.chip { min-height: 44px; font-size: .8rem; }
 .game-nav .game-nav-btn { font-size: .8rem; }
 .table-wrap { overflow-x: auto; }
 #fantasy { overflow-x: auto; }
+.fantasy-mobile-line { display: none; }
+#fantasy .fantasy-stats th:nth-child(2) .table-sort { justify-content: flex-start; }
+@media (max-width: 699px) {
+  #fantasy table.fantasy-stats { table-layout: fixed; }
+  #fantasy .fantasy-stats th:first-child { width: 44px; }
+  #fantasy .fantasy-stats .fantasy-points { width: 76px; }
+  #fantasy .fantasy-stats .fantasy-line { display: none; }
+  #fantasy .fantasy-stats td.pl { white-space: normal; overflow-wrap: anywhere; }
+  #fantasy .fantasy-mobile-line { display: block; margin-top: 4px; color: var(--muted);
+    font-size: .78rem; font-weight: 400; line-height: 1.5; }
+  #fantasy .fantasy-points strong { font-size: 1.05rem; }
+}
 .site-footer { padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
 .ad-slot { margin: 24px 0; background: var(--card); border-radius: 12px; }
 .ad-slot:has(ins[data-ad-status="unfilled"]) { display: none; }

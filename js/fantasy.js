@@ -22,11 +22,12 @@
       const list = byPos[pos] || [];
       if (!list.length) return '';
       const trs = list.map((r, i) =>
-        `<tr><td>${i + 1}</td><td class="pl">${HC.esc(r.name)} <span class="pos">${HC.esc(r.team)}</span></td>` +
-        `<td>${HC.esc(statline(pos, r.s))}</td><td><strong>${r.pts.toFixed(1)}</strong></td></tr>`).join('');
-      return `<table class="stats" data-sort-id="fantasy-${pos}" data-sort-default="3"><caption>${label}</caption>
+        `<tr><td>${i + 1}</td><td class="pl" data-sort-value="${HC.esc(r.name)} ${HC.esc(r.team)}">${HC.esc(r.name)} <span class="pos">${HC.esc(r.team)}</span>` +
+        `<span class="fantasy-mobile-line">${HC.esc(statline(pos, r.s))}</span></td>` +
+        `<td class="fantasy-points"><strong>${r.pts.toFixed(1)}</strong></td><td class="fantasy-line">${HC.esc(statline(pos, r.s))}</td></tr>`).join('');
+      return `<table class="stats fantasy-stats" data-sort-id="fantasy-${pos}" data-sort-default="2"><caption>${label}</caption>
         <thead><tr><th data-sort-type="number">#</th><th data-sort-type="text">Player</th>` +
-        `<th data-sort-type="text">Line</th><th data-sort-type="number">Pts</th></tr></thead><tbody>${trs}</tbody></table>`;
+        `<th class="fantasy-points" data-sort-type="number">Pts</th><th class="fantasy-line" data-sort-type="text">Line</th></tr></thead><tbody>${trs}</tbody></table>`;
     }).join('') || `<div class="empty">No fantasy stats available for the ${HC.context.season} regular season, Week ${HC.context.week} yet.</div>`;
     HC.contentReady(box);
   }
