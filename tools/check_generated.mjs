@@ -21,7 +21,10 @@ try {
   for (const file of files) {
     const expected = readFileSync(join(temp, file));
     const committed = readFileSync(join(root, file));
-    if (!expected.equals(committed)) throw new Error(`${file} differs from TypeScript output; run npm run build:js`);
+    if (!expected.equals(committed)) {
+      const first = expected.findIndex((byte, index) => byte !== committed[index]);
+      throw new Error(`${file} differs from TypeScript output at byte ${first} (${expected.length} generated, ${committed.length} committed); run npm run build:js`);
+    }
   }
   console.log(`TypeScript output matches ${files.length} committed scripts.`);
 } finally {
