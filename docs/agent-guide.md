@@ -77,10 +77,15 @@ data failures.
   shows a score-margin label immediately, fetches each final summary once per
   final score while it succeeds, and refines labels from scoring plays. Failed
   summaries are retried on the next scoreboard refresh. Nail-biter includes overtime,
-  one-score margin after every scoring play, and a one-score game at the two-minute
-  mark. Late consolation scoring after a 17-point deficit is garbage-time when
-  the game was still more than one score apart at two minutes; final margins of
-  17+ are blowouts. Missing or inconsistent play timelines use the score margin.
+  one-score margin after every scoring play, a late fourth-quarter lead change,
+  and a one-score game at the two-minute mark. A late score by the eventual loser
+  is garbage-time when ESPN's play-linked win probability gives that team at
+  most 5% chance afterward, never more than 10% later, and at most 1% at the
+  end. When that series is unavailable, the conservative fallback requires a
+  late score inside two minutes after a 17-point deficit that still leaves a
+  two-score final margin. A close game at two minutes, or at five minutes before
+  late scores stretch the final margin to 17+, stays a nail-biter; other 17+
+  margins are blowouts. Missing or inconsistent play timelines use the score margin.
   Game and Recaps pages use the same classifier; stored recap verdicts remain a
   fallback when ESPN game data is unavailable. No LLM is used for labels.
 - `HC.initSeasonWeek(seasonEl, weekEl)` discovers the default ESPN year/type/week,

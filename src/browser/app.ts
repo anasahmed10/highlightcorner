@@ -204,8 +204,11 @@
     const fallback: GameVerdict = margin <= 8 ? 'nail-biter' : margin >= 17 ? 'blowout' : 'comfortable';
     const raw = summary?.scoringPlays;
     if (!Array.isArray(raw) || !raw.length) return fallback;
+    if (raw.some(play => play?.awayScore == null || play?.homeScore == null)) return fallback;
     const plays = raw.map(play => ({
-      period: Number(play?.period?.number), clock: Number(play?.clock?.value),
+      id: play?.id == null ? '' : String(play.id),
+      period: Number(play?.period?.number),
+      clock: play?.clock?.value == null ? NaN : Number(play.clock.value),
       away: Number(play?.awayScore), home: Number(play?.homeScore)
     }));
     if (plays.some(p => !Number.isInteger(p.period) || p.period < 1 ||
@@ -231,15 +234,51 @@
     const atTwo = [...plays].reverse().find(p => p.period < 4 ||
       (p.period === 4 && Number.isFinite(p.clock) && p.clock >= 120));
     const twoMinuteMargin = atTwo ? Math.abs(atTwo.away - atTwo.home) : 0;
-    const loserIsAway = away < home;
-    const lateConsolation = plays.some((p, i) => {
-      if (p.period !== 4 || !Number.isFinite(p.clock) || p.clock > 300) return false;
-      const before = plays[i - 1] || { away: 0, home: 0 };
-      const deficit = loserIsAway ? before.home - before.away : before.away - before.home;
-      const loserScored = loserIsAway ? p.away > before.away : p.home > before.home;
-      return deficit >= 17 && loserScored;
+    let priorLeader = 0;
+    const lateLeadChange = plays.some(p => {
+      const leader = Math.sign(p.away - p.home);
+      const changed = p.period === 4 && p.clock <= 300 && leader !== 0 &&
+        priorLeader !== 0 && leader !== priorLeader;
+      if (leader !== 0) priorLeader = leader;
+      return changed;
     });
-    if (lateConsolation && twoMinuteMargin > 8 && margin <= 16) return 'garbage-time';
+    if (lateLeadChange) return 'nail-biter';
+
+    // A defensive score at or after 2:00 can make the two-minute snapshot look
+    // lopsided even though the game was still within one score five minutes out.
+    const atFive = [...plays].reverse().find(p => p.period < 4 ||
+      (p.period === 4 && p.clock > 300));
+    if (margin >= 17 && (!atFive || Math.abs(atFive.away - atFive.home) <= 8))
+      return 'nail-biter';
+
+    const loserIsAway = away < home;
+    const probability = summary?.winprobability;
+    const loserChance = (homeChance: number) => loserIsAway ? 1 - homeChance : homeChance;
+    const lateLoserScores = plays.flatMap((p, i) => {
+      if (p.period !== 4 || p.clock > 300) return [];
+      const before = plays[i - 1] || { away: 0, home: 0 };
+      const loserScored = loserIsAway ? p.away > before.away : p.home > before.home;
+      if (!loserScored) return [];
+      const index = Array.isArray(probability) ? probability.findIndex(entry =>
+        entry != null && String(entry.playId) === p.id) : -1;
+      const homeChances = index < 0 ? [] : probability!.slice(index)
+        .map(entry => entry?.homeWinPercentage == null ? NaN : Number(entry.homeWinPercentage));
+      const chances = homeChances.every(value => Number.isFinite(value) && value >= 0 && value <= 1)
+        ? homeChances.map(loserChance) : [];
+      return [{ play: p, before, chances }];
+    });
+    const lowWinChance = margin <= 16 && lateLoserScores.some(({ chances }) =>
+      chances.length >= 2 && chances[0] <= 0.05 + 1e-9 &&
+      Math.max(...chances) <= 0.10 + 1e-9 && chances[chances.length - 1] <= 0.01 + 1e-9);
+    // With no usable win-probability sequence, require a two-possession deficit
+    // even after a score inside two minutes before calling it garbage time.
+    const clearConsolation = margin > 8 && margin <= 16 && twoMinuteMargin > 8 &&
+      lateLoserScores.some(({ play, before, chances }) => {
+        if (chances.length) return false;
+        const deficit = loserIsAway ? before.home - before.away : before.away - before.home;
+        return play.clock <= 120 && deficit >= 17 && Math.abs(play.away - play.home) > 8;
+      });
+    if (lowWinChance || clearConsolation) return 'garbage-time';
     if (twoMinuteMargin <= 8) return 'nail-biter';
     if (margin >= 17) return 'blowout';
     return 'comfortable';

@@ -23,7 +23,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | Fantasy leaders | PPR / half-PPR / standard, via Sleeper; points beside player names, with stat lines underneath on mobile so points are visible without horizontal scrolling |
 | Recap show more (game page) | Recap body clamps to 3 lines with Show more/less on mobile so the box score sits higher; full text on desktop |
 | Scoreboard verdict pills | Verdict colors fill the complete pill, with centered labels sized to match the adjacent controls |
-| Automatic final-game verdicts | ESPN scores and scoring plays classify completed games across Scores, Game, and Recaps without LLM calls; one-score throughout counts as Nail Biter; score-margin fallback covers unavailable timelines |
+| Automatic final-game verdicts | ESPN scores, scoring plays and win probability classify completed games across Scores, Game, and Recaps without LLM calls; late lead changes and one-score games throughout count as Nail Biter; incomplete data uses a conservative fallback |
 | Comedic recaps | Original multi-paragraph narratives with verdicts (nail-biter, comfortable, garbage-time, blowout); Week 4 stored in JSON |
 | Recap score panels | Prominent away/home teams in readable team colors and final scores above headlines on Recaps and game pages; respects themes and Hide spoilers |
 | Game center pages | Matchup/highlights → recap → scoring summary → tabbed box score → team stats → fantasy → tabbed injuries; prev/next game nav; live game details refresh every minute while visible and stop after the final status |
