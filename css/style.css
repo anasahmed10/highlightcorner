@@ -208,6 +208,7 @@ button.chip { cursor: pointer; border: 0; font: inherit; }
 /* AdSense slots: collapse gracefully until Google approves the site */
 .ad-slot { margin: 4px 0 14px; }
 .ad-slot ins.adsbygoogle { display: block; }
+.ad-slot[data-hc-ad-status="blocked"], .ad-rail[data-hc-ad-status="blocked"] { display: none; }
 
 /* desktop side rails (injected by ads.js; hidden below 1280px) */
 .ad-rail { display: none; position: fixed; top: 120px; z-index: 40; }

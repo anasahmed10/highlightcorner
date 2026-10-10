@@ -33,6 +33,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | Team colors | Logo-derived, matchup-aware, readable in light/dark |
 | Mobile-first UI | Direct highlight actions, three navigation tabs, responsive layouts, keyboard game tabs, focus restoration and sortable tables; manual screen-reader verification remains |
 | AdSense | Manual in-flow units use the existing Board/Game IDs; desktop rails (≥1280px) use a dedicated Rail ID. Privacy page and `ads.txt` remain in place. |
+| Measured performance and ad quality (R9) | Repeatable Lighthouse mobile baselines cover Scores, Game Center, and Privacy. AdSense loads once on demand; Privacy/404 skip it, blocked and unfilled units collapse, and repeat render calls queue each unit once. Privacy dropped from one provider-script request to zero; scoreboard CLS baseline (0.524) is recorded for follow-up. |
 | In-flow ad placement | The existing unit appears after five score cards, three highlight cards, or the first recap; these pages keep one stable unit across renders. Revenue impact requires AdSense reporting after ads serve. |
 | SEO basics | Meta/OG/canonical, sitemap.xml, robots.txt, favicon, 404 page |
 | Matchup sharing | Build-time regular-season game pages from 2026 through the current year, plus a probe of the next season, expose matchup-specific HTML metadata and canonical URLs; sitemap lists only generated valid matchups, while legacy query links remain usable and noindex |
@@ -62,11 +63,10 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 Implementation priorities live in [docs/roadmap.md](docs/roadmap.md):
 
 1. Finish R4/R5: spoiler coverage and manual screen-reader verification.
-2. Start R9: measured mobile performance, layout shifts and ad quality.
-3. Scope R10: accounts, community comments and paid data access remain proposed
+2. Scope R10: accounts, community comments and paid data access remain proposed
    discovery in [issue #14](https://github.com/anasahmed10/highlightcorner/issues/14).
 
-R1, R2, R3, R6, R7 and R8 are shipped. Acceptance criteria and implementation
+R1, R2, R3, R6, R7, R8 and R9 are shipped. Acceptance criteria and implementation
 references live in the roadmap.
 
 | Follow-up | Current evidence / next action |
