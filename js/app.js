@@ -14,8 +14,8 @@
     <div class="settings-row flex items-center justify-between gap-4"><div><strong>Appearance</strong><p>Switch between light and dark.</p></div><button class="theme-toggle">Theme</button></div>
     <div class="settings-row flex items-center justify-between gap-4"><div><strong>Hide spoilers</strong><p>Hide scores, outcomes, recaps, and stats.</p></div><button class="spoiler-toggle" aria-pressed="false">Off</button></div>
     <div class="settings-install"><h3>Game day, one tap away</h3><p>Add Highlight Corner to your home screen for quick access.</p>
-    <button class="btn btn-primary install-action flex items-center justify-center gap-2"><img src="icons/ui/download.svg" alt="" width="18" height="18">Add to Home Screen</button>
-    <div id="installHelp" class="install-help" tabindex="-1"><p><strong>iPhone / iPad</strong><br>Open this site in Safari. Open the Share menu, tap Add to Home Screen, then Add. Keep Open as Web App on if shown.</p><p><strong>Android</strong><br>Open your browser’s menu and choose Install app or Add to Home screen. If you’re in another app’s browser, open this site in Chrome first.</p></div>
+    <button class="btn btn-primary install-action flex items-center justify-center gap-2" aria-controls="installHelp" aria-expanded="false"><img src="icons/ui/download.svg" alt="" width="18" height="18">Show home screen steps</button>
+    <div id="installHelp" class="install-help" tabindex="-1" hidden><p><strong>iPhone / iPad</strong><br>Open this site in Safari. Tap Share (or More, then Share), scroll to Add to Home Screen, turn on Open as Web App if shown, then tap Add. If Add to Home Screen is missing, scroll down and tap Edit Actions to add it.</p><p><strong>Android</strong><br>Open your browser’s menu and choose Install app or Add to Home screen. If you’re in another app’s browser, open this site in Chrome first.</p></div>
     </div><a class="settings-privacy" href="privacy.html">Privacy &amp; data sources →</a>`;
     document.body.appendChild(dialog);
     document.querySelectorAll('.settings-toggle').forEach(b => b.addEventListener('click', () => dialog.showModal()));
@@ -32,7 +32,7 @@
     promo.className = 'install-promo';
     promo.hidden = true;
     promo.setAttribute('aria-label', 'Add Highlight Corner to your home screen');
-    promo.innerHTML = `<div class="flex items-start justify-between gap-3"><div><p class="eyebrow">YOUR HOME-SCREEN HUDDLE</p><h2>Keep game day close.</h2><p>Scores, highlights, and recaps. One tap away.</p></div><button class="icon-button" id="dismissInstall" aria-label="Dismiss home-screen suggestion"><img src="icons/ui/x.svg" alt="" width="20" height="20"></button></div><button class="btn btn-primary install-action" id="installPromoAction">Add to Home Screen</button>`;
+    promo.innerHTML = `<div class="flex items-start justify-between gap-3"><div><p class="eyebrow">YOUR HOME-SCREEN HUDDLE</p><h2>Keep game day close.</h2><p>Scores, highlights, and recaps. One tap away.</p></div><button class="icon-button" id="dismissInstall" aria-label="Dismiss home-screen suggestion"><img src="icons/ui/x.svg" alt="" width="20" height="20"></button></div><button class="btn btn-primary install-action" id="installPromoAction" aria-controls="installHelp" aria-expanded="false">Show home screen steps</button>`;
     document.querySelector('main').appendChild(promo);
     /* ---------- theme ---------- */
     const root = document.documentElement;
@@ -524,15 +524,25 @@
     let installedThisSession = false;
     const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
     const installButtons = [...document.querySelectorAll('.install-action')];
+    const installHelp = document.getElementById('installHelp');
+    function showInstallHelp() {
+        if (!dialog.open)
+            dialog.showModal();
+        installHelp.hidden = false;
+        installButtons.forEach(b => b.setAttribute('aria-expanded', 'true'));
+        installHelp.focus();
+    }
     function updateInstall() {
         const installed = standalone() || installedThisSession;
         installButtons.forEach(b => {
             b.hidden = installed;
-            b.textContent = installEvent ? 'Install Highlight Corner' : 'Add to Home Screen';
+            b.textContent = installEvent ? 'Install Highlight Corner' : 'Show home screen steps';
         });
-        document.getElementById('installHelp').hidden = installed;
-        if (installed)
+        if (installed) {
+            installHelp.hidden = true;
+            installButtons.forEach(b => b.setAttribute('aria-expanded', 'false'));
             promo.hidden = true;
+        }
     }
     window.addEventListener('beforeinstallprompt', e => {
         e.preventDefault();
@@ -544,7 +554,8 @@
         installEvent = null;
         installButtons.forEach(b => { b.hidden = true; });
         promo.hidden = true;
-        document.getElementById('installHelp').hidden = true;
+        installHelp.hidden = true;
+        installButtons.forEach(b => b.setAttribute('aria-expanded', 'false'));
     });
     window.matchMedia('(display-mode: standalone)').addEventListener('change', updateInstall);
     installButtons.forEach(b => b.addEventListener('click', async () => {
@@ -557,18 +568,20 @@
                 await event.userChoice;
             }
             catch (e) {
-                if (!dialog.open)
-                    dialog.showModal();
+                showInstallHelp();
             }
             finally {
                 installButtons.forEach(btn => { btn.disabled = false; });
                 updateInstall();
             }
         }
+        else if (dialog.open && b.closest('#settingsDialog') && !installHelp.hidden) {
+            installHelp.hidden = true;
+            installButtons.forEach(btn => btn.setAttribute('aria-expanded', 'false'));
+            b.focus();
+        }
         else {
-            if (!dialog.open)
-                dialog.showModal();
-            document.getElementById('installHelp').focus();
+            showInstallHelp();
         }
     }));
     document.getElementById('dismissInstall').addEventListener('click', () => {

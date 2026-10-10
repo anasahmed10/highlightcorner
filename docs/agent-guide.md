@@ -443,8 +443,9 @@ performed in the completion report.
 ## Mobile app UI and install checks
 
 Settings exposes theme, Hide spoilers, privacy, and home-screen help. Installation
-uses `beforeinstallprompt` only after a user tap when supported; instructions
-remain available elsewhere. `appinstalled`, standalone display mode, and the iOS
+uses `beforeinstallprompt` only after a user tap when supported. Without a native
+prompt, both the Settings action and scoreboard promotion reveal Safari/Android
+instructions in Settings, with focus moved to the steps. `appinstalled`, standalone display mode, and the iOS
 standalone flag hide install controls. Check actual Safari/iOS and Chrome/Android
 installation on devices before calling device behavior verified. The stable
 manifest ID is `/index.html`, matching the previous start URL identity.
