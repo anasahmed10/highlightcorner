@@ -18,6 +18,12 @@
       "sizes": "512x512",
       "src": "icons/icon-maskable-512.png",
       "type": "image/png"
+    },
+    {
+      "purpose": "any",
+      "sizes": "180x180",
+      "src": "icons/apple-touch-icon.png",
+      "type": "image/png"
     }
   ],
   "name": "Highlight Corner \u2014 NFL Scores & Recaps",

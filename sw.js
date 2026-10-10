@@ -12,6 +12,7 @@ const APP_SHELL = [
     'js/recaps.js', 'js/game.js', 'js/ads.js', 'js/privacy.js', 'js/not-found.js',
     'manifest.webmanifest', 'favicon.svg',
     'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
+    'icons/brand-mark.svg',
     'icons/apple-touch-icon.png',
     'icons/ui/list.svg', 'icons/ui/play.svg', 'icons/ui/chart-no-axes-column.svg',
     'icons/ui/notebook-pen.svg', 'icons/ui/settings.svg', 'icons/ui/x.svg',
