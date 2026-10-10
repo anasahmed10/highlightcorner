@@ -2,6 +2,40 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { page, until, fixture, select, reply, deferred } = require('./helpers/page.cjs');
 
+test('automatic verdict uses scoring history and never labels unfinished games', t => {
+  const { w } = page(t, 'privacy.html');
+  const game = (away, home, completed = true) => ({
+    id: 'verdict', state: completed ? 'post' : 'in', completed,
+    away: { score: away }, home: { score: home }
+  });
+  const play = (period, clock, awayScore, homeScore) => ({
+    period: { number: period }, clock: { value: clock }, awayScore, homeScore
+  });
+  const verdict = (g, plays) => w.HC.gameVerdict(g, { scoringPlays: plays });
+  assert.equal(w.HC.gameVerdict(game(7, 10, false)), null);
+  assert.equal(verdict(game(20, 17), [play(1, 600, 7, 0), play(2, 500, 7, 3), play(2, 400, 7, 10),
+    play(3, 300, 14, 10), play(4, 600, 14, 17), play(4, 360, 20, 17)]), 'nail-biter',
+  'a game within one score throughout stays a nail-biter without late scoring');
+  assert.equal(verdict(game(24, 27), [play(1, 600, 7, 0), play(2, 400, 7, 14),
+    play(3, 300, 7, 21), play(4, 240, 14, 21), play(4, 120, 21, 21), play(4, 90, 24, 21),
+    play(4, 10, 24, 27)]), 'nail-biter');
+  assert.equal(verdict(game(20, 24), [play(1, 600, 0, 7), play(2, 400, 0, 14),
+    play(3, 300, 0, 21), play(4, 600, 0, 24), play(4, 240, 7, 24), play(4, 60, 14, 24),
+    play(4, 10, 20, 24)]), 'garbage-time');
+  assert.equal(verdict(game(7, 31), [play(1, 600, 0, 7), play(2, 400, 0, 14),
+    play(3, 300, 0, 21), play(4, 600, 0, 28), play(4, 400, 0, 31),
+    play(4, 30, 7, 31)]), 'blowout');
+  assert.equal(verdict(game(14, 27), [play(1, 600, 0, 7), play(2, 400, 0, 14),
+    play(3, 300, 7, 14), play(4, 600, 7, 21), play(4, 400, 14, 21),
+    play(4, 150, 14, 27)]), 'comfortable');
+  assert.equal(w.HC.gameVerdict(game(10, 23), { scoringPlays: [] }), 'comfortable');
+  assert.equal(w.HC.gameVerdict(game(10, 17), { scoringPlays: [play(4, 20, 7, 17)] }), 'nail-biter',
+    'incomplete timeline falls back to final margin');
+  assert.equal(w.HC.gameVerdict(game(20, 24), { scoringPlays: [
+    play(1, 600, 0, 7), play(4, undefined, 20, 24)
+  ] }), 'nail-biter', 'missing fourth-quarter clocks cannot imply garbage time');
+});
+
 for (const [index, state, away, home, score] of [
   [0, 'pre', 'TB', 'DAL', '0'], [1, 'in', 'NE', 'NYJ', '14'], [2, 'post', 'PIT', 'CLE', '24']
 ]) test(`normalizes ${state} games independently of competitor order`, t => {

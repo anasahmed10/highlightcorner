@@ -193,6 +193,58 @@
     };
   };
 
+  // Score-only verdicts appear immediately; a final summary can refine them
+  // using ESPN's chronological scoring timeline without an editorial/LLM call.
+  HC.gameVerdict = (game, summary) => {
+    if (!game.completed || game.state !== 'post') return null;
+    const away = Number(game.away.score), home = Number(game.home.score);
+    if (game.away.score == null || game.home.score == null ||
+        !Number.isFinite(away) || !Number.isFinite(home) || away < 0 || home < 0) return null;
+    const margin = Math.abs(away - home);
+    const fallback: GameVerdict = margin <= 8 ? 'nail-biter' : margin >= 17 ? 'blowout' : 'comfortable';
+    const raw = summary?.scoringPlays;
+    if (!Array.isArray(raw) || !raw.length) return fallback;
+    const plays = raw.map(play => ({
+      period: Number(play?.period?.number), clock: Number(play?.clock?.value),
+      away: Number(play?.awayScore), home: Number(play?.homeScore)
+    }));
+    if (plays.some(p => !Number.isInteger(p.period) || p.period < 1 ||
+        !Number.isFinite(p.away) || !Number.isFinite(p.home) || p.away < 0 || p.home < 0)) return fallback;
+    if (plays.some(p => p.period === 4 && (!Number.isFinite(p.clock) || p.clock < 0 || p.clock > 900)))
+      return fallback;
+    const last = plays[plays.length - 1];
+    if (last.away !== away || last.home !== home) return fallback;
+    let previous = { away: 0, home: 0, period: 1, clock: 900 };
+    for (const play of plays) {
+      if (play.away < previous.away || play.home < previous.home ||
+          play.away - previous.away > 8 || play.home - previous.home > 8 ||
+          play.period < previous.period ||
+          (play.period === previous.period && Number.isFinite(play.clock) &&
+           Number.isFinite(previous.clock) && play.clock > previous.clock)) return fallback;
+      previous = play;
+    }
+    if (plays.some(p => p.period >= 5) || plays.every(p => Math.abs(p.away - p.home) <= 8))
+      return 'nail-biter';
+
+    // The last scoring play before the two-minute mark gives the score then.
+    // A late consolation score must not turn an earlier blowout into a nail-biter.
+    const atTwo = [...plays].reverse().find(p => p.period < 4 ||
+      (p.period === 4 && Number.isFinite(p.clock) && p.clock >= 120));
+    const twoMinuteMargin = atTwo ? Math.abs(atTwo.away - atTwo.home) : 0;
+    const loserIsAway = away < home;
+    const lateConsolation = plays.some((p, i) => {
+      if (p.period !== 4 || !Number.isFinite(p.clock) || p.clock > 300) return false;
+      const before = plays[i - 1] || { away: 0, home: 0 };
+      const deficit = loserIsAway ? before.home - before.away : before.away - before.home;
+      const loserScored = loserIsAway ? p.away > before.away : p.home > before.home;
+      return deficit >= 17 && loserScored;
+    });
+    if (lateConsolation && twoMinuteMargin > 8 && margin <= 16) return 'garbage-time';
+    if (twoMinuteMargin <= 8) return 'nail-biter';
+    if (margin >= 17) return 'blowout';
+    return 'comfortable';
+  };
+
   /* ---------- dates: always viewer-local, always labeled ---------- */
   HC.fmtDate = function (iso) {
     if (!iso) return '';
