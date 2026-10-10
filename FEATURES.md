@@ -37,7 +37,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | Matchup sharing | Build-time regular-season game pages from 2026 through the current year, plus a probe of the next season, expose matchup-specific HTML metadata and canonical URLs; sitemap lists only generated valid matchups, while legacy query links remain usable and noindex |
 | Crawlable recaps and future games | Scheduled Pages builds publish ESPN-listed future matchups automatically; published editorial recaps appear in initial matchup HTML and a static recap index, with no separate weekly SEO edits |
 | Matchup release checks | PR CI runs every Python tool test; Pages verifies generated matchup files, sitemap URLs, and the game-page lookup before uploading the site |
-| PWA | Manifest, icons, offline shell, home-screen actions that reveal iOS/Android steps when no native prompt is available, native prompt when supported, dismissed/standalone promotion handling; physical-device installation pending |
+| PWA | Manifest, icons, offline shell, home-screen actions that reveal iOS/Android steps when no native prompt is available, native prompt when supported, dismissed/standalone promotion handling; owner confirmed installation and offline launch on a physical phone October 10 |
 | Brand identity | A single corner route with an O and X evokes a sports playsheet; shared wordmark and matching favicon, Apple touch icon, and Android/PWA icons |
 | Recap supporting statistics | `tools/nflverse_week.py` emits nflverse evidence for regular-season recaps; does not write recap prose |
 | Recap content port | Longer Week 4 recaps stored in `data/recaps.json`; external dashboard/refresh status is unverified |
@@ -54,19 +54,18 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | Feature | Notes |
 |---|---|
 | Highlight coverage and operations | Automatic discovery is implemented; missing uploads stay pending, links expire after 30 days without verification, and postseason matching is unsupported. The October 7 live run mapped 61 of 64 completed games; that is historical coverage, not a current completeness claim. |
-| Mobile/PWA upgrade — implemented; device checks pending | Compiled Tailwind utilities and Lucide icons; content before ads; focused regression tests and public-asset deployment. Physical-device install and screen-reader checks remain. |
+| Mobile/PWA upgrade — screen-reader checks pending | Compiled Tailwind utilities and Lucide icons; content before ads; focused regression tests and public-asset deployment. Physical-phone installation and offline launch confirmed; screen-reader checks remain. |
 
 ## 📋 Proposed upgrades and external follow-ups
 
 Implementation priorities live in [docs/roadmap.md](docs/roadmap.md):
 
 1. Finish R4/R5: spoiler coverage and manual screen-reader verification.
-2. Finish R7: confirm the release update on production and installation on a physical device. Local browser offline/update checks found and fixed stale shell preloading.
-3. Start R9: measured mobile performance, layout shifts and ad quality.
-4. Scope R10: accounts, community comments and paid data access remain proposed
+2. Start R9: measured mobile performance, layout shifts and ad quality.
+3. Scope R10: accounts, community comments and paid data access remain proposed
    discovery in [issue #14](https://github.com/anasahmed10/highlightcorner/issues/14).
 
-R1, R2, R3, R6 and R8 are shipped. Acceptance criteria and implementation
+R1, R2, R3, R6, R7 and R8 are shipped. Acceptance criteria and implementation
 references live in the roadmap.
 
 | Follow-up | Current evidence / next action |
