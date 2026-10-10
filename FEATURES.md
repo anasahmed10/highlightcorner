@@ -61,7 +61,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 Implementation priorities live in [docs/roadmap.md](docs/roadmap.md):
 
 1. Finish R4/R5: spoiler coverage and manual screen-reader verification.
-2. Finish R7: browser offline/new-release checks and physical-device installation.
+2. Finish R7: confirm the release update on production and installation on a physical device. Local browser offline/update checks found and fixed stale shell preloading.
 3. Start R9: measured mobile performance, layout shifts and ad quality.
 4. Scope R10: accounts, community comments and paid data access remain proposed
    discovery in [issue #14](https://github.com/anasahmed10/highlightcorner/issues/14).

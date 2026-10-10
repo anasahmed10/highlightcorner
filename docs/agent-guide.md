@@ -428,12 +428,21 @@ findings prevent a safe merge.
   showed `www.highlightcorner.com` redirecting to the apex, which returned HTTP 200
   with GitHub hosting headers. Verify live hosting again for future migrations.
 - `.vercel/` is ignored historical deployment output, not current editable source.
-- `sw.js` caches listed shell assets at install; activation removes only previous `hc-` caches
-  on this origin. Shell requests use cache first; `data/` requests use network
+- `sw.js` fetches listed shell assets with a release-specific query at install,
+  then stores them under their normal URLs. This prevents the active worker's
+  cache-first responses from seeding a new release with old files. A failed
+  preload aborts installation and removes its partial cache. Activation removes
+  only previous `hc-` caches on this origin. Shell requests use cache first; `data/` requests use network
   first with cached fallback. All cross-origin requests bypass worker caching. Only successful responses
   are stored. Query-bearing navigation uses the matching cached HTML shell;
   unvisited generated game URLs fall back to the cached generic game shell, while
   other failed navigations fall back to the cached recovery page. Offline shell support does not imply offline live sports data.
+- To check an update locally, stage the public artifact, stamp one build ID into
+  `sw.js`, visit it over HTTP, then change an HTML marker and stamp a second ID.
+  Update the registration and verify the changed page appears after activation,
+  the old `hc-` cache is gone, and an unrelated cache remains. Stop the local
+  server to test offline navigation; tab-only network emulation may leave the
+  service worker's network access active.
 - Keep the literal `__BUILD_ID__` in `src/worker/sw.ts` and compiled `sw.js`.
   Local runs lack deploy stamping, so unregister the worker and clear this
   preview origin's cache in browser tools when changes appear stale. Do not erase
