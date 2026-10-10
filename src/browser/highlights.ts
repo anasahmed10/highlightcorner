@@ -58,7 +58,7 @@
           </div>
           <div class="card-foot center" style="margin-top:12px">${highlight
             ? `<a class="btn btn-primary" href="${HC.esc(highlight.url)}" target="_blank" rel="noopener">▶ Watch highlights on ${HC.esc(highlight.source)}</a>`
-            : `<p class="page-sub">${HC.esc(HC.highlightPending(links, true))}</p>`}</div>
+            : `<p class="page-sub"><span data-outcome>${HC.esc(HC.highlightPending(links, true))}</span><span data-spoiler-placeholder hidden>No verified highlight link available</span></p>`}</div>
         </div>`;
       }
 
@@ -81,7 +81,7 @@
           <div class="card-foot center" style="margin-top:12px">
             ${highlight
               ? `<a class="btn btn-primary" href="${HC.esc(highlight.url)}" target="_blank" rel="noopener">▶ Watch highlights on ${HC.esc(highlight.source)}</a>`
-              : `<p class="page-sub">${HC.esc(HC.highlightPending(links, g.completed))}</p>`}
+              : `<p class="page-sub"><span data-outcome>${HC.esc(HC.highlightPending(links, g.completed))}</span><span data-spoiler-placeholder hidden>No verified highlight link available</span></p>`}
             <a class="btn btn-ghost" href="${HC.esc(HC.gameURL(g.id))}">Game page</a>
             ${highlight ? `<button class="chip copy-btn" data-focus-key="copy-${g.id}" data-url="${HC.esc(highlight.url)}">⧉ Copy highlight link</button>` : ''}
           </div>

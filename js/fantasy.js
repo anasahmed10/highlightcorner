@@ -21,7 +21,7 @@
         if (loading || !statsReady)
             return;
         const positions = posFilter === 'ALL' ? POSITIONS : POSITIONS.filter(([p]) => p === posFilter);
-        box.innerHTML = positions.map(([pos, label]) => {
+        const tables = positions.map(([pos, label]) => {
             const list = byPos[pos] || [];
             if (!list.length)
                 return '';
@@ -31,7 +31,10 @@
             return `<table class="stats fantasy-stats" data-sort-id="fantasy-${pos}" data-sort-default="2"><caption>${label}</caption>
         <thead><tr><th data-sort-type="number">#</th><th data-sort-type="text">Player</th>` +
                 `<th class="fantasy-points" data-sort-type="number">Pts</th><th class="fantasy-line" data-sort-type="text">Line</th></tr></thead><tbody>${trs}</tbody></table>`;
-        }).join('') || `<div class="empty">No fantasy stats available for the ${HC.context.season} regular season, Week ${HC.context.week} yet.</div>`;
+        }).join('');
+        box.innerHTML = tables
+            ? `<p data-spoiler-placeholder hidden class="spoiler-notice">Fantasy results are hidden. Turn off Hide spoilers in Settings to reveal them.</p><div data-outcome>${tables}</div>`
+            : `<div class="empty">No fantasy stats available for the ${HC.context.season} regular season, Week ${HC.context.week} yet.</div>`;
         HC.contentReady(box);
     }
     const FMT_KEY = { ppr: 'pts_ppr', half: 'pts_half_ppr', std: 'pts_std' };

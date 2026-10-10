@@ -210,7 +210,7 @@ preparation must include the season when adding future entries.
 Theme changes dispatch `hc:theme`; data pages reuse loaded data rather than
 requesting sports data solely for a theme change.
 Spoiler changes update `data-spoilers` on the document. Outcome elements use `data-outcome`; `HC.applySpoilers()` toggles their native
-`hidden` attribute, including accessible content. Add `data-spoiler-placeholder`
+`hidden` attribute, including accessible content. Fantasy leader tables are hidden as a whole so rankings, points and stat lines cannot reveal results. Missing-highlight messages use a neutral placeholder because game-completion wording can reveal state. Add `data-spoiler-placeholder`
 for safe replacement text. Every dynamic renderer must call `HC.contentReady(box)`
 after inserting markup. Scoreboard accessible names contain only matchups; records,
 scores, verdicts, featured picks, recaps, and stats are hidden. Complete manual

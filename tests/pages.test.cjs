@@ -144,6 +144,35 @@ for (const [file, ready] of [
   assert.ok([...p.doc.querySelectorAll('#main [data-outcome]')].every(el => !el.hidden));
 });
 
+test('fantasy hides points, lines and leader ordering until spoilers are revealed', async t => {
+  const p = page(t, 'fantasy.html', { storage: { 'hc:spoilers': '"hide"' } });
+  await until(() => p.doc.querySelector('#fantasy table'));
+  assert.equal(p.doc.querySelector('#fantasy [data-outcome]').hidden, true);
+  assert.equal(p.doc.querySelector('#fantasy [data-spoiler-placeholder]').hidden, false);
+  p.doc.querySelector('.spoiler-toggle').click();
+  assert.equal(p.doc.querySelector('#fantasy [data-outcome]').hidden, false);
+  assert.equal(p.doc.querySelector('#fantasy [data-spoiler-placeholder]').hidden, true);
+  assert.ok(p.doc.querySelectorAll('#fantasy tbody tr').length > 0);
+});
+
+for (const [file, selector] of [
+  ['highlights.html', '#hl'], ['game.html', '#game']
+]) test(`${file}: missing highlights do not disclose game state with spoilers hidden`, async t => {
+  const p = page(t, file, { query: '?id=1003&week=5',
+    storage: { 'hc:spoilers': '"hide"' },
+    fetch: url => url.pathname === '/data/highlights.json'
+      ? reply({ version: 1, status: 'ready', games: {} }) : undefined
+  });
+  await until(() => p.doc.querySelector(`${selector} [data-spoiler-placeholder].page-sub, ${selector} .page-sub [data-spoiler-placeholder]`));
+  const pending = [...p.doc.querySelectorAll(`${selector} .page-sub [data-outcome]`)];
+  assert.ok(pending.length > 0);
+  assert.ok(pending.every(el => el.hidden));
+  assert.ok([...p.doc.querySelectorAll(`${selector} .page-sub [data-spoiler-placeholder]`)]
+    .every(el => !el.hidden && el.textContent === 'No verified highlight link available'));
+  p.doc.querySelector('.spoiler-toggle').click();
+  assert.ok(pending.every(el => !el.hidden));
+});
+
 for (const [file, container] of [
   ['index.html', '#games'], ['highlights.html', '#hl'], ['fantasy.html', '#fantasy'], ['recaps.html', '#recaps']
 ]) test(`${file}: empty provider data resolves loading with usable controls`, async t => {
