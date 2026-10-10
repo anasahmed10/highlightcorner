@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+import json
 from pathlib import Path
 from unittest.mock import patch
 
@@ -17,13 +18,79 @@ def event(game_id="401872980", away="Tampa Bay Buccaneers", home="Dallas Cowboys
     }
 
 
+def stage(root, recaps=None):
+    (root / "js").mkdir()
+    (root / "data").mkdir()
+    for name in ("game.html", "recaps.html", "sitemap.xml"):
+        (root / name).write_text(Path(name).read_text())
+    (root / "data/recaps.json").write_text(json.dumps(recaps or []))
+
+
 class GamePageTests(unittest.TestCase):
+    def test_future_schedule_builds_crawlable_matchup_and_sitemap_entry(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            stage(root)
+            upcoming = event(game_id="401999001")
+            upcoming["date"] = "2026-12-27T18:00Z"
+            upcoming["status"] = {"type": {"state": "pre"}}
+            payload = {"season": {"year": 2026, "type": 2}, "week": {"number": 17},
+                       "events": [upcoming]}
+            with patch.object(build_game_pages, "fetch_json", return_value=payload):
+                build_game_pages.build(root, 2026, weeks=[17])
+            page = (root / "game-401999001.html").read_text()
+            self.assertIn("Tampa Bay Buccaneers at Dallas Cowboys", page)
+            self.assertIn('data-week="17"', page)
+            self.assertLess(page.index('<h1 class="page-title">'), page.index('<div id="game"'))
+            self.assertNotIn('data-static-recap', page)
+            self.assertIn('https://highlightcorner.com/game-401999001.html',
+                          (root / "sitemap.xml").read_text())
+            verify_game_pages.verify(root)
+
+    def test_published_recap_is_in_game_html_and_crawlable_index(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            recap = {"gameId": "401872980", "season": 2026, "week": 5,
+                     "away": "TB", "home": "DAL", "awayScore": 17, "homeScore": 20,
+                     "headline": 'Late <script>alert("x")</script> comeback',
+                     "recap": "First <b>paragraph</b>.\n\nSecond paragraph.",
+                     "keyStat": "Three & out", "verdict": "nail-biter"}
+            stage(root, [recap])
+            payload = {"season": {"year": 2026, "type": 2}, "week": {"number": 5},
+                       "events": [event()]}
+            with patch.object(build_game_pages, "fetch_json", return_value=payload):
+                build_game_pages.build(root, 2026, weeks=[5])
+                build_game_pages.build(root, 2026, weeks=[5])
+            page = (root / "game-401872980.html").read_text()
+            index = (root / "recaps.html").read_text()
+            self.assertIn("2026 Week 5 Recap", page)
+            self.assertIn('content="article"', page)
+            self.assertIn('data-static-recap', page)
+            self.assertIn("TB 17 · DAL 20", page)
+            self.assertIn("First &lt;b&gt;paragraph&lt;/b&gt;.", page)
+            self.assertIn("Three &amp; out", page)
+            self.assertNotIn('<script>alert("x")</script>', page)
+            self.assertIn('href="game-401872980.html"', index)
+            self.assertIn("Late &lt;script&gt;", index)
+            verify_game_pages.verify(root)
+
+    def test_recap_without_matching_scheduled_game_fails_publication(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            stage(root, [{"gameId": "999", "season": 2026, "week": 5,
+                          "away": "TB", "home": "DAL", "awayScore": 17, "homeScore": 20,
+                          "headline": "Headline", "recap": "Story", "keyStat": "Stat",
+                          "verdict": "nail-biter"}])
+            payload = {"season": {"year": 2026, "type": 2}, "week": {"number": 5},
+                       "events": [event()]}
+            with patch.object(build_game_pages, "fetch_json", return_value=payload):
+                with self.assertRaisesRegex(RuntimeError, "no matching published"):
+                    build_game_pages.build(root, 2026, weeks=[5])
+
     def test_build_writes_matchup_html_index_and_matching_sitemap(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "js").mkdir()
-            (root / "game.html").write_text(Path("game.html").read_text())
-            (root / "sitemap.xml").write_text(Path("sitemap.xml").read_text())
+            stage(root)
             with patch.object(build_game_pages, "fetch_json", return_value={
                 "season": {"year": 2026, "type": 2},
                 "week": {"number": 5},
@@ -50,9 +117,7 @@ class GamePageTests(unittest.TestCase):
     def test_invalid_games_are_not_published(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "js").mkdir()
-            (root / "game.html").write_text(Path("game.html").read_text())
-            (root / "sitemap.xml").write_text(Path("sitemap.xml").read_text())
+            stage(root)
             broken = event(game_id="bad")
             missing = event(game_id="401872981")
             missing["competitions"][0]["competitors"].pop()
@@ -69,9 +134,7 @@ class GamePageTests(unittest.TestCase):
     def test_provider_mismatch_aborts_before_publishing(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "js").mkdir()
-            (root / "game.html").write_text(Path("game.html").read_text())
-            (root / "sitemap.xml").write_text(Path("sitemap.xml").read_text())
+            stage(root)
             with patch.object(build_game_pages, "fetch_json", return_value={
                 "season": {"year": 2025, "type": 2}, "week": {"number": 5},
                 "events": [event()],
@@ -83,9 +146,7 @@ class GamePageTests(unittest.TestCase):
     def test_rebuild_replaces_old_game_pages_without_duplicate_sitemap_urls(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "js").mkdir()
-            (root / "game.html").write_text(Path("game.html").read_text())
-            (root / "sitemap.xml").write_text(Path("sitemap.xml").read_text())
+            stage(root)
             payload = {"season": {"year": 2026, "type": 2}, "week": {"number": 5},
                        "events": [event()]}
             with patch.object(build_game_pages, "fetch_json", return_value=payload):
@@ -97,9 +158,7 @@ class GamePageTests(unittest.TestCase):
     def test_archive_keeps_multiple_seasons(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "js").mkdir()
-            (root / "game.html").write_text(Path("game.html").read_text())
-            (root / "sitemap.xml").write_text(Path("sitemap.xml").read_text())
+            stage(root)
             def schedule(url):
                 season = 2027 if 'dates=2027' in url else 2026
                 game_id = '401999999' if season == 2027 else '401872980'
@@ -116,9 +175,7 @@ class GamePageTests(unittest.TestCase):
     def test_unpublished_future_season_does_not_block_existing_archive(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "js").mkdir()
-            (root / "game.html").write_text(Path("game.html").read_text())
-            (root / "sitemap.xml").write_text(Path("sitemap.xml").read_text())
+            stage(root)
             def schedule(url):
                 if 'dates=2027' in url:
                     return {"events": []}
@@ -132,9 +189,7 @@ class GamePageTests(unittest.TestCase):
     def test_missing_archived_season_fails_the_build(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "js").mkdir()
-            (root / "game.html").write_text(Path("game.html").read_text())
-            (root / "sitemap.xml").write_text(Path("sitemap.xml").read_text())
+            stage(root)
             def schedule(url):
                 if 'dates=2027' in url:
                     return {"events": []}

@@ -18,7 +18,7 @@ function page(t, filename = 'index.html', options = {}) {
   const errors = [], requests = [], unexpected = [];
   const console = new VirtualConsole();
   console.on('jsdomError', error => errors.push(error.message));
-  const dom = new JSDOM(fs.readFileSync(path.join(root, filename), 'utf8'), {
+  const dom = new JSDOM(options.html ?? fs.readFileSync(path.join(root, filename), 'utf8'), {
     url: 'http://localhost:8080/' + (options.urlPath || filename) + (options.query || ''),
     runScripts: 'outside-only', virtualConsole: console
   });

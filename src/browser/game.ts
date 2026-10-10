@@ -234,6 +234,7 @@
   async function loadGame(quiet = false) {
     const token = ++request;
     if (!gameId) { box.innerHTML = '<div class="empty">No game selected. <a href="index.html">Back to scores</a>.</div>'; return; }
+    const staticRecap = box.querySelector<HTMLElement>('[data-static-recap]')?.outerHTML || '';
     const readUI = () => ({
       openSections: new Map(Array.from(box.querySelectorAll('details'), section =>
         [section.querySelector('summary span')?.textContent, section.open])),
@@ -244,7 +245,7 @@
       recapExpanded: Boolean(box.querySelector('#recapText.expanded'))
     });
     let uiState = readUI();
-    if (!quiet) box.innerHTML = HC.skeletons(3);
+    if (!quiet && !staticRecap) box.innerHTML = HC.skeletons(3);
     try {
       const [d, recaps, highlightMap] = await Promise.all([
         HC.gameSummary(gameId),
@@ -336,7 +337,7 @@
           <button class="btn btn-ghost" id="copyGameBtn" style="flex:0 0 auto" aria-label="Copy link to this game" title="Copy link to this game">⧉</button>
         </div>
         ${navHtml}
-        ${verdict && !recap ? `<span data-outcome class="verdict ${verdict}">${HC.esc(verdict.replace(/-/g, ' '))}</span>` : ''}
+        ${verdict && !recap && !staticRecap ? `<span data-outcome class="verdict ${verdict}">${HC.esc(verdict.replace(/-/g, ' '))}</span>` : ''}
         <p data-spoiler-placeholder hidden class="spoiler-notice">Scores, recaps, and game stats are hidden. Turn off Hide spoilers in Settings to reveal them.</p>`;
 
       if (recap) {
@@ -353,7 +354,7 @@
           <button class="recap-toggle" id="recapToggle" aria-expanded="false">Show more ▾</button>
           <div class="keystat"><strong>Key stat:</strong> ${HC.esc(recap.keyStat)}</div>
         </article>`;
-      }
+      } else if (staticRecap) html += staticRecap;
 
       if (state !== 'pre') {
         html += '<section data-outcome aria-label="Game statistics">';
@@ -432,11 +433,14 @@
         HC.renderAds();
         adsInitialized = true;
       }
-      document.title = `Highlight Corner — ${(away.team || {}).abbreviation} @ ${(home.team || {}).abbreviation}`;
+      if (!box.dataset.gameId) document.title = `Highlight Corner — ${(away.team || {}).abbreviation} @ ${(home.team || {}).abbreviation}`;
     } catch (e) {
       if (token !== request) return;
       if (quiet && box.querySelector('.game-hero')) {
         updateStatus.textContent = 'Couldn’t refresh — showing the last update';
+      } else if (staticRecap) {
+        updateStatus.innerHTML = 'Live game details are unavailable — showing the published recap. <button class="btn btn-ghost" id="retryGame">Try again</button>';
+        document.getElementById('retryGame')!.addEventListener('click', () => loadGame());
       } else {
         box.innerHTML = '<div class="error"><p>Couldn’t load this game. Try again when you’re connected.</p><button class="btn btn-ghost" id="retryGame">Try again</button> <a href="index.html">Back to scores</a>.</div>';
         document.getElementById('retryGame')!.addEventListener('click', () => loadGame());

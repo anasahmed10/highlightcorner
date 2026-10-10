@@ -34,7 +34,8 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | AdSense | Manual in-flow units use the existing Board/Game IDs; desktop rails (≥1280px) use a dedicated Rail ID. Privacy page and `ads.txt` remain in place. |
 | In-flow ad placement | The existing unit appears after five score cards, three highlight cards, or the first recap; these pages keep one stable unit across renders. Revenue impact requires AdSense reporting after ads serve. |
 | SEO basics | Meta/OG/canonical, sitemap.xml, robots.txt, favicon, 404 page |
-| Matchup sharing | Build-time regular-season game pages from 2026 through the current year expose matchup-specific HTML metadata and canonical URLs; sitemap lists only generated valid matchups, while legacy query links remain usable and noindex |
+| Matchup sharing | Build-time regular-season game pages from 2026 through the current year, plus a probe of the next season, expose matchup-specific HTML metadata and canonical URLs; sitemap lists only generated valid matchups, while legacy query links remain usable and noindex |
+| Crawlable recaps and future games | Scheduled Pages builds publish ESPN-listed future matchups automatically; published editorial recaps appear in initial matchup HTML and a static recap index, with no separate weekly SEO edits |
 | Matchup release checks | PR CI runs every Python tool test; Pages verifies generated matchup files, sitemap URLs, and the game-page lookup before uploading the site |
 | PWA | Manifest, icons, offline shell, home-screen actions that reveal iOS/Android steps when no native prompt is available, native prompt when supported, dismissed/standalone promotion handling; physical-device installation pending |
 | Brand identity | A single corner route with an O and X evokes a sports playsheet; shared wordmark and matching favicon, Apple touch icon, and Android/PWA icons |

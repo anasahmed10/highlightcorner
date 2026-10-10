@@ -9,14 +9,18 @@
     const lead = document.getElementById('recapsLead');
     const rest = document.getElementById('recapsRest');
     async function load() {
-        lead.innerHTML = HC.skeletons(4);
+        const hasStaticRecaps = Boolean(box.querySelector('[data-static-recap]'));
+        if (!hasStaticRecaps)
+            lead.innerHTML = HC.skeletons(4);
         try {
             const recaps = await HC.fetchRecaps();
             if (!Array.isArray(recaps))
                 throw new Error('Invalid recap archive');
             if (!recaps.length) {
-                lead.innerHTML = '<div class="empty">Recaps are still being written — good jokes take a minute.</div>';
-                rest.innerHTML = '';
+                if (!hasStaticRecaps) {
+                    lead.innerHTML = '<div class="empty">Recaps are still being written — good jokes take a minute.</div>';
+                    rest.innerHTML = '';
+                }
                 return;
             }
             const weeks = [...new Map(recaps.map(r => [`${r.season}-${r.week}`, { season: r.season, week: r.week }])).values()]
@@ -67,8 +71,15 @@
             }
         }
         catch (e) {
-            lead.innerHTML = '<div class="error"><p>Couldn’t load recaps. Try again when you’re connected.</p><button class="btn btn-ghost" id="retryRecaps">Try again</button></div>';
-            rest.innerHTML = '';
+            const error = '<div class="error"><p>Couldn’t refresh recaps. Try again when you’re connected.</p><button class="btn btn-ghost" id="retryRecaps">Try again</button></div>';
+            if (hasStaticRecaps) {
+                box.querySelector('#recapLoadError')?.remove();
+                lead.insertAdjacentHTML('afterbegin', `<div id="recapLoadError">${error}</div>`);
+            }
+            else {
+                lead.innerHTML = error;
+                rest.innerHTML = '';
+            }
             document.getElementById('retryRecaps').addEventListener('click', load);
         }
     }
