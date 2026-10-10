@@ -36,7 +36,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | Matchup sharing | Build-time regular-season game pages from 2026 through the current year expose matchup-specific HTML metadata and canonical URLs; sitemap lists only generated valid matchups, while legacy query links remain usable and noindex |
 | Matchup release checks | PR CI runs every Python tool test; Pages verifies generated matchup files, sitemap URLs, and the game-page lookup before uploading the site |
 | PWA | Manifest, icons, offline shell, home-screen actions that reveal iOS/Android steps when no native prompt is available, native prompt when supported, dismissed/standalone promotion handling; physical-device installation pending |
-| Brand identity | X-to-O play route turns into a highlighted corner; shared wordmark and matching favicon, Apple touch icon, and Android/PWA icons |
+| Brand identity | A single corner route with an O and X evokes a sports playsheet; shared wordmark and matching favicon, Apple touch icon, and Android/PWA icons |
 | Recap supporting statistics | `tools/nflverse_week.py` emits nflverse evidence for regular-season recaps; does not write recap prose |
 | Recap content port | Longer Week 4 recaps stored in `data/recaps.json`; external dashboard/refresh status is unverified |
 | Content refresh preparation | Sleeper player-map refresh with field validation; sourced/timestamped ESPN recap evidence checks final teams/scores and global ID uniqueness; supporting output cannot overwrite recap archives. Reverified October 9; editorial prose remains manual |
