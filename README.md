@@ -42,6 +42,15 @@ content-refresh tests. It requires Node 24+, Python 3 and `npm ci`. Run
 `python3 -m unittest discover -s tests -p 'test_*.py'` for all Python tools,
 including highlight matching and matchup-page generation.
 These checks use fixtures without live providers or advertising services.
+To check the current ESPN scoreboard/game-summary and Sleeper stats response
+shapes for a completed regular-season week, run the optional diagnostic:
+
+```sh
+python3 tools/check_provider_contracts.py --season 2026 --week 4
+```
+
+It prints endpoint-level PASS, SCHEMA, FETCH, or UNAVAILABLE results. Choose a
+week with completed games; this live check is separate from `npm test` and CI.
 Preview over HTTP rather than opening HTML files directly.
 If the service worker keeps showing old local files, unregister it and clear the
 preview origin's cache in browser developer tools.

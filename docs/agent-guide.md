@@ -65,6 +65,17 @@ the generated public map reaches the browser. No application server is needed.
 Provider availability and formats can change; verify responses when investigating
 data failures.
 
+For a quick live contract check, run
+`python3 tools/check_provider_contracts.py --season 2026 --week 4` with a completed
+regular-season week. The read-only tool checks ESPN scoreboard, one completed
+game summary, and Sleeper weekly stats against the fields the browser consumes.
+It reports each endpoint without printing full responses: `SCHEMA` means a field
+or type changed (exit 1), `FETCH` means an HTTP/network/provider failure (exit 2),
+and `UNAVAILABLE` means the chosen week has no representative data yet (exit 3).
+`PASS` for all three exits 0. A failed scoreboard check skips the dependent
+summary check but still checks Sleeper. This diagnostic is opt-in; `npm test` and
+CI only run its offline validator tests and never request live provider data.
+
 - `HC.fetchJSON(url)` rejects non-success HTTP responses, parses JSON, and aborts after 12 seconds.
 - `HC.startVisiblePolling(callback, interval)` schedules non-overlapping updates while a page is visible, pauses its timer in a background tab, and refreshes immediately when the tab returns. Scores, Highlights, and game pages use it with a 60-second interval; the game page stops after ESPN reports the final state. Scoreboard and Highlights retain their last successful rendering when a background update fails.
 - `HC.scoreboard(week, season)` calls ESPN's NFL scoreboard. With a season,
