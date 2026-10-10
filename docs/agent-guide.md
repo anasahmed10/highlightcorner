@@ -73,6 +73,16 @@ data failures.
 - `HC.gameSummary(id)` calls ESPN's summary endpoint with `?event=`.
 - `HC.gameInfo(event)` normalizes competitors into away/home, status and scores.
   ESPN game IDs become strings.
+- `HC.gameVerdict(game, summary?)` classifies only completed games. The scoreboard
+  shows a score-margin label immediately, fetches each final summary once per
+  final score while it succeeds, and refines labels from scoring plays. Failed
+  summaries are retried on the next scoreboard refresh. Nail-biter includes overtime,
+  one-score margin after every scoring play, and a one-score game at the two-minute
+  mark. Late consolation scoring after a 17-point deficit is garbage-time when
+  the game was still more than one score apart at two minutes; final margins of
+  17+ are blowouts. Missing or inconsistent play timelines use the score margin.
+  Game and Recaps pages use the same classifier; stored recap verdicts remain a
+  fallback when ESPN game data is unavailable. No LLM is used for labels.
 - `HC.initSeasonWeek(seasonEl, weekEl)` discovers the default ESPN year/type/week,
   populates 2026-through-current regular-season years and available weeks, and
   honors valid URL `season`/`week` parameters. `HC.selectSeasonWeek` updates the
@@ -168,7 +178,7 @@ before committing; the tool does not publish the site.
 | `away`, `home` | Team abbreviations |
 | `awayScore`, `homeScore` | Numeric final scores |
 | `headline`, `recap`, `keyStat` | Plain-text strings; double newlines separate paragraphs |
-| `verdict` | `nail-biter`, `comfortable`, `garbage-time`, or `blowout` |
+| `verdict` | `nail-biter`, `comfortable`, `garbage-time`, or `blowout`; editorial fallback for the displayed automatic verdict |
 
 Keep IDs unique within the stored collection and preserve previous recaps unless
 replacement is explicitly requested. Readers group by season and week; recap

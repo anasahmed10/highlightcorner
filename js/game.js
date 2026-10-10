@@ -302,6 +302,7 @@
             };
             const c = HC.teamTextColors(away.team || {}, home.team || {});
             const recap = (Array.isArray(recaps) ? recaps : []).find(r => r?.season === season && String(r.gameId) === String(gameId));
+            const verdict = HC.gameVerdict(HC.gameInfo({ id: gameId, competitions: [comp], status: st }), d);
             const venue = (((d.gameInfo || {}).venue) || {}).fullName || '';
             const highlight = HC.highlightLink(highlightMap, gameId);
             // prev/next game within the week, ordered by kickoff (spoiler-safe: no scores)
@@ -353,6 +354,7 @@
           <button class="btn btn-ghost" id="copyGameBtn" style="flex:0 0 auto" aria-label="Copy link to this game" title="Copy link to this game">⧉</button>
         </div>
         ${navHtml}
+        ${verdict && !recap ? `<span data-outcome class="verdict ${verdict}">${HC.esc(verdict.replace(/-/g, ' '))}</span>` : ''}
         <p data-spoiler-placeholder hidden class="spoiler-notice">Scores, recaps, and game stats are hidden. Turn off Hide spoilers in Settings to reveal them.</p>`;
             if (recap) {
                 const recapColors = HC.teamTextColors(away.team || {}, home.team || {});
@@ -362,7 +364,7 @@
             <span class="recap-score-status">Final</span>
             <div class="recap-score-team"><span class="recap-score-location">Home</span><strong style="color:${recapColors.home}">${HC.esc(recap.home)}</strong><span class="recap-score-number">${HC.esc(recap.homeScore)}</span></div>
           </div>
-          <span class="verdict ${HC.esc(recap.verdict)}">${HC.esc(String(recap.verdict).replace(/-/g, ' '))}</span>
+          <span class="verdict ${HC.esc(verdict || recap.verdict)}">${HC.esc(String(verdict || recap.verdict).replace(/-/g, ' '))}</span>
           <h3>${HC.esc(recap.headline)}</h3>
           <div class="recap-text" id="recapText">${HC.esc(recap.recap).split('\n\n').map(x => `<p>${x}</p>`).join('')}</div>
           <button class="recap-toggle" id="recapToggle" aria-expanded="false">Show more ▾</button>

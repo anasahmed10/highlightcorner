@@ -36,6 +36,38 @@ test('scoreboard renders pre/live/final states, favorite and unwatched filters',
   assert.equal(cards().length, 2);
 });
 
+test('final game gets an automatic verdict without an editorial recap', async t => {
+  const p = page(t, 'index.html', { fetch: (url, _init, data) => {
+    if (url.pathname === '/data/recaps.json') return reply([]);
+    if (url.pathname.endsWith('/summary')) return reply(data.summary);
+  } });
+  await until(() => p.doc.querySelectorAll('#games .game-card').length === 3);
+  const cards = [...p.doc.querySelectorAll('#games .game-card')];
+  assert.equal(cards[0].querySelector('.verdict'), null);
+  assert.equal(cards[1].querySelector('.verdict'), null);
+  assert.equal(cards[2].querySelector('.verdict').textContent, 'nail biter');
+  await until(() => p.requests.some(url => url.endsWith('/summary?event=1003')));
+  assert.equal(p.requests.filter(url => url.endsWith('/summary?event=1003')).length, 1);
+});
+
+test('game and recap pages replace a stored verdict using ESPN scoring plays', async t => {
+  const scoringPlays = [
+    [1, 600, 0, 7], [2, 600, 0, 14], [2, 300, 0, 21],
+    [3, 600, 3, 21], [3, 300, 3, 24], [4, 600, 3, 27],
+    [4, 240, 10, 27], [4, 60, 17, 27], [4, 5, 24, 27]
+  ].map(([period, clock, awayScore, homeScore]) =>
+    ({ period: { number: period }, clock: { value: clock }, awayScore, homeScore }));
+  const fetch = (url, _init, data) => {
+    if (url.pathname.endsWith('/summary')) return reply({ ...data.summary, scoringPlays });
+  };
+  const game = page(t, 'game.html', { query: '?id=1003&week=5', fetch });
+  await until(() => game.doc.querySelector('#game .recap-card .verdict'));
+  assert.equal(game.doc.querySelector('#game .recap-card .verdict').textContent, 'garbage time');
+  const recaps = page(t, 'recaps.html', { fetch });
+  await until(() => recaps.doc.querySelector('#recaps .verdict.garbage-time'));
+  assert.equal(recaps.doc.querySelector('#recaps .verdict').textContent, 'garbage time');
+});
+
 test('highlights feature only a completed game and use the verified video and preserve selected week in game links', async t => {
   const p = page(t, 'highlights.html');
   await until(() => p.doc.querySelector('#hl .copy-btn'));

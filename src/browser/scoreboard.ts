@@ -8,10 +8,11 @@
   const lead = document.getElementById('gamesLead')!;
   const rest = document.getElementById('gamesRest')!;
   const favGrid = document.getElementById('favGrid')!;
-  let recaps: Recap[] = [];
   let highlightMap: HighlightMap | null = null;
   let filter = 'all';
   let eventsCache: ESPNEvent[] = [];
+  const verdicts = new Map<string, GameVerdict>();
+  const pendingVerdicts = new Set<string>();
   let request = 0;
   let loading = false;
   const refresh = document.getElementById("refreshScores") as HTMLButtonElement;
@@ -41,9 +42,11 @@
 
   function cardHTML(g: GameInfo) {
     const c = HC.teamTextColors(g.away, g.home);
-    const recap = recaps.find(r => r?.season === HC.context.season && String(r.gameId) === g.id);
     const watched = HC.isWatched(g.id);
     const highlight = g.state === 'post' ? HC.highlightLink(highlightMap, g.id) : null;
+    const verdict = HC.gameVerdict(g);
+    const verdictKey = `${HC.context.season}:${g.id}:${g.away.score}:${g.home.score}`;
+    const shownVerdict = verdict ? (verdicts.get(verdictKey) || verdict) : null;
     return `<div class="game-card" style="--ga:${c.away};--gh:${c.home}" data-href="${HC.esc(HC.gameURL(g.id))}" data-focus-key="game-${g.id}" tabindex="0" role="link"
         aria-label="${HC.esc(g.away.abbr)} at ${HC.esc(g.home.abbr)}">
       <div class="game-meta">
@@ -52,7 +55,7 @@
       </div>
       ${teamRow({ ...g.away, score: g.state === 'pre' ? null : g.away.score }, c.away)}${teamRow({ ...g.home, score: g.state === 'pre' ? null : g.home.score }, c.home)}
       <div class="card-foot">
-        ${recap ? `<span data-outcome class="chip verdict ${HC.esc(recap.verdict)}">${HC.esc(String(recap.verdict).replace(/-/g, ' '))}</span>` : ''}
+        ${shownVerdict ? `<span data-outcome class="chip verdict ${shownVerdict}">${HC.esc(shownVerdict.replace(/-/g, ' '))}</span>` : ''}
         <button class="chip watched-toggle" data-id="${g.id}" data-focus-key="watched-${g.id}" aria-pressed="${watched}">${watched ? '✓ Watched' : 'Mark watched'}</button>
         <span class="card-actions">
           <a class="chip" data-focus-key="view-${g.id}" href="${HC.esc(HC.gameURL(g.id))}">View game →</a>
@@ -60,6 +63,23 @@
         </span>
       </div>
     </div>`;
+  }
+
+  function refreshVerdicts(events: ESPNEvent[], token: number) {
+    for (const event of events) {
+      const game = HC.gameInfo(event);
+      if (!HC.gameVerdict(game)) continue;
+      const key = `${HC.context.season}:${game.id}:${game.away.score}:${game.home.score}`;
+      if (verdicts.has(key) || pendingVerdicts.has(key)) continue;
+      pendingVerdicts.add(key);
+      HC.gameSummary(game.id).then(summary => {
+        const verdict = HC.gameVerdict(game, summary);
+        if (verdict) verdicts.set(key, verdict);
+        if (token === request && !loading) render();
+      }).catch(() => {
+        // The score-only label remains usable when summary data is unavailable.
+      }).finally(() => pendingVerdicts.delete(key));
+    }
   }
 
   function render() {
@@ -134,6 +154,7 @@
       highlightMap = links;
       loading = false;
       render();
+      refreshVerdicts(eventsCache, token);
       freshness.textContent = navigator.onLine
         ? 'Updated ' + new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(new Date())
         : 'Offline — showing a saved response';
@@ -162,11 +183,7 @@
   }));
 
   (async function init() {
-    const [stored] = await Promise.all([
-      HC.fetchRecaps().catch(() => []),
-      HC.initSeasonWeek(seasonSel, sel)
-    ]);
-    recaps = Array.isArray(stored) ? stored : [];
+    await HC.initSeasonWeek(seasonSel, sel);
     document.querySelectorAll<HTMLButtonElement>("#filterRow button").forEach(b => b.setAttribute("aria-pressed", String(b.classList.contains("active"))));
     sel.addEventListener('change', () => load());
     seasonSel.addEventListener('change', () => { HC.selectSeasonWeek(seasonSel, sel); load(); });
