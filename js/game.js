@@ -349,7 +349,7 @@
         </div>
         ${highlight
                 ? `<a class="btn btn-primary btn-block-center" target="_blank" rel="noopener" href="${HC.esc(highlight.url)}">▶ Watch highlights on ${HC.esc(highlight.source)}</a>`
-                : `<p class="page-sub" style="text-align:center;margin:16px 0">${HC.esc(HC.highlightPending(highlightMap, state === 'post'))}</p>`}
+                : `<p class="page-sub" style="text-align:center;margin:16px 0"><span data-outcome>${HC.esc(HC.highlightPending(highlightMap, state === 'post'))}</span><span data-spoiler-placeholder hidden>No verified highlight link available</span></p>`}
         <div style="display:flex;gap:8px;margin-top:10px">
           <button class="btn btn-ghost" id="watchedBtn" aria-pressed="${HC.isWatched(gameId)}" style="flex:1">${HC.isWatched(gameId) ? '✓ Watched' : 'Mark as watched'}</button>
           <button class="btn btn-ghost" id="copyGameBtn" style="flex:0 0 auto" aria-label="Copy link to this game" title="Copy link to this game">⧉</button>

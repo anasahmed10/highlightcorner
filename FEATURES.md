@@ -27,7 +27,7 @@ criteria: [upgrade roadmap](docs/roadmap.md).
 | Comedic recaps | Original multi-paragraph narratives with verdicts (nail-biter, comfortable, garbage-time, blowout); Week 4 stored in JSON |
 | Recap score panels | Prominent away/home teams in readable team colors and final scores above headlines on Recaps and game pages; respects themes and Hide spoilers |
 | Game center pages | Matchup/highlights → recap → scoring summary → tabbed box score → team stats → fantasy → tabbed injuries; prev/next game nav; live game details refresh every minute while visible and stop after the final status |
-| Spoiler preference | Settings toggle hides scores, records, verdicts, featured picks, recaps and stats from visible/accessibility content; device screen-reader review pending |
+| Spoiler preference | Settings toggle hides scores, records, verdicts, featured picks, recaps, fantasy rankings and stats from visible/accessibility content; missing-highlight messages remain neutral. Device screen-reader review pending. |
 | Favorites + watched | Team favorites w/ filter; watched/unwatched tracking w/ filter |
 | Team colors | Logo-derived, matchup-aware, readable in light/dark |
 | Mobile-first UI | Direct highlight actions, three navigation tabs, responsive layouts, keyboard game tabs, focus restoration and sortable tables; manual screen-reader verification remains |
