@@ -8,12 +8,25 @@ function worker() {
   const deleted = [];
   const cached = new Map([['https://highlightcorner.com/game.html', new Response('game shell')]]);
   const puts = [];
-  const self = { location: { origin: 'https://highlightcorner.com' }, addEventListener: (name, cb) => { handlers[name] = cb; }, clients: { claim() {} }, skipWaiting() {} };
-  const cache = { addAll: async () => {}, put: async (req, response) => { puts.push(response.status); }, match: async req => cached.get(typeof req === 'string' ? req : req.url) };
-  const context = vm.createContext({ self, URL, Response, fetch: async () => { throw new Error('offline'); }, caches: { keys: async () => ['hc-old', 'another-app'], delete: async key => { deleted.push(key); }, open: async () => cache, match: cache.match } });
+  const putKeys = [];
+  const self = { location: { origin: 'https://highlightcorner.com' }, registration: { scope: 'https://highlightcorner.com/' }, addEventListener: (name, cb) => { handlers[name] = cb; }, clients: { claim() {} }, skipWaiting() {} };
+  const cache = { addAll: async () => {}, put: async (req, response) => { puts.push(response.status); putKeys.push(typeof req === 'string' ? req : req.url); }, match: async req => cached.get(typeof req === 'string' ? req : req.url) };
+  const context = vm.createContext({ self, URL, Request, Response, fetch: async () => { throw new Error('offline'); }, caches: { keys: async () => ['hc-old', 'another-app'], delete: async key => { deleted.push(key); }, open: async () => cache, match: cache.match } });
   vm.runInContext(fs.readFileSync('sw.js', 'utf8'), context);
-  return { handlers, deleted, puts, context };
+  return { handlers, deleted, puts, putKeys, context };
 }
+
+test('a new worker fetches versioned shell URLs and stores canonical cache keys', async () => {
+  const w = worker(); let done;
+  const fetched = [];
+  w.context.fetch = async request => { fetched.push(request.url); return new Response('fresh'); };
+  w.handlers.install({ waitUntil: p => { done = p; } });
+  await done;
+  assert.ok(fetched.length > 20);
+  assert.ok(fetched.every(url => new URL(url).searchParams.get('__hc_build') === '__BUILD_ID__'));
+  assert.ok(w.putKeys.includes('https://highlightcorner.com/index.html'));
+  assert.ok(w.putKeys.every(url => !url.includes('__hc_build')));
+});
 
 test('offline game query URLs resolve to the cached game shell', async () => {
   const w = worker(); let response;

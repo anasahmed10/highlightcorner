@@ -1,7 +1,8 @@
 /* Highlight Corner service worker — offline app shell, fresh data.
-   The deploy workflow stamps the commit SHA into CACHE below, so every
-   deploy installs a fresh worker and no stale shell can survive a release. */
-const CACHE = 'hc-__BUILD_ID__';
+   The deploy workflow stamps the commit SHA below, so each release fetches
+   fresh shell assets before activating its cache. */
+const BUILD_ID = '__BUILD_ID__';
+const CACHE = 'hc-' + BUILD_ID;
 const worker = self as unknown as ServiceWorkerGlobalScope;
 const APP_SHELL = [
   './', 'index.html', 'highlights.html', 'fantasy.html', 'recaps.html',
@@ -19,9 +20,26 @@ const APP_SHELL = [
 ];
 
 worker.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll(APP_SHELL)).then(() => worker.skipWaiting())
-  );
+  e.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    try {
+      const results = await Promise.allSettled(APP_SHELL.map(async (asset) => {
+        const canonical = new URL(asset, worker.registration.scope);
+        const releaseURL = new URL(canonical);
+        releaseURL.searchParams.set('__hc_build', BUILD_ID);
+        // The active worker may serve plain shell URLs from its old cache.
+        const response = await fetch(new Request(releaseURL, { cache: 'reload' }));
+        if (!response.ok) throw new Error(`Could not cache ${asset}: ${response.status}`);
+        await cache.put(canonical.href, response);
+      }));
+      const failure = results.find((result): result is PromiseRejectedResult => result.status === 'rejected');
+      if (failure) throw failure.reason;
+      await worker.skipWaiting();
+    } catch (error) {
+      await caches.delete(CACHE);
+      throw error;
+    }
+  })());
 });
 
 worker.addEventListener('activate', (e) => {
