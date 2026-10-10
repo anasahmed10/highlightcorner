@@ -92,6 +92,7 @@
                 if (pts === 0 || !Number.isFinite(pts))
                     continue;
                 let pos, name, team;
+                // Sleeper uses synthetic TEAM_ IDs for defenses; player IDs resolve through the compact local map.
                 if (pid.startsWith('TEAM_')) {
                     pos = 'DST';
                     team = pid.slice(5);
