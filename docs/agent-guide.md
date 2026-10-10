@@ -501,8 +501,13 @@ responses; Fantasy guards stale selections. Theme changes reuse loaded data.
 Static in-flow ads appear within
 the Scores, Highlights, and Recaps content lists; Fantasy follows its tables and
 game ads follow the recap/stats. Each manual unit is queued once, including
-units added after a game loads; repeated render calls skip existing units. Unfilled AdSense units collapse via status
-attributes; do not hide a pending unit before its first AdSense measurement.
+units added after a game loads; repeated render calls skip existing units. The
+AdSense provider script is added once when an eligible unit exists, so Privacy
+and 404 do not request it. A failed script load marks ad wrappers blocked so
+their empty space collapses; unfilled AdSense units also collapse via status
+attributes. Do not hide a pending unit before its first AdSense measurement.
+Mobile Lighthouse baselines and the repeatable R9 comparison are recorded in
+[`performance/r9-baseline.md`](performance/r9-baseline.md).
 
 Use `npm test` for install-event lifecycle, nav state, week recovery, hidden
 outcomes, offline game-shell resolution, cache ownership, and failed-response
