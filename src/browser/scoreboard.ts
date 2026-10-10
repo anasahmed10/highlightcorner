@@ -149,6 +149,7 @@
         HC.scoreboard(week, HC.context.season),
         HC.fetchJSON<HighlightMap>('data/highlights.json').catch(() => null)
       ]);
+      // A newer selection or refresh owns the page now; discard this slower response.
       if (token !== request) return;
       eventsCache = sb.events || [];
       highlightMap = links;

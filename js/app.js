@@ -142,8 +142,10 @@
         const onVisibilityChange = () => {
             if (document.visibilityState === 'hidden')
                 clear();
-            else
+            else {
+                // Refresh immediately on return; schedule() resumes the normal interval afterward.
                 run();
+            }
         };
         document.addEventListener('visibilitychange', onVisibilityChange);
         schedule();
@@ -495,6 +497,7 @@
     HC.selectSeasonWeek = function (seasonEl, weekEl, requestedWeek) {
         const info = HC.seasonWindow;
         const season = Number(seasonEl.value);
+        // Completed seasons expose all 18 weeks; the provider's current season may only expose a partial schedule.
         const latest = season < info.providerSeason ? 18 : info.currentWeek;
         const wanted = Number(requestedWeek);
         const week = Number.isInteger(wanted) && wanted >= 1 && wanted <= latest ? wanted : latest;
@@ -541,11 +544,13 @@
         const fallbackYear = today.getFullYear() - (today.getMonth() < 7 ? 1 : 0);
         const reportedYear = Number(sb?.season?.year ?? sb?.leagues?.[0]?.season?.year);
         const verified = Number.isInteger(reportedYear) && reportedYear >= 2026 && reportedYear <= 2100;
+        // ESPN can report preseason or postseason here, but the site selectors always represent regular-season weeks.
         const providerSeason = verified ? reportedYear : fallbackYear;
         const type = Number(sb?.season?.type ?? sb?.leagues?.[0]?.season?.type?.type);
         const reportedWeek = Number(sb?.week?.number);
         const regularWeek = type === 2 && Number.isInteger(reportedWeek) && reportedWeek >= 1 && reportedWeek <= 18;
         const phase = type === 1 ? 'upcoming' : type === 3 || type === 4 ? 'last' : 'current';
+        // In postseason/offseason default to the completed regular season; preseason defaults to last season if available.
         const currentWeek = regularWeek ? reportedWeek : phase === 'last' ? 18 : 1;
         HC.seasonWindow = { providerSeason, currentWeek, verified: verified && (regularWeek || phase !== 'current'), phase };
         seasonEl.innerHTML = '';
