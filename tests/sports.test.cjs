@@ -21,7 +21,8 @@ test('automatic verdict uses scoring history and never labels unfinished games',
     play(4, 10, 24, 27)]), 'nail-biter');
   assert.equal(verdict(game(20, 24), [play(1, 600, 0, 7), play(2, 400, 0, 14),
     play(3, 300, 0, 21), play(4, 600, 0, 24), play(4, 240, 7, 24), play(4, 60, 14, 24),
-    play(4, 10, 20, 24)]), 'garbage-time');
+    play(4, 10, 20, 24)]), 'comfortable',
+    'a one-score finish needs win-probability evidence before calling it garbage time');
   assert.equal(verdict(game(7, 31), [play(1, 600, 0, 7), play(2, 400, 0, 14),
     play(3, 300, 0, 21), play(4, 600, 0, 28), play(4, 400, 0, 31),
     play(4, 30, 7, 31)]), 'blowout');

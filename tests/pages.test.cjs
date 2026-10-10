@@ -55,10 +55,12 @@ test('game and recap pages replace a stored verdict using ESPN scoring plays', a
     [1, 600, 0, 7], [2, 600, 0, 14], [2, 300, 0, 21],
     [3, 600, 3, 21], [3, 300, 3, 24], [4, 600, 3, 27],
     [4, 240, 10, 27], [4, 60, 17, 27], [4, 5, 24, 27]
-  ].map(([period, clock, awayScore, homeScore]) =>
-    ({ period: { number: period }, clock: { value: clock }, awayScore, homeScore }));
+  ].map(([period, clock, awayScore, homeScore], index) =>
+    ({ id: String(index), period: { number: period }, clock: { value: clock }, awayScore, homeScore }));
   const fetch = (url, _init, data) => {
-    if (url.pathname.endsWith('/summary')) return reply({ ...data.summary, scoringPlays });
+    if (url.pathname.endsWith('/summary')) return reply({ ...data.summary, scoringPlays,
+      winprobability: [{ playId: '8', homeWinPercentage: 0.99 },
+        { playId: 'final', homeWinPercentage: 1 }] });
   };
   const game = page(t, 'game.html', { query: '?id=1003&week=5', fetch });
   await until(() => game.doc.querySelector('#game .recap-card .verdict'));

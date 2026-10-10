@@ -78,8 +78,9 @@ year and week travel in navigation and game links. Missing discovery data and
 unavailable weeks are labeled. Every data page offers retry controls; failed live
 updates retain their last successful view with a notice. Optional recap/highlight
 data failures do not prevent usable scores or game summaries.
-Final-game verdicts are calculated in the browser from ESPN scores and scoring
-plays, including games without an editorial recap. They require no LLM call.
+Final-game verdicts are calculated in the browser from ESPN scores, scoring
+plays and, for late consolation scores, win probability. Games without an
+editorial recap still receive a verdict. They require no LLM call.
 When a summary is unavailable, the label uses the final score margin.
 
 Highlight buttons use `data/highlights.json` to open the official video matched

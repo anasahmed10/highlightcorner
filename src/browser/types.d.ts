@@ -138,11 +138,12 @@ interface ESPNStatGroup { name?: string; text?: string; keys?: string[]; labels?
 interface ESPNBoxTeam { team?: ESPNTeam; statistics?: ESPNStatGroup[] }
 interface ESPNTeamStats { team?: ESPNTeam; statistics?: Array<{ name?: string; displayValue?: string; value?: string; summary?: string }> }
 interface ESPNInjuryTeam { team?: ESPNTeam; injuries?: Array<{ athlete?: { displayName?: string }; details?: string; longComment?: string; shortComment?: string; status?: string; date?: string }> }
-interface ESPNScoringPlay { period?: { number?: number }; clock?: { value?: number; displayValue?: string }; team?: ESPNTeam; text?: string; awayScore?: number; homeScore?: number }
+interface ESPNScoringPlay { id?: string | number; period?: { number?: number }; clock?: { value?: number; displayValue?: string }; team?: ESPNTeam; text?: string; awayScore?: number; homeScore?: number }
 interface ESPNGameSummary {
   header?: { competitions?: ESPNCompetition[]; season?: { year?: number }; week?: { number?: number }; status?: ESPNStatus };
   gameInfo?: { venue?: { fullName?: string } };
   scoringPlays?: ESPNScoringPlay[];
+  winprobability?: Array<{ playId?: string | number; homeWinPercentage?: number }>;
   boxscore?: { players?: ESPNBoxTeam[]; teams?: ESPNTeamStats[] };
   injuries?: ESPNInjuryTeam[];
 }
