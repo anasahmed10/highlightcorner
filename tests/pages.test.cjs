@@ -1,6 +1,8 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { page, until, select, reply, clone, fixture } = require('./helpers/page.cjs');
+const fs = require('node:fs');
+const path = require('node:path');
+const { page, until, select, reply, clone, fixture, root } = require('./helpers/page.cjs');
 
 for (const [file, ready, nav] of [
   ['index.html', '#games .game-card', 'scores'], ['highlights.html', '#hl .copy-btn', null],
@@ -200,4 +202,43 @@ test('recaps remain readable with failed optional scoreboards and escape editori
   assert.equal(p.doc.querySelector('#recaps b'), null);
   assert.equal(p.doc.querySelectorAll('#recaps [data-outcome] p').length, 2);
   assert.equal(p.doc.querySelector('#recaps h3 a').getAttribute('href'), 'game.html?id=1003&season=2026&week=5');
+});
+
+test('generated game recap survives unavailable live data and honors Hide spoilers', async t => {
+  const source = fs.readFileSync(path.join(root, 'game.html'), 'utf8');
+  const html = source.replace(
+    '<div id="game"><div class="loading"><div class="spinner"></div>Loading game…</div></div>',
+    '<div id="game" data-game-id="1003" data-season="2026" data-week="5"><h1>PIT at CLE</h1>' +
+    '<article class="recap-card" data-static-recap><p data-spoiler-placeholder hidden>Recap hidden</p>' +
+    '<div data-outcome><h2>Published recap</h2><p>Original story</p></div></article></div>'
+  );
+  const p = page(t, 'game.html', { html, urlPath: 'game-1003.html',
+    storage: { 'hc:spoilers': JSON.stringify('hide') },
+    fetch: url => {
+      if (url.pathname.endsWith('/summary')) return { ok: false, status: 503 };
+    }
+  });
+  await until(() => p.doc.querySelector('#retryGame'));
+  assert.match(p.doc.querySelector('[data-static-recap]').textContent, /Original story/);
+  assert.equal(p.doc.querySelector('[data-static-recap] [data-outcome]').hidden, true);
+  assert.equal(p.doc.documentElement.dataset.spoilers, 'hide');
+  assert.ok([...p.doc.querySelectorAll('#main [role="status"]')]
+    .some(el => /published recap/.test(el.textContent)));
+  p.doc.querySelector('.spoiler-toggle').click();
+  assert.equal(p.doc.querySelector('[data-static-recap] [data-outcome]').hidden, false);
+});
+
+test('generated recap index remains readable when refresh fails', async t => {
+  const source = fs.readFileSync(path.join(root, 'recaps.html'), 'utf8');
+  const html = source.replace(
+    '<div id="recapsLead"><div class="loading"><div class="spinner"></div>Loading recaps…</div></div>',
+    '<div id="recapsLead"><article class="recap-card" data-static-recap>' +
+    '<h3 data-outcome><a href="game-1003.html">Published recap</a></h3></article></div>'
+  );
+  const p = page(t, 'recaps.html', { html, fetch: url => {
+    if (url.pathname.endsWith('/data/recaps.json')) return { ok: false, status: 503 };
+  } });
+  await until(() => p.doc.querySelector('#retryRecaps'));
+  assert.equal(p.doc.querySelector('[data-static-recap] a').getAttribute('href'), 'game-1003.html');
+  assert.match(p.doc.querySelector('#recaps').textContent, /Published recap/);
 });

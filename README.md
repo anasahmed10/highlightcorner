@@ -53,8 +53,8 @@ preview origin's cache in browser developer tools.
 | `index.html` | Weekly scores, favorites, watched filters, game links and available direct highlights |
 | `highlights.html` | Legacy standalone page for matched official game videos and copied links |
 | `fantasy.html` | Weekly leaders by position, scoring format and sortable tables |
-| `recaps.html` | Original recaps grouped by season and week |
-| `game-<espnGameId>.html` (generated at deployment) | Matchup-specific game center and share metadata |
+| `recaps.html` | Original recaps grouped by season and week; generated HTML includes crawlable recap links and text |
+| `game-<espnGameId>.html` (generated at deployment) | Matchup-specific game center and share metadata; published recaps appear in the initial HTML |
 | `game.html?id=<espnGameId>&season=<year>&week=<n>` | Legacy game links and fallback for IDs without a generated page |
 | `privacy.html` | Privacy disclosures |
 | `404.html` | Missing-page recovery |
@@ -124,6 +124,11 @@ to overwrite editorial recap archives. It never writes recap prose.
 `curl`, and `duckdb`. See the maintenance guide for review and attribution.
 No Highlight Corner recap scheduler was found in this repo or the local Codex
 automation definitions on October 9, 2026.
+Each Pages build probes the next season and generates matchup pages for
+ESPN-listed future regular-season games, then adds them to the sitemap. When an editor adds a recap to
+`data/recaps.json`, the next scheduled or push-triggered build also places its
+text and metadata in that game's page and the recap index. No weekly SEO edit is
+needed; recap prose remains editorial.
 
 ## Deployment
 

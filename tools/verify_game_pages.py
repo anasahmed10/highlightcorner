@@ -2,6 +2,7 @@
 """Check the generated matchup URLs and lookup map before publishing."""
 
 import argparse
+import html
 import json
 from pathlib import Path
 import re
@@ -40,6 +41,11 @@ def verify(output):
              if (match := GAME_PAGE.fullmatch(path.name))}
     if pages != set(ids):
         raise RuntimeError("Generated matchup files do not match sitemap URLs")
+    recaps = json.loads((output / "data/recaps.json").read_text())
+    recap_index = (output / "recaps.html").read_text()
+    recap_ids = {str(recap["gameId"]) for recap in recaps}
+    if len(recap_ids) != len(recaps) or not recap_ids.issubset(pages):
+        raise RuntimeError("Published recaps must have unique generated matchup pages")
     for game_id in ids:
         season = lookup[game_id]
         if not isinstance(season, int):
@@ -53,6 +59,16 @@ def verify(output):
         )
         if any(fragment not in page for fragment in expected):
             raise RuntimeError(f"Incomplete generated matchup page: {game_id}")
+        if 'name="robots" content="noindex' in page:
+            raise RuntimeError(f"Generated matchup page is noindex: {game_id}")
+        if game_id in recap_ids:
+            recap = next(item for item in recaps if str(item["gameId"]) == game_id)
+            if (not all(fragment in page for fragment in (
+                    'data-static-recap', html.escape(recap["headline"]),
+                    html.escape(recap["keyStat"]), html.escape(recap["recap"].split("\n\n")[0]),
+                    'content="article"'))
+                    or f'game-{game_id}.html' not in recap_index):
+                raise RuntimeError(f"Recap is missing from generated HTML: {game_id}")
     print(f"Verified {len(ids)} matchup pages, sitemap URLs and lookup entries")
 
 

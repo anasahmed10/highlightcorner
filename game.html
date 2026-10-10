@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Highlight Corner — Game Center</title>
 <meta name="description" content="Box score, advanced stats, fantasy leaders, comedic recap and injuries for every NFL game.">
+<script>try { if (JSON.parse(localStorage.getItem('hc:spoilers')) === 'hide') document.documentElement.dataset.spoilers = 'hide'; } catch (e) {}</script>
 <meta name="robots" content="noindex,follow">
 <link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -40,7 +41,7 @@
   <div id="game"><div class="loading"><div class="spinner"></div>Loading game…</div></div>
   <div id="gameAd"></div>
 </main>
-<footer class="site-footer">Scores are facts. The jokes are opinions.<br>Data: ESPN · Highlights: NFL / YouTube · Fantasy: Sleeper.<br><a href="privacy.html">Privacy</a></footer>
+<footer class="site-footer">Scores are facts. The jokes are opinions.<br>Data: ESPN · Highlights: NFL / YouTube · Fantasy: Sleeper · Advanced stats: <a href="https://github.com/nflverse/nflverse-data">nflverse</a> (CC-BY 4.0).<br><a href="privacy.html">Privacy</a></footer>
 <nav class="bottom-nav grid grid-cols-3" aria-label="Mobile navigation">
   <a data-page="scores" href="index.html" class="flex flex-col items-center justify-center gap-1"><img src="icons/ui/list.svg" alt="" width="22" height="22"><span>Scores</span></a>
   <a data-page="fantasy" href="fantasy.html" class="flex flex-col items-center justify-center gap-1"><img src="icons/ui/chart-no-axes-column.svg" alt="" width="22" height="22"><span>Fantasy</span></a>
